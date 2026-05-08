@@ -1,0 +1,33 @@
+[package]
+name = "ctrl-cc"
+version = "0.1.0"
+description = "Ctrl-CC — AI Coding Control Plane for Claude Code"
+authors = ["Ctrl-CC"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.75"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-process = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+dirs = "5"
+chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1", features = ["process", "io-util", "time", "sync"] }
+uuid = { version = "1", features = ["v4"] }
+rusqlite = { version = "0.32", features = ["bundled"] }
+log = "0.4"
+env_logger = "0.11"
+portable-pty = "0.9"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

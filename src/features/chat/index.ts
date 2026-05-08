@@ -1,0 +1,1 @@
+export { StreamCoalescer } from './StreamCoalescer';
