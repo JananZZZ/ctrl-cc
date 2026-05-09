@@ -5,10 +5,13 @@ import type { Session } from '../../types';
 interface Props {
   session: Session | null;
   collapsed: boolean;
+  expanded: boolean;
   onToggleCollapse: () => void;
+  onToggleExpand: () => void;
 }
 
-export function SessionInspector({ session, collapsed, onToggleCollapse }: Props) {
+export function SessionInspector({ session, collapsed, expanded, onToggleCollapse, onToggleExpand }: Props) {
+  const width = collapsed ? 32 : expanded ? 520 : 320;
   if (collapsed) {
     return (
       <div style={{ width: 32, borderLeft: '1px solid var(--cc-border)', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 8 }}>
@@ -20,8 +23,8 @@ export function SessionInspector({ session, collapsed, onToggleCollapse }: Props
 
   if (!session) {
     return (
-      <div data-testid="inspector-panel" style={{ width: 320, flexShrink: 0, borderLeft: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column', background: 'var(--cc-surface-solid)' }}>
-        <Header onToggle={onToggleCollapse} />
+      <div data-testid="inspector-panel" style={{ width, flexShrink: 0, borderLeft: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column', background: 'var(--cc-surface-solid)' }}>
+        <Header onToggle={onToggleCollapse} onExpand={onToggleExpand} expanded={expanded} />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <CcEmptyState icon="🔍" title="无活跃会话" description="打开会话后实时监控" />
         </div>
@@ -32,8 +35,8 @@ export function SessionInspector({ session, collapsed, onToggleCollapse }: Props
   const isRunning = session.status === 'running' || session.status === 'starting';
 
   return (
-    <div data-testid="inspector-panel" style={{ width: 320, flexShrink: 0, borderLeft: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--cc-surface-solid)' }}>
-      <Header onToggle={onToggleCollapse} />
+    <div data-testid="inspector-panel" style={{ width, flexShrink: 0, borderLeft: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--cc-surface-solid)' }}>
+      <Header onToggle={onToggleCollapse} onExpand={onToggleExpand} expanded={expanded} />
 
       <div style={{ flex: 1, overflow: 'auto', padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {/* Statusline — Claude Code style */}
@@ -110,11 +113,14 @@ export function SessionInspector({ session, collapsed, onToggleCollapse }: Props
   );
 }
 
-function Header({ onToggle }: { onToggle: () => void }) {
+function Header({ onToggle, onExpand, expanded }: { onToggle: () => void; onExpand: () => void; expanded: boolean }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 12px', borderBottom: '1px solid var(--cc-border)', minHeight: 32 }}>
       <span style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)' }}>📊 实时监控</span>
-      <button onClick={onToggle} style={collapseBtnStyle}>▶</button>
+      <div style={{ display: 'flex', gap: 4 }}>
+        <button onClick={onExpand} style={{ ...collapseBtnStyle, fontSize: 10 }}>{expanded ? '⊟' : '⊞'}</button>
+        <button onClick={onToggle} style={collapseBtnStyle}>▶</button>
+      </div>
     </div>
   );
 }

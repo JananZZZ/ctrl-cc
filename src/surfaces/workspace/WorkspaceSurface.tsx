@@ -23,6 +23,7 @@ export function WorkspaceSurface() {
   const openSession = useOpenSessionStore((s) => s.openSession);
   const [viewMode, setViewMode] = useState<ViewMode>('chat');
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
+  const [inspectorExpanded, setInspectorExpanded] = useState(false);
   const [rawEvents, setRawEvents] = useState<RuntimeEvent[]>([]);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,10 +69,10 @@ export function WorkspaceSurface() {
 
   const handleSend = useCallback((text: string) => {
     if (!activeTabId) return;
-    invokeCommand('create_claude_chat', {
+    invokeCommand('create_claude_chat', { options: {
       sessionId: activeTabId, projectId: activeSession?.projectId ?? 'default',
       cwd: activeSession?.cwd ?? '.', model: 'sonnet', prompt: text,
-    }).catch((err) => setError(`发送失败: ${String(err)}`));
+    } }).catch((err) => setError(`发送失败: ${String(err)}`));
     setRawEvents((prev) => [...prev, {
       id: `usr-${Date.now()}`, sessionId: activeTabId,
       projectId: activeSession?.projectId ?? '',
@@ -132,7 +133,7 @@ export function WorkspaceSurface() {
           {viewMode === 'terminal' && <TerminalView sessionId={activeTabId} />}
           {viewMode === 'split' && (<div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}><div style={{ flex: '0 0 50%', borderRight: '1px solid var(--cc-border-strong)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}><TerminalView sessionId={activeTabId} /></div><div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}><ChatView events={events} /><ComposerBar viewMode="split" runtimeMode="structured-print" model="sonnet" permissionMode="default" onSend={handleSend} onRuntimeModeChange={() => {}} /></div></div>)}
         </div>
-        <SessionInspector session={activeSession} collapsed={inspectorCollapsed} onToggleCollapse={() => setInspectorCollapsed((v) => !v)} />
+        <SessionInspector session={activeSession} collapsed={inspectorCollapsed} expanded={inspectorExpanded} onToggleCollapse={() => setInspectorCollapsed((v) => !v)} onToggleExpand={() => setInspectorExpanded((v) => !v)} />
       </div>
     </div>
   );

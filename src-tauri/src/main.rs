@@ -25,6 +25,9 @@ fn main() {
         .manage(pty_manager)
         .manage(claude_manager)
         .invoke_handler(tauri::generate_handler![
+            // Database persistence
+            commands::db_commands::save_session_to_db,
+            commands::db_commands::load_sessions_from_db,
             // Stream-json control plane
             runtime::commands::create_claude_chat,
             runtime::commands::stop_claude_chat,

@@ -1,7 +1,6 @@
 use crate::error::AppError;
 use crate::runtime::ndjson_parser::{self, ChatRuntimeEvent};
-use portable_pty::{native_pty_system, CommandBuilder, PtySize};
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -13,35 +12,61 @@ pub struct ClaudeSession {
     pub cwd: String,
     pub model: String,
     pub running: Arc<Mutex<bool>>,
+    pub claude_session_id: Option<String>,
     child: Option<std::process::Child>,
 }
 
 impl ClaudeSession {
+    fn validate_cwd(cwd: &str) -> String {
+        let path = std::path::Path::new(cwd);
+        if path.exists() && path.is_dir() {
+            return cwd.to_string();
+        }
+        // Fallback to current directory
+        if let Ok(cur) = std::env::current_dir() {
+            log::warn!("CWD '{}' does not exist, using {:?}", cwd, cur);
+            return cur.to_string_lossy().to_string();
+        }
+        // Last resort: home directory
+        if let Some(home) = dirs::home_dir() {
+            log::warn!("Using home directory as CWD fallback");
+            return home.to_string_lossy().to_string();
+        }
+        ".".to_string()
+    }
+
     pub fn spawn(
         session_id: String,
         project_id: String,
         cwd: String,
         model: String,
         prompt: String,
+        resume_session: Option<String>,
         app: AppHandle,
     ) -> Result<Self, AppError> {
+        let valid_cwd = Self::validate_cwd(&cwd);
         let mut cmd = Command::new("claude");
         cmd.arg("-p")
             .arg(&prompt)
-            .arg("--output-format")
-            .arg("stream-json")
+            .arg("--output-format").arg("stream-json")
             .arg("--include-partial-messages")
             .arg("--verbose")
-            .arg("--model")
-            .arg(&model)
-            .arg("--permission-mode")
-            .arg("default")
-            .current_dir(&cwd)
+            .arg("--model").arg(&model)
+            .arg("--permission-mode").arg("default")
+            .current_dir(&valid_cwd)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
 
-        let mut child = cmd.spawn().map_err(|e| AppError::Process(format!("claude spawn: {}", e)))?;
+        if let Some(ref resume_id) = resume_session {
+            cmd.arg("--resume").arg(resume_id);
+        }
+
+        let mut child = cmd.spawn().map_err(|e| {
+            let msg = format!("claude spawn failed: {} (cwd={}, model={})", e, valid_cwd, model);
+            log::error!("{}", msg);
+            AppError::Process(msg)
+        })?;
 
         let stdout = child.stdout.take().ok_or_else(|| AppError::Process("no stdout".into()))?;
         let stderr = child.stderr.take().ok_or_else(|| AppError::Process("no stderr".into()))?;
@@ -67,7 +92,7 @@ impl ClaudeSession {
             }
         });
 
-        // stderr reader thread
+        // stderr reader
         let app_stderr = app.clone();
         let sid_stderr = session_id.clone();
         thread::spawn(move || {
@@ -84,24 +109,18 @@ impl ClaudeSession {
             }
         });
 
-        // stdin writer — stored for follow-up messages
+        // Keep stdin for potential follow-up (though claude -p is one-shot)
         let _stdin = Arc::new(Mutex::new(stdin));
 
         Ok(Self {
             session_id,
             project_id,
-            cwd,
+            cwd: valid_cwd,
             model,
             running,
+            claude_session_id: resume_session,
             child: Some(child),
         })
-    }
-
-    pub fn send(&self, message: &str) -> Result<(), AppError> {
-        // For follow-up messages, we need to spawn a new claude process
-        // since claude -p is one-shot. In practice, we spawn a new process
-        // with the conversation history.
-        Ok(())
     }
 
     pub fn stop(&mut self) {
