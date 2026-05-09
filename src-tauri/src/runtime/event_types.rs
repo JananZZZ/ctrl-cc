@@ -60,7 +60,7 @@ pub enum ContentBlock {
         input: serde_json::Value,
     },
     #[serde(rename = "thinking")]
-    Thinking { thinking: String },
+    Thinking { thinking: String, #[serde(default)] signature: Option<String> },
     #[serde(rename = "server_tool_use")]
     ServerToolUse {
         id: String,
@@ -114,6 +114,8 @@ pub enum ContentDelta {
     ThinkingDelta { thinking: String },
     #[serde(rename = "input_json_delta")]
     InputJsonDelta { partial_json: String },
+    #[serde(rename = "signature_delta")]
+    SignatureDelta { signature: String },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

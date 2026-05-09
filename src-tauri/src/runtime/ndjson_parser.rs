@@ -73,7 +73,7 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
                                     input_tokens: None, output_tokens: None, total_cost_usd: None, duration_ms: None,
                                 });
                             }
-                            ContentBlock::Thinking { thinking } => {
+                            ContentBlock::Thinking { thinking, .. } => {
                                 out.push(ChatRuntimeEvent {
                                     session_id: sid.clone(), event_type: "thinking".into(),
                                     content: thinking.clone(), title: Some("Thinking".into()),
