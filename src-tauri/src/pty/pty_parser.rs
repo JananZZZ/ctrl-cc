@@ -170,12 +170,14 @@ impl PtySemanticParser {
     }
 
     /// Explicit reset after event emission.
+    #[allow(dead_code)]
     pub fn reset(&mut self) {
         self.buffer.clear();
         self.lower_cache.clear();
         self.in_permission_prompt = false;
     }
 
+    #[allow(dead_code)]
     pub fn buffer_len(&self) -> usize {
         self.buffer.len()
     }

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { CcButton } from '../../components/ui/CcButton';
 
 interface Props {
@@ -10,16 +11,17 @@ interface Props {
   onFilterChange: (f: 'all' | 'running' | 'risk' | 'archived') => void;
 }
 
-const filters: { id: Props['filterMode']; label: string }[] = [
-  { id: 'all', label: '全部' },
-  { id: 'running', label: '运行中' },
-  { id: 'risk', label: '有风险' },
-  { id: 'archived', label: '已归档' },
-];
-
 export function ProjectsTopBar({
   searchQuery, onSearchChange, onCreateProject, onImportProject, onContinueLatest, filterMode, onFilterChange,
 }: Props) {
+  const { t } = useTranslation();
+  const filters: { id: Props['filterMode']; label: string }[] = [
+    { id: 'all', label: t('projects.filterAll') },
+    { id: 'running', label: t('projects.filterRunning') },
+    { id: 'risk', label: t('projects.filterRisk') },
+    { id: 'archived', label: t('projects.filterArchived') },
+  ];
+
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px',
@@ -30,7 +32,7 @@ export function ProjectsTopBar({
         type="text"
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
-        placeholder="搜索项目、会话、文件、风险..."
+        placeholder={t('projects.searchPlaceholder')}
         data-testid="projects-search"
         style={{
           flex: 1, height: 32, padding: '0 12px',
@@ -55,9 +57,9 @@ export function ProjectsTopBar({
           {f.label}
         </button>
       ))}
-      <CcButton size="sm" onClick={onContinueLatest}>继续最近</CcButton>
-      <CcButton size="sm" onClick={onImportProject} variant="ghost">导入</CcButton>
-      <CcButton size="sm" variant="primary" onClick={onCreateProject} data-testid="create-project-button">+ 新建项目</CcButton>
+      <CcButton size="sm" onClick={onContinueLatest}>{t('projects.continueLatest')}</CcButton>
+      <CcButton size="sm" onClick={onImportProject} variant="ghost">{t('common.import')}</CcButton>
+      <CcButton size="sm" variant="primary" onClick={onCreateProject} data-testid="create-project-button">+ {t('projects.newProject')}</CcButton>
     </div>
   );
 }

@@ -12,7 +12,7 @@ export function CcEmptyState({ icon = '📋', title, description }: Props) {
         padding: '48px 24px', gap: 8, textAlign: 'center',
       }}
     >
-      <span style={{ fontSize: 32, opacity: 0.6 }}>{icon}</span>
+      <span style={{ fontSize: 'var(--cc-font-2xl)', opacity: 0.6 }}>{icon}</span>
       <span style={{ fontSize: 'var(--cc-font-md)', fontWeight: 500, color: 'var(--cc-text-muted)' }}>{title}</span>
       {description && <span style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-soft)' }}>{description}</span>}
     </div>

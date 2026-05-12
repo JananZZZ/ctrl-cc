@@ -1,3 +1,4 @@
+// OpenSessionStore — React #185 fix: openSessionTab idempotent (no-op when same tab already active)
 import { create } from 'zustand';
 import type { OpenSessionTab } from '../types';
 
@@ -14,10 +15,22 @@ export const useOpenSessionStore = create<OpenSessionState>((set) => ({
   tabs: [],
   activeTabId: null,
   openSession: (tab) =>
-    set((s) => {
-      const exists = s.tabs.find((t) => t.sessionId === tab.sessionId);
-      if (exists) return { activeTabId: tab.sessionId };
-      return { tabs: [...s.tabs, tab], activeTabId: tab.sessionId };
+    set((state) => {
+      // Idempotent guard: if same tab already active, return unchanged state
+      const existing = state.tabs.find((t) => t.sessionId === tab.sessionId);
+      const alreadyActive = existing && state.activeTabId === tab.sessionId;
+      if (alreadyActive) return state;
+
+      if (existing) {
+        return {
+          activeTabId: tab.sessionId,
+          tabs: state.tabs.map((t) => ({ ...t, active: t.sessionId === tab.sessionId })),
+        };
+      }
+      return {
+        tabs: [...state.tabs.map((t) => ({ ...t, active: false })), { ...tab, active: true }],
+        activeTabId: tab.sessionId,
+      };
     }),
   closeTab: (sessionId) =>
     set((s) => {
@@ -27,7 +40,11 @@ export const useOpenSessionStore = create<OpenSessionState>((set) => ({
         activeTabId: s.activeTabId === sessionId ? (remaining[0]?.sessionId ?? null) : s.activeTabId,
       };
     }),
-  setActiveTab: (id) => set({ activeTabId: id }),
+  setActiveTab: (id) =>
+    set((state) => {
+      if (state.activeTabId === id) return state; // idempotent guard
+      return { activeTabId: id };
+    }),
   pinTab: (sessionId) =>
     set((s) => ({
       tabs: s.tabs.map((t) => (t.sessionId === sessionId ? { ...t, isPinned: !t.isPinned } : t)),

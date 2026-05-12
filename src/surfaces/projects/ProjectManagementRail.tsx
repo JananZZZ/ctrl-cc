@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '../../stores/projectStore';
 import { CcStatusDot } from '../../components/ui/CcStatusDot';
 import type { Project } from '../../types';
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function ProjectManagementRail({ collapsed, onToggleCollapse, selectedProjectId, onSelectProject, searchQuery }: Props) {
+  const { t } = useTranslation();
   const { projects, roots } = useProjectStore();
 
   const filtered = useMemo(
@@ -27,17 +29,17 @@ export function ProjectManagementRail({ collapsed, onToggleCollapse, selectedPro
   if (collapsed) {
     return (
       <div style={{ width: 32, borderRight: '1px solid var(--cc-border)', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 8 }}>
-        <button onClick={onToggleCollapse} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'var(--cc-text-muted)' }}>▶</button>
+        <button onClick={onToggleCollapse} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>&#x25B6;</button>
       </div>
     );
   }
 
   return (
     <div data-testid="project-management-rail" style={{ width: 240, flexShrink: 0, borderRight: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <RailHeader title="项目" onCollapse={onToggleCollapse} count={filtered.length} />
+      <RailHeader title={t('projects.title')} onCollapse={onToggleCollapse} count={filtered.length} />
       <div style={{ flex: 1, overflow: 'auto', padding: '4px 0' }}>
         {roots.length > 0 && (
-          <GroupSection title="工作文件夹">
+          <GroupSection title={t('projects.workspaceRoot')}>
             {roots.map((r) => (
               <div key={r.id} style={{ padding: '4px 12px', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', fontWeight: 500 }}>
                 📂 {r.label || r.path.split(/[/\\]/).pop()}
@@ -46,16 +48,16 @@ export function ProjectManagementRail({ collapsed, onToggleCollapse, selectedPro
           </GroupSection>
         )}
 
-        <GroupSection title={`正在运行 (${active.length})`}>
-          {active.map((p) => <ProjectNode key={p.id} project={p} isSelected={selectedProjectId === p.id} onSelect={() => onSelectProject(p.id)} />)}
+        <GroupSection title={`${t('projects.filterRunning')} (${active.length})`}>
+          {active.map((p) => <ProjectNode key={p.id} project={p} isSelected={selectedProjectId === p.id} onSelect={() => onSelectProject(p.id)} t={t} />)}
         </GroupSection>
 
-        <GroupSection title={`有风险 (${withRisks.length})`}>
-          {withRisks.map((p) => <ProjectNode key={p.id} project={p} isSelected={selectedProjectId === p.id} onSelect={() => onSelectProject(p.id)} />)}
+        <GroupSection title={`${t('projects.withRisks')} (${withRisks.length})`}>
+          {withRisks.map((p) => <ProjectNode key={p.id} project={p} isSelected={selectedProjectId === p.id} onSelect={() => onSelectProject(p.id)} t={t} />)}
         </GroupSection>
 
-        <GroupSection title={`全部项目 (${filtered.length})`}>
-          {filtered.map((p) => <ProjectNode key={p.id} project={p} isSelected={selectedProjectId === p.id} onSelect={() => onSelectProject(p.id)} />)}
+        <GroupSection title={`${t('projects.allProjects')} (${filtered.length})`}>
+          {filtered.map((p) => <ProjectNode key={p.id} project={p} isSelected={selectedProjectId === p.id} onSelect={() => onSelectProject(p.id)} t={t} />)}
         </GroupSection>
       </div>
     </div>
@@ -67,7 +69,7 @@ function RailHeader({ title, onCollapse, count }: { title: string; onCollapse: (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid var(--cc-border)', minHeight: 36 }}>
       <span style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)' }}>{title}</span>
       <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>{count}</span>
-      <button onClick={onCollapse} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'var(--cc-text-muted)' }}>◀</button>
+      <button onClick={onCollapse} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>&#x25C0;</button>
     </div>
   );
 }
@@ -83,7 +85,7 @@ function GroupSection({ title, children }: { title: string; children: React.Reac
   );
 }
 
-function ProjectNode({ project, isSelected, onSelect }: { project: Project; isSelected: boolean; onSelect: () => void }) {
+function ProjectNode({ project, isSelected, onSelect, t }: { project: Project; isSelected: boolean; onSelect: () => void; t: (key: string, opts?: any) => string }) {
   const status: 'running' | 'idle' | 'error' = project.activeSessionCount > 0 ? 'running' : project.riskCount > 0 ? 'error' : 'idle';
   return (
     <div
@@ -101,8 +103,8 @@ function ProjectNode({ project, isSelected, onSelect }: { project: Project; isSe
       </div>
       <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', marginTop: 2 }}>
         {project.gitBranch && <span style={{ marginRight: 8 }}>{project.gitBranch}</span>}
-        {project.activeSessionCount > 0 && <span style={{ marginRight: 8, color: 'var(--cc-green)' }}>{project.activeSessionCount} 运行</span>}
-        {project.riskCount > 0 && <span style={{ color: 'var(--cc-red)' }}>{project.riskCount} 风险</span>}
+        {project.activeSessionCount > 0 && <span style={{ marginRight: 8, color: 'var(--cc-green)' }}>{t('projects.activeCount', { count: project.activeSessionCount })}</span>}
+        {project.riskCount > 0 && <span style={{ color: 'var(--cc-red)' }}>{t('projects.riskCountLabel', { count: project.riskCount })}</span>}
       </div>
       <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project.path}</div>
     </div>

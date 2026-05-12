@@ -9,6 +9,10 @@ export default defineConfig({
     strictPort: true,
     watch: { ignored: ['**/src-tauri/**'] },
   },
+  build: {
+    sourcemap: true,
+    minify: false,
+  },
   resolve: {
     alias: { '@': '/src' },
   },

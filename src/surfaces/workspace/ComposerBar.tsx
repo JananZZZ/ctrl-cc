@@ -1,25 +1,39 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CcButton } from '../../components/ui/CcButton';
-import type { RuntimeMode, PermissionMode } from '../../types';
+import { ResourcePicker } from '../../features/composer/ResourcePicker';
+import { CommandPalette } from '../../features/composer/CommandPalette';
+import type { PermissionMode, RuntimeMode } from '../../types';
 
 interface Props {
   viewMode: 'chat' | 'terminal' | 'split' | 'structured-task';
-  runtimeMode: RuntimeMode;
-  model: string;
-  permissionMode: PermissionMode;
+  sessionRuntimeMode?: 'pty-interactive' | 'structured-print';
   disabled?: boolean;
-  onSend: (text: string) => void;
-  onRuntimeModeChange: (mode: RuntimeMode) => void;
+  onSend: (text: string, config: { model: string; effort: string; permissionMode: PermissionMode; runtimeMode: RuntimeMode }) => void;
 }
 
-export function ComposerBar({ viewMode, runtimeMode, model: _m, permissionMode: _p, disabled, onSend, onRuntimeModeChange }: Props) {
+const MODELS = ['sonnet', 'opus', 'haiku'] as const;
+const EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
+const PERMISSION_MODES: PermissionMode[] = ['default', 'acceptEdits', 'plan', 'auto', 'dontAsk'];
+const PERM_KEYS: Record<string, string> = { default: 'composerBar.permDefault', acceptEdits: 'composerBar.permAcceptEdits', plan: 'composerBar.permPlan', auto: 'composerBar.permAuto', dontAsk: 'composerBar.permDontAsk' };
+
+export function ComposerBar({ viewMode, sessionRuntimeMode, disabled, onSend }: Props) {
+  const { t } = useTranslation();
   const [text, setText] = useState('');
+  const [model, setModel] = useState<string>(() => localStorage.getItem('ctrl-cc-model') || 'sonnet');
+  const [effort, setEffort] = useState<string>(() => localStorage.getItem('ctrl-cc-effort') || 'medium');
+  const [permissionMode, setPermissionMode] = useState<PermissionMode>(() => (localStorage.getItem('ctrl-cc-permMode') as PermissionMode) || 'default');
+  const [runtimeMode, setRuntimeMode] = useState<RuntimeMode>(
+    () => (sessionRuntimeMode === 'pty-interactive' || viewMode === 'terminal' || viewMode === 'split') ? 'pty-interactive' : 'structured-print'
+  );
+  const [showResourcePicker, setShowResourcePicker] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    onSend(trimmed);
+    onSend(trimmed, { model, effort, permissionMode, runtimeMode });
     setText('');
   };
 
@@ -43,17 +57,27 @@ export function ComposerBar({ viewMode, runtimeMode, model: _m, permissionMode: 
       }}
     >
       <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-        <select
-          value={runtimeMode}
-          onChange={(e) => onRuntimeModeChange(e.target.value as RuntimeMode)}
-          style={selectStyle}
-          title="Runtime 模式"
-        >
+        <select value={runtimeMode} onChange={(e) => setRuntimeMode(e.target.value as RuntimeMode)} style={selectStyle} title={t('composerBar.pty')}>
           <option value="pty-interactive">PTY</option>
           <option value="structured-print">CLI</option>
         </select>
-        <button style={hintBtnStyle} title="@ 资源">@</button>
-        <button style={hintBtnStyle} title="/ 命令">/</button>
+        <select value={model} onChange={(e) => setModel(e.target.value)} style={selectStyle} title={t('composerBar.model')}>
+          {MODELS.map((m) => <option key={m} value={m}>{m}</option>)}
+        </select>
+        <select value={effort} onChange={(e) => setEffort(e.target.value)} style={selectStyle} title={t('composerBar.effort')}>
+          {EFFORTS.map((e) => <option key={e} value={e}>{e}</option>)}
+        </select>
+        <select value={permissionMode} onChange={(e) => setPermissionMode(e.target.value as PermissionMode)} style={selectStyle} title={t('composerBar.permission')}>
+          {PERMISSION_MODES.map((p) => <option key={p} value={p}>{t(PERM_KEYS[p])}</option>)}
+        </select>
+        <div style={{ position: 'relative' }}>
+          <button style={hintBtnStyle} title={t('composerBar.resourcePicker')} onClick={() => setShowResourcePicker(!showResourcePicker)}>@</button>
+          <ResourcePicker open={showResourcePicker} onClose={() => setShowResourcePicker(false)} onSelect={(r) => { setText((t) => t + ' ' + r + ' '); inputRef.current?.focus(); }} />
+        </div>
+        <div style={{ position: 'relative' }}>
+          <button style={hintBtnStyle} title={t('composerBar.commandPalette')} onClick={() => setShowCommandPalette(!showCommandPalette)}>/</button>
+          <CommandPalette open={showCommandPalette} onClose={() => setShowCommandPalette(false)} onSelect={(c) => { setText((t) => t + ' ' + c + ' '); inputRef.current?.focus(); }} />
+        </div>
       </div>
       <textarea
         ref={inputRef}
@@ -61,9 +85,9 @@ export function ComposerBar({ viewMode, runtimeMode, model: _m, permissionMode: 
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={viewMode === 'terminal' ? '终端模式 — 直接在下方终端中输入...' : '输入消息... (Enter 发送, Shift+Enter 换行)'}
-        rows={1}
         disabled={disabled}
+        placeholder={disabled ? t('workspace.composerReadyGate') : viewMode === 'terminal' ? t('composerBar.terminalPlaceholder') : `${t('composerBar.placeholder')} (${t('composerBar.shortcutHint')})`}
+        rows={1}
         style={{
           flex: 1, resize: 'none', padding: '8px 12px',
           fontSize: 'var(--cc-font-sm)', lineHeight: 1.5,
@@ -79,19 +103,19 @@ export function ComposerBar({ viewMode, runtimeMode, model: _m, permissionMode: 
         onClick={handleSend}
         disabled={disabled || !text.trim()}
       >
-        发送
+        {t('composerBar.send')}
       </CcButton>
     </div>
   );
 }
 
 const selectStyle: React.CSSProperties = {
-  height: 28, padding: '0 6px', fontSize: 'var(--cc-font-xs)',
+  minHeight: 28, padding: '2px 6px', fontSize: 'var(--cc-font-xs)',
   border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-xs)',
   background: 'var(--cc-surface-solid)', color: 'var(--cc-text)', cursor: 'pointer',
 };
 const hintBtnStyle: React.CSSProperties = {
-  width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+  width: 28, minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
   fontSize: 'var(--cc-font-sm)', fontWeight: 600,
   border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-xs)',
   background: 'var(--cc-surface-solid)', color: 'var(--cc-text-muted)', cursor: 'pointer',

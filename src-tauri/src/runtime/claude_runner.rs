@@ -6,6 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use tauri::{AppHandle, Emitter};
 
+#[allow(dead_code)]
 pub struct ClaudeSession {
     pub session_id: String,
     pub project_id: String,
@@ -13,6 +14,7 @@ pub struct ClaudeSession {
     pub model: String,
     pub running: Arc<Mutex<bool>>,
     pub claude_session_id: Option<String>,
+    pub stdin: Arc<Mutex<std::process::ChildStdin>>,
     child: Option<std::process::Child>,
 }
 
@@ -41,6 +43,8 @@ impl ClaudeSession {
         cwd: String,
         model: String,
         prompt: String,
+        effort: Option<String>,
+        permission_mode: Option<String>,
         resume_session: Option<String>,
         app: AppHandle,
     ) -> Result<Self, AppError> {
@@ -50,9 +54,12 @@ impl ClaudeSession {
             .arg(&prompt)
             .arg("--output-format").arg("stream-json")
             .arg("--include-partial-messages")
-            .arg("--verbose")
-            .arg("--model").arg(&model)
-            .arg("--permission-mode").arg("default")
+            .arg("--verbose");
+        if let Some(ref e) = effort {
+            cmd.arg("--effort").arg(e);
+        }
+        cmd.arg("--model").arg(&model)
+            .arg("--permission-mode").arg(permission_mode.as_deref().unwrap_or("default"))
             .current_dir(&valid_cwd)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -81,7 +88,7 @@ impl ClaudeSession {
         thread::spawn(move || {
             let reader = BufReader::new(stdout);
             for line in reader.lines() {
-                if !*running_clone.lock().unwrap() { break; }
+                if !*running_clone.lock().expect("mutex poisoned") { break; }
                 if let Ok(line) = line {
                     if let Ok(Some(event)) = ndjson_parser::parse_line(&line) {
                         for rt in ndjson_parser::event_to_runtime(&sid, &event) {
@@ -104,13 +111,14 @@ impl ClaudeSession {
                         content: line, title: None, tool_name: None, tool_input: None,
                         tool_use_id: None, is_error: None, input_tokens: None, output_tokens: None,
                         total_cost_usd: None, duration_ms: None,
+                        claude_session_id: None,
                     });
                 }
             }
         });
 
         // Keep stdin for potential follow-up (though claude -p is one-shot)
-        let _stdin = Arc::new(Mutex::new(stdin));
+        let stdin_handle = Arc::new(Mutex::new(stdin));
 
         Ok(Self {
             session_id,
@@ -119,12 +127,23 @@ impl ClaudeSession {
             model,
             running,
             claude_session_id: resume_session,
+            stdin: stdin_handle,
             child: Some(child),
         })
     }
 
+    pub fn send_input(&self, text: &str) -> Result<(), AppError> {
+        use std::io::Write;
+        let mut stdin = self.stdin.lock().map_err(|e| AppError::Process(e.to_string()))?;
+        stdin.write_all(text.as_bytes()).map_err(|e| AppError::Process(e.to_string()))?;
+        stdin.write_all(b"
+").map_err(|e| AppError::Process(e.to_string()))?;
+        stdin.flush().map_err(|e| AppError::Process(e.to_string()))?;
+        Ok(())
+    }
+
     pub fn stop(&mut self) {
-        *self.running.lock().unwrap() = false;
+        *self.running.lock().expect("mutex poisoned") = false;
         if let Some(mut child) = self.child.take() {
             let _ = child.kill();
         }

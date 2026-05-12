@@ -1,0 +1,14 @@
+@keyframes cc-fade-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ctrlcc-error-toast-enter {
+  animation: cc-fade-in var(--cc-duration-fast) var(--cc-ease-out);
+}
+
+.ctrlcc-error-toast-exit {
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity var(--cc-duration-fast), transform var(--cc-duration-fast);
+}

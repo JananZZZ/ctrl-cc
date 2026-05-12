@@ -35,6 +35,7 @@ pub struct ChatRuntimeEvent {
     pub output_tokens: Option<u32>,
     pub total_cost_usd: Option<f64>,
     pub duration_ms: Option<u64>,
+    pub claude_session_id: Option<String>,
 }
 
 pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntimeEvent> {
@@ -43,9 +44,11 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
 
     match event {
         ClaudeEvent::System(sys) => {
+            let claude_sid = sys.session_id.clone();
             out.push(ChatRuntimeEvent {
                 session_id: sid, event_type: "system_init".into(),
                 content: format!("Session started — model: {}", sys.model.as_deref().unwrap_or("unknown")),
+                claude_session_id: claude_sid,
                 title: Some("System".into()), tool_name: None, tool_input: None,
                 tool_use_id: None, is_error: None, input_tokens: None, output_tokens: None,
                 total_cost_usd: None, duration_ms: None,
@@ -62,6 +65,7 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
                                     content: text.clone(), title: None, tool_name: None, tool_input: None,
                                     tool_use_id: None, is_error: None, input_tokens: None, output_tokens: None,
                                     total_cost_usd: None, duration_ms: None,
+                claude_session_id: None,
                                 });
                             }
                             ContentBlock::ToolUse { id, name, input } => {
@@ -71,6 +75,7 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
                                     tool_name: Some(name.clone()), tool_input: Some(input.clone()),
                                     tool_use_id: Some(id.clone()), is_error: None,
                                     input_tokens: None, output_tokens: None, total_cost_usd: None, duration_ms: None,
+                claude_session_id: None,
                                 });
                             }
                             ContentBlock::Thinking { thinking, .. } => {
@@ -79,6 +84,7 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
                                     content: thinking.clone(), title: Some("Thinking".into()),
                                     tool_name: None, tool_input: None, tool_use_id: None, is_error: None,
                                     input_tokens: None, output_tokens: None, total_cost_usd: None, duration_ms: None,
+                claude_session_id: None,
                                 });
                             }
                             ContentBlock::ToolResult { tool_use_id, content, is_error } => {
@@ -88,6 +94,7 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
                                     tool_input: None, tool_use_id: Some(tool_use_id.clone()),
                                     is_error: *is_error, input_tokens: None, output_tokens: None,
                                     total_cost_usd: None, duration_ms: None,
+                claude_session_id: None,
                                 });
                             }
                             _ => {}
@@ -107,6 +114,7 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
                                     content: text.clone(), title: None, tool_name: None, tool_input: None,
                                     tool_use_id: None, is_error: None, input_tokens: None, output_tokens: None,
                                     total_cost_usd: None, duration_ms: None,
+                claude_session_id: None,
                                 });
                             }
                             ContentDelta::ThinkingDelta { thinking } => {
@@ -115,6 +123,7 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
                                     content: thinking.clone(), title: Some("Thinking".into()),
                                     tool_name: None, tool_input: None, tool_use_id: None, is_error: None,
                                     input_tokens: None, output_tokens: None, total_cost_usd: None, duration_ms: None,
+                claude_session_id: None,
                                 });
                             }
                             _ => {}
@@ -128,6 +137,7 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
                                 title: None, tool_name: None, tool_input: None, tool_use_id: None, is_error: None,
                                 input_tokens: u.input_tokens, output_tokens: u.output_tokens,
                                 total_cost_usd: None, duration_ms: None,
+                claude_session_id: None,
                             });
                         }
                     }
@@ -143,6 +153,7 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
                 input_tokens: result.usage.as_ref().and_then(|u| u.input_tokens),
                 output_tokens: result.usage.as_ref().and_then(|u| u.output_tokens),
                 total_cost_usd: result.total_cost_usd, duration_ms: result.duration_ms,
+                claude_session_id: None,
             });
         }
         ClaudeEvent::Error(err) => {
@@ -151,6 +162,7 @@ pub fn event_to_runtime(session_id: &str, event: &ClaudeEvent) -> Vec<ChatRuntim
                 content: err.message.clone().unwrap_or_default(), title: Some("Error".into()),
                 tool_name: None, tool_input: None, tool_use_id: None, is_error: Some(true),
                 input_tokens: None, output_tokens: None, total_cost_usd: None, duration_ms: None,
+                claude_session_id: None,
             });
         }
         _ => {}

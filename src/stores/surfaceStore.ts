@@ -1,3 +1,4 @@
+// SurfaceStore — React #185 fix: navigateTo idempotent (no-op when same surface)
 import { create } from 'zustand';
 import type { SurfaceId } from '../types';
 
@@ -8,5 +9,9 @@ interface SurfaceState {
 
 export const useSurfaceStore = create<SurfaceState>((set) => ({
   activeSurface: 'console',
-  navigateTo: (surface) => set({ activeSurface: surface }),
+  navigateTo: (surface) =>
+    set((state) => {
+      if (state.activeSurface === surface) return state; // idempotent guard
+      return { activeSurface: surface };
+    }),
 }));

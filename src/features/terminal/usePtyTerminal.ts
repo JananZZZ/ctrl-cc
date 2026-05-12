@@ -6,8 +6,38 @@ import { SearchAddon } from '@xterm/addon-search';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { SerializeAddon } from '@xterm/addon-serialize';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import { invokeCommand } from '../../services/invokeCommand';
+import { writePtyV2, resizePtyV2, sendCtrlCPtyV2, sendCtrlDPtyV2 } from '../runtime/services/interactionAdapter';
+import { warnLog } from '../../services/invokeCommand';
 import '@xterm/xterm/css/xterm.css';
+
+function readCssVar(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function buildXtermTheme() {
+  return {
+    background: readCssVar('--cc-bg') || '#1a1b1e',
+    foreground: readCssVar('--cc-text') || '#d4d4d8',
+    cursor: readCssVar('--cc-brand') || '#4c8dff',
+    selectionBackground: (readCssVar('--cc-brand-soft') || '#3b82f6') + '40',
+    black: readCssVar('--cc-bg-subtle') || '#1a1b1e',
+    red: readCssVar('--cc-red') || '#f35b5b',
+    green: readCssVar('--cc-green') || '#21c17a',
+    yellow: readCssVar('--cc-amber') || '#f5a524',
+    blue: readCssVar('--cc-blue') || '#4c8dff',
+    magenta: readCssVar('--cc-purple') || '#8b7cff',
+    cyan: '#06b6d4',
+    white: readCssVar('--cc-text') || '#d4d4d8',
+    brightBlack: readCssVar('--cc-text-soft') || '#52525b',
+    brightRed: readCssVar('--cc-red') || '#f87171',
+    brightGreen: readCssVar('--cc-green') || '#4ade80',
+    brightYellow: readCssVar('--cc-amber') || '#facc15',
+    brightBlue: readCssVar('--cc-blue') || '#60a5fa',
+    brightMagenta: readCssVar('--cc-purple') || '#c084fc',
+    brightCyan: '#22d3ee',
+    brightWhite: readCssVar('--cc-text-inverse') || '#fafafa',
+  };
+}
 
 export type PtyStatus = 'idle' | 'starting' | 'running' | 'waiting' | 'exited' | 'failed' | 'killed';
 
@@ -47,21 +77,16 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     searchRef.current = search;
     serializeRef.current = serialize;
 
+    const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cc-font-scale').trim()) || 1;
+    const termFontSize = Math.round(13 * scale);
+
     const term = new Terminal({
       cursorBlink: true,
-      fontSize: 13,
+      fontSize: termFontSize,
       fontFamily: 'var(--cc-font-mono), "JetBrains Mono", "Cascadia Code", Consolas, monospace',
       lineHeight: 1.35,
       scrollback: 10000,
-      theme: {
-        background: '#1a1b1e', foreground: '#d4d4d8',
-        cursor: '#4c8dff', selectionBackground: '#3b82f640',
-        black: '#1a1b1e', red: '#f35b5b', green: '#21c17a', yellow: '#f5a524',
-        blue: '#4c8dff', magenta: '#8b7cff', cyan: '#06b6d4', white: '#d4d4d8',
-        brightBlack: '#52525b', brightRed: '#f87171', brightGreen: '#4ade80',
-        brightYellow: '#facc15', brightBlue: '#60a5fa', brightMagenta: '#c084fc',
-        brightCyan: '#22d3ee', brightWhite: '#fafafa',
-      },
+      theme: buildXtermTheme(),
       allowProposedApi: true,
     });
 
@@ -70,7 +95,11 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     term.loadAddon(webLinks);
     term.loadAddon(serialize);
 
-    try { const wgl = new WebglAddon(); term.loadAddon(wgl); wgl.onContextLoss(() => wgl.dispose()); } catch {}
+    // WebGL disabled by default on Windows WebView2 — causes GPU lag
+    const enableWebgl = false;
+    if (enableWebgl) {
+      try { const wgl = new WebglAddon(); term.loadAddon(wgl); wgl.onContextLoss(() => wgl.dispose()); } catch {}
+    }
 
     term.open(container);
     fit.fit();
@@ -86,28 +115,37 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     listen<PtyStatusPayload>('pty://status', (e) => {
       if (e.payload.session_id !== sessionId) return;
       const map: Record<string, PtyStatus> = { starting: 'starting', running: 'running', exited: 'exited', failed: 'failed', killed: 'killed' };
-      setStatus(map[e.payload.status] ?? 'idle');
+      const newStatus = map[e.payload.status] ?? 'idle';
+      setStatus(newStatus);
     }).then((fn) => unlisteners.push(fn));
 
     listen<PtyExitPayload>('pty://exit', () => { setStatus('exited'); }).then((fn) => unlisteners.push(fn));
     listen<PtyErrorPayload>('pty://error', () => { setStatus('failed'); }).then((fn) => unlisteners.push(fn));
 
     term.onData((data) => {
-      invokeCommand('pty_v2_write', { sessionId, data }).catch(() => {});
+      writePtyV2(sessionId, data).catch((e) => {
+        warnLog('pty', 'PTY write failed', String(e));
+        term.writeln(`\x1b[31m[Ctrl-CC] Write failed: ${e}\x1b[0m`);
+      });
     });
 
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const resizeObserver = new ResizeObserver(() => {
-      fit.fit();
-      const dims = fit.proposeDimensions();
-      if (dims && dims.rows && dims.cols) {
-        invokeCommand('pty_v2_resize', { sessionId, rows: dims.rows, cols: dims.cols }).catch(() => {});
-      }
+      if (resizeTimer != null) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        fit.fit();
+        const dims = fit.proposeDimensions();
+        if (dims?.rows && dims?.cols) {
+          resizePtyV2(sessionId, dims.cols, dims.rows).catch((e) => warnLog('pty', 'PTY resize failed', String(e)));
+        }
+      }, 120);
     });
     resizeObserver.observe(container);
 
     setReady(true);
 
     return () => {
+      if (resizeTimer != null) clearTimeout(resizeTimer);
       resizeObserver.disconnect();
       unlisteners.forEach((fn) => fn());
       term.dispose();
@@ -116,9 +154,9 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     };
   }, [sessionId, container]);
 
-  const write = useCallback((data: string) => { invokeCommand('pty_v2_write', { sessionId, data }).catch(() => {}); }, [sessionId]);
-  const sendCtrlC = useCallback(() => { invokeCommand('pty_send_ctrl_c', { sessionId }).catch(() => {}); }, [sessionId]);
-  const sendCtrlD = useCallback(() => { invokeCommand('pty_send_ctrl_d', { sessionId }).catch(() => {}); }, [sessionId]);
+  const write = useCallback((data: string) => { writePtyV2(sessionId!, data).catch((e) => warnLog('pty', 'PTY write failed', String(e))); }, [sessionId]);
+  const sendCtrlC = useCallback(() => { sendCtrlCPtyV2(sessionId!).catch((e) => warnLog('pty', 'Ctrl+C failed', String(e))); }, [sessionId]);
+  const sendCtrlD = useCallback(() => { sendCtrlDPtyV2(sessionId!).catch((e) => warnLog('pty', 'Ctrl+D failed', String(e))); }, [sessionId]);
   const clear = useCallback(() => { termRef.current?.clear(); }, []);
   const searchFn = useCallback((query: string) => { searchRef.current?.findNext(query); }, []);
   const serializeFn = useCallback(() => serializeRef.current?.serialize() ?? '', []);

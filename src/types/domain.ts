@@ -4,7 +4,7 @@ export type RuntimeMode = 'pty-interactive' | 'structured-print';
 
 export type SurfaceId = 'console' | 'projects' | 'workspace' | 'resources' | 'canvas' | 'github' | 'settings';
 
-export type SessionStatus = 'created' | 'starting' | 'running' | 'waiting' | 'paused' | 'completed' | 'failed' | 'stopped' | 'archived';
+export type SessionStatus = 'created' | 'starting' | 'running' | 'waiting' | 'paused' | 'completed' | 'failed' | 'stopped' | 'archived' | 'disconnected';
 
 export type PtyStatus = 'idle' | 'starting' | 'running' | 'exited' | 'failed' | 'killed';
 
@@ -119,6 +119,7 @@ export interface RuntimeEvent {
   outputTokens?: number;
   totalCostUsd?: number;
   durationMs?: number;
+  claudeSessionId?: string;
 }
 
 export interface AuditLog {

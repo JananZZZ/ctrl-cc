@@ -1,15 +1,38 @@
-import { CcEmptyState } from '../../components/ui/CcEmptyState';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 
 export function GitHubSurface() {
+  useRenderLoopGuard('GitHubSurface');
+  const { t } = useTranslation();
+  const [url, setUrl] = useState('https://github.com');
+  const [inputUrl, setInputUrl] = useState('https://github.com');
+
   return (
-    <div data-testid="surface-github" style={{ padding: '40px 32px' }}>
-      <h1 style={{ fontSize: 'var(--cc-font-2xl)', fontWeight: 600, color: 'var(--cc-text)', marginBottom: 8 }}>
-        GitHub
-      </h1>
-      <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-muted)', marginBottom: 24 }}>
-        安全 WebView + 项目 GitHub 仓库映射 — 当前模块尚未接入真实数据
-      </p>
-      <CcEmptyState icon="🔗" title="GitHub Surface 将在 Stage 4 实现" description="只做安全 WebView 和项目 repo/PR/Issue 映射，不读取 token/cookie" />
+    <div data-testid="surface-github" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ display: 'flex', gap: 6, padding: '8px 12px', borderBottom: '1px solid var(--cc-border)', background: 'var(--cc-surface-solid)', flexShrink: 0 }}>
+        <input
+          type="text"
+          value={inputUrl}
+          onChange={(e) => setInputUrl(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') setUrl(inputUrl); }}
+          placeholder={t('github.urlPlaceholder')}
+          style={{ flex: 1, padding: '4px 10px', fontSize: 'var(--cc-font-sm)', border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-bg)', color: 'var(--cc-text)', outline: 'none' }}
+        />
+        <button
+          onClick={() => setUrl(inputUrl)}
+          style={{ padding: '4px 14px', fontSize: 'var(--cc-font-sm)', border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-navy)', color: 'var(--cc-text-on-accent)', cursor: 'pointer', fontWeight: 600 }}
+        >
+          {t('github.go')}
+        </button>
+        <button
+          onClick={() => { setUrl('https://github.com'); setInputUrl('https://github.com'); }}
+          style={{ padding: '4px 10px', fontSize: 'var(--cc-font-sm)', border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-surface-solid)', color: 'var(--cc-text)', cursor: 'pointer' }}
+        >
+          {t('github.title')}
+        </button>
+      </div>
+      <iframe src={url} style={{ flex: 1, border: 'none', width: '100%' }} title="GitHub Browser" />
     </div>
   );
 }

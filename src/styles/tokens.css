@@ -1,63 +1,69 @@
+/* Ctrl-CC — Neo Calm Industrial | 四主题视觉系统 v5 */
+/* warm-sand(默认) / light / pale-blue / dark */
+/* 严格遵循 CIA 设计总则 */
+
+/* ═══════════════ Shared Typography ═══════════════ */
 :root {
-  --cc-bg: #f7f4ee;
-  --cc-bg-muted: #f1ece2;
-  --cc-surface: rgba(255, 255, 255, 0.88);
-  --cc-surface-solid: #ffffff;
-  --cc-surface-muted: #fbf8f2;
-  --cc-surface-hover: #f5f0e7;
-  --cc-border: #e8ded1;
-  --cc-border-strong: #d7c7b4;
-  --cc-border-muted: #f0e8da;
-  --cc-text: #243044;
-  --cc-text-muted: #7b6f62;
-  --cc-text-soft: #9a8f83;
-  --cc-text-placeholder: #b8a890;
-  --cc-text-on-accent: #ffffff;
-  --cc-brand: #d8c29b;
-  --cc-brand-strong: #c4a876;
-  --cc-brand-soft: #f1e7d2;
-  --cc-navy: #223047;
-  --cc-blue: #82afff;
-  --cc-blue-soft: #e8f1ff;
-  --cc-green: #63c59b;
-  --cc-green-soft: #e6f7ef;
-  --cc-amber: #f0a54a;
-  --cc-amber-soft: #fef5e8;
-  --cc-red: #e66b6b;
-  --cc-red-soft: #fdeeee;
-  --cc-purple: #9a8cff;
-  --cc-purple-soft: #f1eeff;
-  --cc-radius-xs: 8px;
-  --cc-radius-sm: 12px;
-  --cc-radius-md: 16px;
-  --cc-radius-lg: 20px;
-  --cc-radius-xl: 24px;
-  --cc-radius-full: 999px;
-  --cc-shadow-soft: 0 10px 30px rgba(36, 48, 68, 0.08);
-  --cc-shadow-card: 0 6px 18px rgba(36, 48, 68, 0.06);
-  --cc-shadow-floating: 0 16px 44px rgba(36, 48, 68, 0.12);
-  --cc-font-sans: "Inter", "Segoe UI Variable", "Microsoft YaHei UI", "PingFang SC", sans-serif;
-  --cc-font-mono: "JetBrains Mono", "Cascadia Code", "Consolas", monospace;
-  --cc-font-xs: 12px;
-  --cc-font-sm: 13px;
-  --cc-font-md: 14px;
-  --cc-font-lg: 16px;
-  --cc-font-xl: 20px;
-  --cc-font-2xl: 24px;
-  --cc-font-3xl: 28px;
-  --cc-line-xs: 16px;
-  --cc-line-sm: 20px;
-  --cc-line-md: 22px;
-  --cc-line-lg: 26px;
-  --cc-line-xl: 32px;
+  --cc-font-sans: 'Inter', 'Noto Sans SC', system-ui, 'Microsoft YaHei UI', 'PingFang SC', sans-serif;
+  --cc-font-mono: 'JetBrains Mono', 'Sarasa Mono SC', 'Cascadia Code', ui-monospace, monospace;
+  --cc-font-scale: 1;
+  --cc-font-3xs: calc(8px * var(--cc-font-scale));
+  --cc-font-2xs: calc(11px * var(--cc-font-scale));
+  --cc-font-xs: calc(12px * var(--cc-font-scale));
+  --cc-font-sm: calc(13px * var(--cc-font-scale));
+  --cc-font-md: calc(14px * var(--cc-font-scale));
+  --cc-font-lg: calc(16px * var(--cc-font-scale));
+  --cc-font-xl: calc(20px * var(--cc-font-scale));
+  --cc-font-2xl: calc(26px * var(--cc-font-scale));
+  --cc-font-3xl: calc(34px * var(--cc-font-scale));
+  --cc-leading-tight: 1.25;
+  --cc-leading-normal: 1.50;
+  --cc-leading-relaxed: 1.70;
+  --cc-font-normal: 400;
+  --cc-font-medium: 500;
+  --cc-font-semibold: 600;
+  --cc-font-bold: 700;
+
+  /* ═══════════════ Shared Spacing (8px grid) ═══════════════ */
+  --cc-space-0: 0;
+  --cc-space-1: 4px;
+  --cc-space-2: 8px;
+  --cc-space-3: 12px;
+  --cc-space-4: 16px;
+  --cc-space-5: 20px;
+  --cc-space-6: 24px;
+  --cc-space-8: 32px;
+  --cc-space-10: 40px;
+  --cc-space-12: 48px;
+  --cc-space-16: 64px;
+
+  /* ═══════════════ Shared Radius ═══════════════ */
+  --cc-radius-xs: 4px;
+  --cc-radius-sm: 8px;
+  --cc-radius-md: 12px;
+  --cc-radius-lg: 16px;
+  --cc-radius-xl: 20px;
+  --cc-radius-2xl: 24px;
+  --cc-radius-full: 9999px;
+
+  /* ═══════════════ Shared Motion ═══════════════ */
   --cc-duration-fast: 120ms;
-  --cc-duration-normal: 220ms;
-  --cc-duration-slow: 360ms;
-  --cc-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --cc-ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --cc-duration-normal: 180ms;
+  --cc-duration-slow: 260ms;
+  --cc-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --cc-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --cc-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --cc-ease-in: cubic-bezier(0.4, 0, 0.7, 0.2);
+
+  /* ═══════════════ Shared Layout ═══════════════ */
   --cc-topbar-height: 52px;
+  --cc-sidebar-width: 56px;
   --cc-rail-width: 56px;
-  --cc-surface-max-width: 1440px;
+  --cc-inspector-width: 340px;
+  --cc-surface-max: 1280px;
+  --cc-card-padding: 20px;
+
+  /* ═══════════════ Z-Index ═══════════════ */
   --z-base: 0;
   --z-dropdown: 1000;
   --z-sticky: 2000;
@@ -67,45 +73,177 @@
   --z-notification: 6000;
   --z-command-palette: 7000;
   --z-max: 9999;
+
+  /* ═══════════════ Semantic Aliases (shared defaults) ═══════════════ */
+  --cc-navy: var(--cc-brand-strong);
+  --cc-bg-muted: var(--cc-surface-muted);
+  --cc-border-muted: var(--cc-border-soft);
+  --cc-text-secondary: var(--cc-text-muted);
+  --cc-text-on-accent: var(--cc-text-inverse);
+  --cc-bg-danger-soft: var(--cc-red-soft);
+  --cc-bg-warning-soft: var(--cc-amber-soft);
+  --cc-bg-success-soft: var(--cc-green-soft);
+
+  /* ═══════════════ Signal Colors (global) ═══════════════ */
+  --cc-signal-running: #21C17A;
+  --cc-signal-waiting: #F5A524;
+  --cc-signal-auto: #8B7CFF;
+  --cc-signal-done: #4B8BF5;
+  --cc-signal-risk: #F35B5B;
+  --cc-signal-idle: #A8B1C2;
+  --cc-signal-failed: #F35B5B;
+  --cc-signal-paused: #A8B1C2;
 }
 
+/* ═══════════════════════════════════════════════════════
+   Theme 1: Warm Sand 暖沙 Claude — 品牌默认
+   情绪: 温暖 / 亲切 / 高级纸张感
+   ═══════════════════════════════════════════════════════ */
+:root,
+[data-theme="warm-sand"] {
+  --cc-bg: #FAF8F2;
+  --cc-bg-subtle: #F5F0E6;
+  --cc-bg-elevated: #FFFEFA;
+  --cc-surface: rgba(255, 254, 250, 0.88);
+  --cc-surface-solid: #FFFFFF;
+  --cc-surface-muted: #F3ECE0;
+  --cc-surface-hover: #FFFBF4;
+  --cc-border: #E8DDCE;
+  --cc-border-soft: rgba(232, 221, 206, 0.60);
+  --cc-border-strong: #D4C4AD;
+  --cc-text: #1E1B15;
+  --cc-text-muted: #736B5E;
+  --cc-text-soft: #9C9283;
+  --cc-text-inverse: #FFFFFF;
+  --cc-brand: #D4A574;
+  --cc-brand-soft: #F5E4D3;
+  --cc-brand-strong: #B88352;
+  --cc-green: #5D9E7A;
+  --cc-green-soft: #E6F3EC;
+  --cc-blue: #7BA4D9;
+  --cc-blue-soft: #EAF0FA;
+  --cc-amber: #E09E4A;
+  --cc-amber-soft: #FDF0DF;
+  --cc-red: #D47473;
+  --cc-red-soft: #FCEAE9;
+  --cc-purple: #9B84D9;
+  --cc-purple-soft: #F0EBFB;
+  --cc-shadow-card: 0 1px 2px rgba(30, 27, 21, 0.04), 0 4px 16px rgba(30, 27, 21, 0.04);
+  --cc-shadow-popover: 0 4px 8px rgba(30, 27, 21, 0.06), 0 12px 32px rgba(30, 27, 21, 0.08);
+  --cc-shadow-floating: 0 8px 16px rgba(30, 27, 21, 0.08), 0 20px 48px rgba(30, 27, 21, 0.10);
+  --cc-overlay: rgba(30, 27, 21, 0.45);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Theme 2: Light 浅色
+   情绪: 干净 / 通透 / 轻盈 / 无压
+   ═══════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  --cc-bg: #F9F9F8;
+  --cc-bg-subtle: #F3F3F1;
+  --cc-bg-elevated: #FFFFFF;
+  --cc-surface: rgba(255, 255, 255, 0.90);
+  --cc-surface-solid: #FFFFFF;
+  --cc-surface-muted: #F5F5F3;
+  --cc-surface-hover: #FDFDFC;
+  --cc-border: #E8E6E3;
+  --cc-border-soft: rgba(232, 230, 227, 0.60);
+  --cc-border-strong: #D1CFCA;
+  --cc-text: #1A1A18;
+  --cc-text-muted: #6E6D68;
+  --cc-text-soft: #9A9994;
+  --cc-text-inverse: #FFFFFF;
+  --cc-brand: #3B82F6;
+  --cc-brand-soft: #E8F0FE;
+  --cc-brand-strong: #2563EB;
+  --cc-green: #16A34A;
+  --cc-green-soft: #E6F7EB;
+  --cc-blue: #60A5FA;
+  --cc-blue-soft: #EDF5FE;
+  --cc-amber: #F59E0B;
+  --cc-amber-soft: #FEF9E8;
+  --cc-red: #EF4444;
+  --cc-red-soft: #FEECEC;
+  --cc-purple: #8B5CF6;
+  --cc-purple-soft: #F2EDFE;
+  --cc-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --cc-shadow-popover: 0 4px 8px rgba(0, 0, 0, 0.06), 0 12px 28px rgba(0, 0, 0, 0.06);
+  --cc-shadow-floating: 0 8px 16px rgba(0, 0, 0, 0.08), 0 20px 44px rgba(0, 0, 0, 0.08);
+  --cc-overlay: rgba(0, 0, 0, 0.40);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Theme 3: Pale Blue 浅蓝
+   情绪: 清澈 / 理性 / 科技 / 凉爽
+   ═══════════════════════════════════════════════════════ */
+[data-theme="pale-blue"] {
+  --cc-bg: #F4F7FB;
+  --cc-bg-subtle: #EDF2FA;
+  --cc-bg-elevated: #FFFFFF;
+  --cc-surface: rgba(255, 255, 255, 0.88);
+  --cc-surface-solid: #FFFFFF;
+  --cc-surface-muted: #EEF3FA;
+  --cc-surface-hover: #FAFBFF;
+  --cc-border: #DCE4F2;
+  --cc-border-soft: rgba(220, 228, 242, 0.65);
+  --cc-border-strong: #C2CEE6;
+  --cc-text: #1A2338;
+  --cc-text-muted: #586884;
+  --cc-text-soft: #8898B4;
+  --cc-text-inverse: #FFFFFF;
+  --cc-brand: #4F8CDF;
+  --cc-brand-soft: #E4EEFB;
+  --cc-brand-strong: #3670C4;
+  --cc-green: #389E6E;
+  --cc-green-soft: #E4F5ED;
+  --cc-blue: #6CACEE;
+  --cc-blue-soft: #EAF3FD;
+  --cc-amber: #E8963C;
+  --cc-amber-soft: #FDF2E4;
+  --cc-red: #E56060;
+  --cc-red-soft: #FCEAEA;
+  --cc-purple: #7E6AE8;
+  --cc-purple-soft: #F0EDFD;
+  --cc-shadow-card: 0 1px 3px rgba(26, 35, 56, 0.04), 0 4px 12px rgba(26, 35, 56, 0.03);
+  --cc-shadow-popover: 0 4px 8px rgba(26, 35, 56, 0.06), 0 12px 28px rgba(26, 35, 56, 0.05);
+  --cc-shadow-floating: 0 8px 16px rgba(26, 35, 56, 0.08), 0 20px 44px rgba(26, 35, 56, 0.07);
+  --cc-overlay: rgba(26, 35, 56, 0.40);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Theme 4: Dark 深色
+   情绪: 沉稳 / 专注 / 低光 / 专业
+   ═══════════════════════════════════════════════════════ */
 [data-theme="dark"] {
-  --cc-bg: #1a1d23;
-  --cc-bg-muted: #22262e;
-  --cc-surface: rgba(30, 33, 40, 0.92);
-  --cc-surface-solid: #1e2128;
-  --cc-surface-muted: #242830;
-  --cc-surface-hover: #2a2e36;
-  --cc-border: #333842;
-  --cc-border-strong: #444a56;
-  --cc-border-muted: #2c303a;
-  --cc-text: #e4e6ea;
-  --cc-text-muted: #959aa5;
-  --cc-text-soft: #6e7480;
-  --cc-text-placeholder: #555b66;
-  --cc-brand-soft: #2a2830;
+  --cc-bg: #0F0F14;
+  --cc-bg-subtle: #16161E;
+  --cc-bg-elevated: #1C1C26;
+  --cc-surface: rgba(28, 28, 38, 0.92);
+  --cc-surface-solid: #1C1C26;
+  --cc-surface-muted: #22222E;
+  --cc-surface-hover: #262634;
+  --cc-border: #2E2E3C;
+  --cc-border-soft: rgba(46, 46, 60, 0.60);
+  --cc-border-strong: #404054;
+  --cc-text: #ECECEE;
+  --cc-text-muted: #9C9CA4;
+  --cc-text-soft: #6A6A76;
+  --cc-text-inverse: #0F0F14;
+  --cc-brand: #D4A574;
+  --cc-brand-soft: rgba(212, 165, 116, 0.14);
+  --cc-brand-strong: #E0B880;
+  --cc-green: #55C08A;
+  --cc-green-soft: rgba(85, 192, 138, 0.14);
+  --cc-blue: #6CB4F0;
+  --cc-blue-soft: rgba(108, 180, 240, 0.14);
+  --cc-amber: #F0B860;
+  --cc-amber-soft: rgba(240, 184, 96, 0.14);
+  --cc-red: #EC7070;
+  --cc-red-soft: rgba(236, 112, 112, 0.14);
+  --cc-purple: #A88EE8;
+  --cc-purple-soft: rgba(168, 142, 232, 0.14);
+  --cc-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.20), 0 4px 8px rgba(0, 0, 0, 0.10);
+  --cc-shadow-popover: 0 4px 12px rgba(0, 0, 0, 0.30), 0 12px 32px rgba(0, 0, 0, 0.18);
+  --cc-shadow-floating: 0 8px 20px rgba(0, 0, 0, 0.38), 0 24px 52px rgba(0, 0, 0, 0.22);
+  --cc-overlay: rgba(0, 0, 0, 0.55);
 }
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html, body, #root {
-  height: 100%;
-  font-family: var(--cc-font-sans);
-  font-size: var(--cc-font-md);
-  color: var(--cc-text);
-  background: var(--cc-bg);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--cc-border-strong); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--cc-text-soft); }
-
-button { font-family: inherit; }
-input, textarea, select { font-family: inherit; }

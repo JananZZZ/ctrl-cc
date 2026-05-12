@@ -1,0 +1,160 @@
+/* Ctrl-CC — Global Styles & Component CSS | Neo Calm Industrial v5 */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--cc-font-sans);
+  font-size: var(--cc-font-md);
+  line-height: var(--cc-leading-normal);
+  color: var(--cc-text);
+  background: var(--cc-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--cc-border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cc-text-soft); }
+
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; font-size: var(--cc-font-md); }
+
+/* ═══════════════ CcCard ═══════════════ */
+.cc-card {
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border-soft);
+  border-radius: var(--cc-radius-lg);
+  box-shadow: var(--cc-shadow-card);
+  color: var(--cc-text);
+  transition: transform var(--cc-duration-normal) var(--cc-ease-standard),
+              box-shadow var(--cc-duration-normal) var(--cc-ease-standard),
+              border-color var(--cc-duration-normal) var(--cc-ease-standard),
+              background var(--cc-duration-normal) var(--cc-ease-standard);
+}
+.cc-card[data-interactive="true"]:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--cc-shadow-popover);
+  border-color: var(--cc-brand);
+}
+
+/* ═══════════════ CcButton ═══════════════ */
+.cc-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 6px 16px; border-radius: var(--cc-radius-full); border: 1px solid transparent;
+  font-size: var(--cc-font-sm); font-weight: var(--cc-font-medium);
+  cursor: pointer; white-space: nowrap;
+  transition: transform var(--cc-duration-fast) var(--cc-ease-spring),
+              box-shadow var(--cc-duration-fast) var(--cc-ease-spring),
+              filter var(--cc-duration-fast) var(--cc-ease-out),
+              background var(--cc-duration-fast) var(--cc-ease-standard),
+              color var(--cc-duration-fast) var(--cc-ease-standard);
+}
+.cc-button:hover { transform: translateY(-2px); }
+.cc-button:active { transform: translateY(1px); }
+.cc-button-sm { padding: 4px 12px; font-size: var(--cc-font-xs); }
+.cc-button-md { padding: 6px 16px; }
+.cc-button-lg { padding: 10px 22px; font-size: var(--cc-font-md); }
+
+.cc-button-primary { background: var(--cc-brand); color: var(--cc-text); border-color: var(--cc-brand-strong); }
+.cc-button-primary:hover { filter: brightness(1.06); box-shadow: 0 0 20px var(--cc-brand-soft); }
+.cc-button-soft { background: var(--cc-brand-soft); color: var(--cc-text); border-color: var(--cc-border-soft); }
+.cc-button-soft:hover { filter: brightness(0.96); }
+.cc-button-ghost { background: transparent; color: var(--cc-text-muted); }
+.cc-button-ghost:hover { background: var(--cc-surface-muted); }
+.cc-button-danger { background: var(--cc-red-soft); color: var(--cc-red); border-color: var(--cc-red-soft); }
+.cc-button-danger:hover { filter: brightness(0.94); }
+.cc-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ═══════════════ CcBadge ═══════════════ */
+.cc-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 8px; height: 22px; border-radius: var(--cc-radius-full);
+  font-size: var(--cc-font-2xs); font-weight: var(--cc-font-medium);
+  transition: background var(--cc-duration-normal) var(--cc-ease-standard),
+              color var(--cc-duration-normal) var(--cc-ease-standard);
+}
+.cc-badge-sm { height: 18px; padding: 0 6px; font-size: 10px; }
+.cc-badge-success { background: var(--cc-green-soft); color: var(--cc-green); }
+.cc-badge-info    { background: var(--cc-blue-soft);  color: var(--cc-blue); }
+.cc-badge-warning { background: var(--cc-amber-soft); color: var(--cc-amber); }
+.cc-badge-danger  { background: var(--cc-red-soft);   color: var(--cc-red); }
+.cc-badge-purple  { background: var(--cc-purple-soft); color: var(--cc-purple); }
+
+/* ═══════════════ CcStatusDot ═══════════════ */
+.cc-status-running { background: var(--cc-green); animation: cc-pulse 1.5s ease-in-out infinite; }
+.cc-status-waiting { background: var(--cc-amber); animation: cc-pulse 1.5s ease-in-out infinite; }
+.cc-status-idle    { background: var(--cc-text-muted); }
+.cc-status-completed { background: var(--cc-blue); }
+.cc-status-failed  { background: var(--cc-red); }
+.cc-status-agent   { background: var(--cc-purple); animation: cc-pulse 2s ease-in-out infinite; }
+
+@keyframes cc-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ═══════════════ CcTabs ═══════════════ */
+.cc-tabs {
+  display: flex; gap: 4px;
+  background: var(--cc-surface-muted);
+  border: 1px solid var(--cc-border-soft);
+  border-radius: var(--cc-radius-md);
+  padding: 4px;
+  transition: all var(--cc-duration-normal) var(--cc-ease-standard);
+}
+.cc-tab {
+  flex: 1; padding: 6px 16px; border: none; border-radius: var(--cc-radius-sm);
+  font-size: var(--cc-font-sm); font-weight: var(--cc-font-normal);
+  color: var(--cc-text-muted); background: transparent;
+  cursor: pointer; white-space: nowrap;
+  transition: all var(--cc-duration-fast) var(--cc-ease-standard);
+}
+.cc-tab[data-active="true"] {
+  background: var(--cc-surface-solid);
+  color: var(--cc-text);
+  box-shadow: var(--cc-shadow-card);
+  font-weight: var(--cc-font-semibold);
+}
+
+/* ═══════════════ Theme Transition ═══════════════ */
+html, body, .cc-card, .cc-button, .cc-badge, .cc-tabs, .cc-tab,
+.card, .btn, .badge, .nav-item, [data-theme] * {
+  transition:
+    background-color var(--cc-duration-normal) var(--cc-ease-standard),
+    border-color var(--cc-duration-normal) var(--cc-ease-standard),
+    color var(--cc-duration-normal) var(--cc-ease-standard),
+    box-shadow var(--cc-duration-normal) var(--cc-ease-standard);
+}
+
+/* ═══════════════ Focus & Accessibility ═══════════════ */
+:focus-visible {
+  outline: 2px solid var(--cc-brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════ Stagger Entrance ═══════════════ */
+@keyframes cc-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.cc-enter-stagger > * {
+  animation: cc-fade-up var(--cc-duration-normal) var(--cc-ease-out) forwards;
+  opacity: 0;
+}
+.cc-enter-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.cc-enter-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.cc-enter-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.cc-enter-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.cc-enter-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.cc-enter-stagger > *:nth-child(6) { animation-delay: 300ms; }
+.cc-enter-stagger > *:nth-child(7) { animation-delay: 360ms; }
+.cc-enter-stagger > *:nth-child(8) { animation-delay: 420ms; }

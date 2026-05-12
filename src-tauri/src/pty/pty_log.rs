@@ -75,6 +75,7 @@ impl PtyLogWriter {
         }
     }
 
+    #[allow(dead_code)]
     pub fn write_ansi(&self, text: &str) {
         lock_writer(&self.writer);
         let path = self.session_dir.join("pty_ansi.log");
@@ -104,6 +105,7 @@ impl PtyLogWriter {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn write_event(&self, event_jsonl: &str) {
         lock_writer(&self.writer);
         let path = self.session_dir.join("pty_events.jsonl");

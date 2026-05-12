@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSessionStore } from '../../stores/sessionStore';
 import { CcStatusDot } from '../../components/ui/CcStatusDot';
 import { CcBadge } from '../../components/ui/CcBadge';
@@ -14,25 +15,26 @@ interface Props {
   onFork: (session: Session) => void;
 }
 
-const statusGroups: { status: SessionStatus; label: string; defaultOpen: boolean }[] = [
-  { status: 'running', label: '工作中', defaultOpen: true },
-  { status: 'waiting', label: '等待输入', defaultOpen: true },
-  { status: 'paused', label: '暂停', defaultOpen: true },
-  { status: 'created', label: '就绪', defaultOpen: false },
-  { status: 'completed', label: '已完成', defaultOpen: false },
-  { status: 'failed', label: '失败', defaultOpen: false },
-  { status: 'stopped', label: '已停止', defaultOpen: false },
-  { status: 'archived', label: '已归档', defaultOpen: false },
+const STATUS_GROUPS: { status: SessionStatus; labelKey: string; defaultOpen: boolean }[] = [
+  { status: 'running', labelKey: 'status.working', defaultOpen: true },
+  { status: 'waiting', labelKey: 'status.waitingInput', defaultOpen: true },
+  { status: 'paused', labelKey: 'status.paused', defaultOpen: true },
+  { status: 'created', labelKey: 'status.ready', defaultOpen: false },
+  { status: 'completed', labelKey: 'status.completed', defaultOpen: false },
+  { status: 'failed', labelKey: 'status.failed', defaultOpen: false },
+  { status: 'stopped', labelKey: 'status.stopped', defaultOpen: false },
+  { status: 'archived', labelKey: 'status.archived', defaultOpen: false },
 ];
 
 export function SessionManagementRail({ collapsed, onToggleCollapse, projectId, selectedSessionId, onSelectSession, onResume, onFork }: Props) {
+  const { t } = useTranslation();
   const allSessions = useSessionStore((s) => s.sessions);
   const sessions = useMemo(() => projectId ? allSessions.filter((ss) => ss.projectId === projectId) : [], [allSessions, projectId]);
 
   if (collapsed) {
     return (
       <div style={{ width: 32, borderRight: '1px solid var(--cc-border)', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 8 }}>
-        <button onClick={onToggleCollapse} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'var(--cc-text-muted)' }}>▶</button>
+        <button onClick={onToggleCollapse} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>&#x25B6;</button>
       </div>
     );
   }
@@ -40,9 +42,9 @@ export function SessionManagementRail({ collapsed, onToggleCollapse, projectId, 
   if (!projectId) {
     return (
       <div data-testid="session-management-rail" style={{ width: 280, flexShrink: 0, borderRight: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column' }}>
-        <RailHeader title="会话" onCollapse={onToggleCollapse} count={0} />
+        <RailHeader title={t('sessionInspector.session')} onCollapse={onToggleCollapse} count={0} />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <span style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-soft)' }}>选择一个项目查看会话</span>
+          <span style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-soft)' }}>{t('common.selectProject')}</span>
         </div>
       </div>
     );
@@ -50,18 +52,18 @@ export function SessionManagementRail({ collapsed, onToggleCollapse, projectId, 
 
   return (
     <div data-testid="session-management-rail" style={{ width: 280, flexShrink: 0, borderRight: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <RailHeader title="会话" onCollapse={onToggleCollapse} count={sessions.length} />
+      <RailHeader title={t('sessionInspector.session')} onCollapse={onToggleCollapse} count={sessions.length} />
       <div style={{ flex: 1, overflow: 'auto', padding: '4px 0' }}>
-        {statusGroups.map((g) => {
+        {STATUS_GROUPS.map((g) => {
           const groupSessions = sessions.filter((s) => s.status === g.status);
           if (groupSessions.length === 0) return null;
           return (
             <div key={g.status} style={{ marginBottom: 2 }}>
               <div style={{ padding: '4px 12px', fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text-soft)', cursor: 'pointer' }}>
-                {g.label} ({groupSessions.length})
+                {t(g.labelKey)} ({groupSessions.length})
               </div>
               {groupSessions.map((s) => (
-                <SessionCard key={s.id} session={s} isSelected={selectedSessionId === s.id} onSelect={() => onSelectSession(s.id)} onResume={() => onResume(s)} onFork={() => onFork(s)} />
+                <SessionCard key={s.id} session={s} isSelected={selectedSessionId === s.id} onSelect={() => onSelectSession(s.id)} onResume={() => onResume(s)} onFork={() => onFork(s)} t={t} />
               ))}
             </div>
           );
@@ -76,15 +78,16 @@ function RailHeader({ title, onCollapse, count }: { title: string; onCollapse: (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid var(--cc-border)', minHeight: 36 }}>
       <span style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)' }}>{title}</span>
       <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>{count}</span>
-      <button onClick={onCollapse} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'var(--cc-text-muted)' }}>◀</button>
+      <button onClick={onCollapse} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>&#x25C0;</button>
     </div>
   );
 }
 
-function SessionCard({ session, isSelected, onSelect, onResume, onFork }: { session: Session; isSelected: boolean; onSelect: () => void; onResume: () => void; onFork: () => void }) {
+function SessionCard({ session, isSelected, onSelect, onResume, onFork, t }: { session: Session; isSelected: boolean; onSelect: () => void; onResume: () => void; onFork: () => void; t: (key: string, opts?: any) => string }) {
   const statusMap: Record<SessionStatus, 'running' | 'waiting' | 'error' | 'done' | 'idle'> = {
     running: 'running', waiting: 'waiting', created: 'idle', starting: 'running',
     paused: 'idle', completed: 'done', failed: 'error', stopped: 'idle', archived: 'idle',
+    disconnected: 'error',
   };
   const isRunning = session.status === 'running' || session.status === 'starting';
   const canResume = session.claudeSessionId != null && !isRunning;
@@ -107,8 +110,8 @@ function SessionCard({ session, isSelected, onSelect, onResume, onFork }: { sess
       <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', marginTop: 2 }}>
         <span style={{ marginRight: 8 }}>{session.model}</span>
         <span style={{ marginRight: 8 }}>{session.permissionMode}</span>
-        {session.fileChangeCount > 0 && <span style={{ marginRight: 8 }}>{session.fileChangeCount} 文件</span>}
-        {session.riskCount > 0 && <span style={{ color: 'var(--cc-red)' }}>{session.riskCount} 风险</span>}
+        {session.fileChangeCount > 0 && <span style={{ marginRight: 8 }}>{t('projects.fileCountLabel', { count: session.fileChangeCount })}</span>}
+        {session.riskCount > 0 && <span style={{ color: 'var(--cc-red)' }}>{t('projects.riskCountLabel', { count: session.riskCount })}</span>}
       </div>
       <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
         {canResume && <button data-testid="session-resume-button" onClick={(e) => { e.stopPropagation(); onResume(); }} style={actionBtnStyle}>Resume</button>}

@@ -1,0 +1,20 @@
+{
+  "identifier": "default",
+  "description": "Default capability set for Ctrl-CC",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "dialog:allow-message",
+    "dialog:allow-ask",
+    "fs:allow-read",
+    "fs:allow-write",
+    "fs:allow-exists",
+    "shell:allow-open",
+    "shell:allow-execute",
+    "process:default"
+  ]
+}

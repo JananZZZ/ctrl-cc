@@ -1,0 +1,50 @@
+.ctrlcc-terminal-shell {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  overflow: hidden;
+  border-radius: var(--cc-radius-lg, 20px);
+  border: 1px solid var(--cc-border-soft, rgba(232, 222, 209, 0.68));
+  background: var(--cc-bg-elevated, #fffdf8);
+}
+
+.ctrlcc-terminal-container {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.ctrlcc-terminal-container .xterm {
+  height: 100%;
+}
+
+.ctrlcc-terminal-toolbar {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--cc-border-soft, rgba(232, 222, 209, 0.68));
+  background: var(--cc-surface-muted, #f4ecdc);
+}
+
+.ctrlcc-terminal-toolbar button {
+  border: 1px solid var(--cc-border-soft, rgba(232, 222, 209, 0.68));
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: var(--cc-surface-solid, #ffffff);
+  color: var(--cc-text, #243044);
+  cursor: pointer;
+}
+
+.ctrlcc-terminal-toolbar button:hover {
+  background: var(--cc-surface-hover, #fffaf2);
+}
+
+.ctrlcc-terminal-status {
+  margin-left: auto;
+  color: var(--cc-text-muted, #7b6f62);
+  font-size: 12px;
+}

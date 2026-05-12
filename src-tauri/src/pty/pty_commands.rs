@@ -1,6 +1,7 @@
 use crate::error::AppError;
 use crate::pty::pty_manager::PtyManager;
-use crate::pty::pty_types::PtyStartOptions;
+use crate::pty::pty_session::runtime_trace_log;
+use crate::pty::pty_types::{PtySessionDebugInfo, PtyStartOptions};
 use tauri::State;
 
 #[tauri::command]
@@ -18,14 +19,20 @@ pub fn pty_start_claude_session(
     cwd: String,
     extra_args: Vec<String>,
 ) -> Result<crate::pty::pty_types::PtySessionInfo, AppError> {
+    runtime_trace_log("no-trace", &session_id, &session_id, "pty.start.request", "start", "");
     let options = PtyStartOptions {
-        session_id,
+        session_id: session_id.clone(),
         project_id,
         cli_path,
         cwd,
         extra_args,
     };
-    manager.create(options, app)
+    let result = manager.create(options, app);
+    match &result {
+        Ok(info) => runtime_trace_log("no-trace", &session_id, &info.id, "pty.start.request", "success", ""),
+        Err(e) => runtime_trace_log("no-trace", &session_id, &session_id, "pty.start.request", "failed", &e.to_string()),
+    }
+    result
 }
 
 #[tauri::command]
@@ -33,8 +40,29 @@ pub fn pty_v2_write(
     manager: State<'_, PtyManager>,
     session_id: String,
     data: String,
+    trace_id: Option<String>,
 ) -> Result<(), AppError> {
-    manager.write(&session_id, &data)
+    let ui_id = &session_id;
+    let pty_id = &session_id;
+    runtime_trace_log(
+        trace_id.as_deref().unwrap_or("no-trace"),
+        ui_id, pty_id,
+        "pty_v2_write", "start", ""
+    );
+    let result = manager.write(&session_id, &data);
+    match &result {
+        Ok(()) => runtime_trace_log(
+            trace_id.as_deref().unwrap_or("no-trace"),
+            ui_id, pty_id,
+            "pty_v2_write", "success", ""
+        ),
+        Err(e) => runtime_trace_log(
+            trace_id.as_deref().unwrap_or("no-trace"),
+            ui_id, pty_id,
+            "pty_v2_write", "failed", &e.to_string()
+        ),
+    }
+    result
 }
 
 #[tauri::command]
@@ -105,4 +133,12 @@ pub fn pty_list_sessions(
     manager: State<'_, PtyManager>,
 ) -> Result<Vec<crate::pty::pty_types::PtySessionInfo>, AppError> {
     Ok(manager.list_all())
+}
+
+/// Session Mapping diagnostic: returns detailed debug info for contract probe.
+#[tauri::command]
+pub fn runtime_list_pty_sessions(
+    manager: State<'_, PtyManager>,
+) -> Result<Vec<PtySessionDebugInfo>, String> {
+    manager.list_debug_sessions()
 }

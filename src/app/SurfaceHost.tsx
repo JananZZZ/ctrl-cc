@@ -1,4 +1,5 @@
 import { useSurfaceStore } from '../stores/surfaceStore';
+import { ErrorBoundary } from '../components/error/ErrorBoundary';
 import { ConsoleSurface } from '../surfaces/console/ConsoleSurface';
 import { ProjectsSurface } from '../surfaces/projects/ProjectsSurface';
 import { WorkspaceSurface } from '../surfaces/workspace/WorkspaceSurface';
@@ -23,7 +24,9 @@ export function SurfaceHost() {
 
   return (
     <div style={{ flex: 1, overflow: 'auto' }}>
-      <Component />
+      <ErrorBoundary key={activeSurface}>
+        <Component />
+      </ErrorBoundary>
     </div>
   );
 }

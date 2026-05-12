@@ -1,17 +1,19 @@
+import { useTranslation } from 'react-i18next';
 import { useSurfaceStore } from '../../stores/surfaceStore';
 import type { SurfaceId } from '../../types';
 
-const navItems: { id: SurfaceId; label: string; icon: string }[] = [
-  { id: 'console', label: '控制台', icon: '🏠' },
-  { id: 'projects', label: '项目管理', icon: '📁' },
-  { id: 'workspace', label: '工作区', icon: '💬' },
-  { id: 'resources', label: '资源区', icon: '📦' },
-  { id: 'canvas', label: '无限画布', icon: '🎨' },
-  { id: 'github', label: 'GitHub', icon: '🔗' },
-  { id: 'settings', label: '设置', icon: '⚙️' },
+const navItems: { id: SurfaceId; labelKey: string; icon: string }[] = [
+  { id: 'console', labelKey: 'nav.console', icon: '🏠' },
+  { id: 'projects', labelKey: 'nav.projects', icon: '📁' },
+  { id: 'workspace', labelKey: 'nav.workspace', icon: '💬' },
+  { id: 'resources', labelKey: 'nav.resources', icon: '📦' },
+  { id: 'canvas', labelKey: 'nav.canvas', icon: '🎨' },
+  { id: 'github', labelKey: 'nav.github', icon: '🔗' },
+  { id: 'settings', labelKey: 'nav.settings', icon: '⚙️' },
 ];
 
 export function LeftSurfaceRail() {
+  const { t } = useTranslation();
   const { activeSurface, navigateTo } = useSurfaceStore();
 
   return (
@@ -29,7 +31,7 @@ export function LeftSurfaceRail() {
         flexShrink: 0,
       }}
     >
-      <div style={{ fontSize: 20, marginBottom: 8, marginTop: 4, cursor: 'pointer' }} onClick={() => navigateTo('console')}>
+      <div style={{ fontSize: 'var(--cc-font-lg)', marginBottom: 8, marginTop: 4, cursor: 'pointer' }} onClick={() => navigateTo('console')}>
         🐱
       </div>
       {navItems.map((item) => {
@@ -39,11 +41,11 @@ export function LeftSurfaceRail() {
             key={item.id}
             data-testid={`nav-${item.id}`}
             onClick={() => navigateTo(item.id)}
-            title={item.label}
+            title={t(item.labelKey)}
             style={{
               width: 40, height: 40,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 18,
+              fontSize: 'var(--cc-font-lg)',
               borderRadius: 'var(--cc-radius-sm)',
               border: 'none',
               background: isActive ? 'var(--cc-brand-soft)' : 'transparent',

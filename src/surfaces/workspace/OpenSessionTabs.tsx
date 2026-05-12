@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { OpenSessionTab } from '../../types';
 import { CcStatusDot } from '../../components/ui/CcStatusDot';
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function OpenSessionTabs({ tabs, activeTabId, onSelectTab, onCloseTab }: Props) {
+  const { t } = useTranslation();
   if (tabs.length === 0) return null;
 
   return (
@@ -41,16 +43,16 @@ export function OpenSessionTabs({ tabs, activeTabId, onSelectTab, onCloseTab }: 
             <span style={{ color: 'var(--cc-text-soft)' }}>/</span>
             <span>{tab.title}</span>
             {tab.pendingConfirms > 0 && (
-              <span style={{ fontSize: 10, padding: '0 4px', borderRadius: 'var(--cc-radius-full)', background: 'var(--cc-amber-soft)', color: 'var(--cc-amber)' }}>{tab.pendingConfirms}</span>
+              <span style={{ fontSize: 'var(--cc-font-2xs)', padding: '0 4px', borderRadius: 'var(--cc-radius-full)', background: 'var(--cc-amber-soft)', color: 'var(--cc-amber)' }}>{tab.pendingConfirms}</span>
             )}
             {tab.riskCount > 0 && (
-              <span style={{ fontSize: 10, padding: '0 4px', borderRadius: 'var(--cc-radius-full)', background: 'var(--cc-red-soft)', color: 'var(--cc-red)' }}>{tab.riskCount}</span>
+              <span style={{ fontSize: 'var(--cc-font-2xs)', padding: '0 4px', borderRadius: 'var(--cc-radius-full)', background: 'var(--cc-red-soft)', color: 'var(--cc-red)' }}>{tab.riskCount}</span>
             )}
-            {tab.isPinned && <span style={{ fontSize: 10 }}>📌</span>}
+            {tab.isPinned && <span style={{ fontSize: 'var(--cc-font-2xs)' }}>📌</span>}
             <button
               onClick={(e) => { e.stopPropagation(); onCloseTab(tab.sessionId); }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'var(--cc-text-muted)', padding: 0, lineHeight: 1 }}
-              title="关闭"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', padding: 0, lineHeight: 1 }}
+              title={t('common.close')}
             >×</button>
           </div>
         );

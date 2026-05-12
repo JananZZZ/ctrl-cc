@@ -26,6 +26,13 @@ const defaultSettings: AppSettings = {
 export const useAppStore = create<AppState>((set) => ({
   booted: false,
   settings: defaultSettings,
-  setBooted: (v) => set({ booted: v }),
-  updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
+  setBooted: (v) => set((s) => { if (s.booted === v) return s; return { booted: v }; }),
+  updateSettings: (patch) => set((s) => {
+    let changed = false;
+    for (const k of Object.keys(patch) as Array<keyof typeof patch>) {
+      if (patch[k] !== undefined && s.settings[k] !== patch[k]) { changed = true; break; }
+    }
+    if (!changed) return s;
+    return { settings: { ...s.settings, ...patch } };
+  }),
 }));

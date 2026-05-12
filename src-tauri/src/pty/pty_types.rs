@@ -4,6 +4,7 @@ use serde::Serialize;
 /// PTY session status machine.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
+#[allow(dead_code)]
 pub enum PtySessionStatus {
     Created,
     Starting,
@@ -25,6 +26,7 @@ pub struct PtySemanticEvent {
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
+#[allow(dead_code)]
 pub enum PtyEventType {
     SessionInitialized,
     PermissionRequested,
@@ -89,8 +91,25 @@ pub struct PtySupportInfo {
     pub details: String,
 }
 
+/// Session Mapping diagnostic info for runtime_list_pty_sessions.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PtySessionDebugInfo {
+    pub pty_session_id: String,
+    pub ui_session_id: Option<String>,
+    pub project_id: Option<String>,
+    pub cwd: String,
+    pub pid: Option<u32>,
+    pub status: String,
+    pub has_writer: bool,
+    pub reader_alive: bool,
+    pub created_at: String,
+    pub last_error: Option<String>,
+}
+
 /// Raw log chunk for retrieval.
 #[derive(Debug, Clone, Serialize)]
+#[allow(dead_code)]
 pub struct RawLogChunk {
     pub session_id: String,
     pub offset: u64,

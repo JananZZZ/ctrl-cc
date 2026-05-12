@@ -22,8 +22,8 @@ export function MarkdownRenderer({ content }: Props) {
 
 function CodeBlock({ lang, code }: { lang: string; code: string }) {
   return (
-    <pre style={{ margin: '6px 0', padding: '8px 12px', borderRadius: 'var(--cc-radius-sm)', background: '#1a1b1e', color: '#d4d4d8', fontSize: 11, fontFamily: 'var(--cc-font-mono)', overflow: 'auto', maxHeight: 400 }}>
-      {lang && <div style={{ fontSize: 10, color: '#888', marginBottom: 4 }}>{lang}</div>}
+    <pre style={{ margin: '6px 0', padding: '8px 12px', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-bg-subtle)', color: 'var(--cc-text)', fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-mono)', overflow: 'auto', maxHeight: 400 }}>
+      {lang && <div style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-soft)', marginBottom: 4 }}>{lang}</div>}
       <code>{code}</code>
     </pre>
   );
