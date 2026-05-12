@@ -4,6 +4,8 @@ import { useSessionStore } from '../../stores/sessionStore';
 import { useProjectStore } from '../../stores/projectStore';
 import { useSurfaceStore } from '../../stores/surfaceStore';
 import { useOpenSessionStore } from '../../stores/openSessionStore';
+import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
+import { useRuntimeTraceStore } from '../../features/runtime/stores/runtimeTraceStore';
 import { invokeCommand } from '../../services/invokeCommand';
 import { CcButton } from '../../components/ui/CcButton';
 import { CcStatusDot } from '../../components/ui/CcStatusDot';
@@ -22,6 +24,8 @@ export function ConsoleSurface() {
   const { openSession } = useOpenSessionStore();
   const [cap, setCap] = useState<Capability | null>(null);
   const [capLoading, setCapLoading] = useState(true);
+  const runtimeSessions = useRuntimeStore((s) => s.sessions);
+  const traceEvents = useRuntimeTraceStore((s) => s.events);
   const running = sessions.filter((s) => s.status === 'running' || s.status === 'starting').length;
   const today = sessions.filter((s) => new Date(s.createdAt).toDateString() === new Date().toDateString());
   const costToday = today.reduce((sum, s) => sum + (s.totalCostUsd || 0), 0);
@@ -29,6 +33,12 @@ export function ConsoleSurface() {
   const hour = new Date().getHours();
   const greetKey = hour < 6 ? 'greeting.night' : hour < 12 ? 'greeting.morning' : hour < 14 ? 'greeting.afternoon' : hour < 18 ? 'greeting.evening' : 'greeting.night';
   const recent = sessions.slice(-6).reverse();
+
+  // Runtime health: count sessions with active PTY connections
+  const runtimeActiveCount = Object.values(runtimeSessions).filter(s => s.ptySessionId).length;
+  const runtimeHealthyCount = Object.values(runtimeSessions).filter(s => s.status === 'claude-active' || s.status === 'pty-ready').length;
+  const traceErrorCount = traceEvents.filter(e => e.level === 'error').length;
+  const traceWarningCount = traceEvents.filter(e => e.level === 'warning').length;
 
   useEffect(() => {
     const cached = localStorage.getItem('ctrl-cc-capability');
@@ -60,6 +70,22 @@ export function ConsoleSurface() {
         <Stat title={t('console.costToday')} value={'$' + costToday.toFixed(3)} color="var(--cc-amber)" sub={`${today.length} ${t('console.sessionsToday')}`} />
         <Stat title={t('console.claudeCli')} value={capLoading ? '...' : cap?.exists ? cap?.version || 'OK' : 'N/A'} color={cap?.exists ? 'var(--cc-green)' : 'var(--cc-red)'} sub={cap?.authStatus || t('common.unknown')} />
         <Stat title={t('console.totalTokens')} value={totalTokens >= 1000 ? (totalTokens / 1000).toFixed(1) + 'k' : String(totalTokens)} color="var(--cc-text)" sub={t('console.tokensDesc')} />
+      </div>
+
+      {/* Runtime Health Strip — v10 Mission Control */}
+      <div style={{
+        display: 'flex', gap: 12, padding: '10px 14px', marginBottom: 16,
+        borderRadius: 'var(--cc-radius-md)', background: 'var(--cc-surface-solid)',
+        border: '1px solid var(--cc-border)', alignItems: 'center', flexWrap: 'wrap',
+      }}>
+        <span style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text-soft)', marginRight: 4 }}>{t('console.runtimeHealth')}:</span>
+        <HealthDot label="PTY" ok={runtimeActiveCount > 0} detail={String(runtimeActiveCount)} />
+        <HealthDot label="Claude" ok={runtimeHealthyCount > 0} detail={String(runtimeHealthyCount)} />
+        <HealthDot label={t('console.errors')} ok={traceErrorCount === 0} detail={String(traceErrorCount)} color="var(--cc-red)" />
+        <HealthDot label={t('console.warnings')} ok={traceWarningCount < 5} detail={String(traceWarningCount)} color="var(--cc-amber)" />
+        <HealthDot label="Bridge" ok={true} detail="OK" />
+        <div style={{ flex: 1 }} />
+        <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-muted)' }}>RuntimeBridge v9.0</span>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
@@ -122,3 +148,11 @@ function Plane({ label, pct, color, desc }: { label: string; pct: number; color:
 function E({ label, value, c }: { label: string; value: string; c?: string }) { return <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--cc-text-soft)' }}>{label}</span><span style={{ color: c || 'var(--cc-text)', fontWeight: 500 }}>{value}</span></div>; }
 const st: React.CSSProperties = { fontSize: 'var(--cc-font-sm)', fontWeight: 600, color: 'var(--cc-text)', marginBottom: 8 };
 function fmtDate(iso: string) { try { return new Date(iso).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return iso; } }
+function HealthDot({ label, ok, detail, color }: { label: string; ok: boolean; detail: string; color?: string }) {
+  const c = color || (ok ? 'var(--cc-green)' : 'var(--cc-red)');
+  return <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--cc-font-2xs)' }}>
+    <span style={{ width: 6, height: 6, borderRadius: 3, background: c, flexShrink: 0 }} />
+    <span style={{ color: 'var(--cc-text-soft)' }}>{label}</span>
+    <span style={{ color: c, fontWeight: 600 }}>{detail}</span>
+  </div>;
+}

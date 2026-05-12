@@ -60,19 +60,29 @@ impl Default for RiskLevel {
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PtyStartOptions {
-    pub session_id: String,
+    // v9.0 ID contract: ui_session_id ≠ pty_session_id ≠ claude_session_id
+    pub trace_id: String,
+    pub ui_session_id: String,
+    pub pty_session_id: String,
     pub project_id: String,
     pub cli_path: String,
     pub cwd: String,
     pub extra_args: Vec<String>,
+    #[serde(default)]
+    pub resume_claude_session_id: Option<String>,
+    // Deprecated: kept for backward compat, equals ui_session_id
+    #[serde(default)]
+    pub session_id: Option<String>,
 }
 
 /// Result returned to frontend after PTY session creation.
+/// v9.0 ID contract: id = pty_session_id, ui_session_id carried separately.
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PtySessionInfo {
-    pub id: String,
-    pub session_id: String,
+    pub id: String,              // pty_session_id (registry key)
+    pub pty_session_id: String,  // same as id
+    pub ui_session_id: String,
     pub project_id: String,
     pub cwd: String,
     pub command: Vec<String>,
@@ -81,6 +91,9 @@ pub struct PtySessionInfo {
     pub status: PtySessionStatus,
     pub pid: Option<u32>,
     pub created_at: String,
+    // Deprecated backward compat
+    #[serde(default)]
+    pub session_id: Option<String>,
 }
 
 /// Static check result for PTY support.

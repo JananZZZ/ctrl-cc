@@ -33,7 +33,7 @@ impl PtyManager {
             let status = h.status.lock().map(|s| format!("{:?}", s)).unwrap_or_else(|_| "unknown".into());
             PtySessionDebugInfo {
                 pty_session_id: info.id.clone(),
-                ui_session_id: Some(info.session_id.clone()),
+                ui_session_id: Some(info.ui_session_id.clone()),
                 project_id: Some(info.project_id.clone()),
                 cwd: info.cwd.clone(),
                 pid,

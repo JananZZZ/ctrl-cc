@@ -1,14 +1,14 @@
-# Ctrl-CC Project Memory — Stability-First Desktop Runtime Platform v7.0
+# Ctrl-CC Project Memory — Industrial Runtime Platform v9.0
 
-> **Read-first rule**: Before ANY code change, read @docs/engineering/00_READ_FIRST.md and relevant engineering docs.
+> **Read-first rule**: Before ANY code change, read @docs/engineering/00_READ_FIRST.md and @docs/engineering/12_EIGHT_HONORS_AND_EIGHT_SHAMES.md.
 
-**版本**: v0.1.0 | **架构**: RuntimeBridge 5.0 (单入口 Runtime) | **语言**: zh-CN
+**版本**: v0.1.0 | **架构**: RuntimeBridge 9.0 (唯一 RuntimeKernel) | **语言**: zh-CN
 **框架**: Tauri v2 + React 18 + TypeScript 5 + Zustand 5 + Vite 6
 **视觉**: Neo Calm Industrial — 四主题 (暖沙/浅色/浅蓝/深色) + 热切换 i18n
 
 ---
 
-## Non-negotiable architecture rules (20 rules)
+## Non-negotiable architecture rules (25 rules)
 
 1. All surfaces must use RuntimeBridge. No page may directly invoke PTY or Claude commands.
 2. RuntimeKernel owns Claude discovery, shell strategy, PTY lifecycle, session registry, orphan cleanup.
@@ -23,13 +23,18 @@
 11. Tauri commands return < 1s. Long work → background thread.
 12. New Session → Workspace within 1s, before PTY is ready.
 13. No silent failure. No fake success. Error always visible + classified + copyable.
-14. Before every change: run /preflight, typecheck, build, cargo check.
+14. Before every change: run typecheck, cargo check.
 15. Never bypass RuntimeBridge contract from any UI surface.
-16. Shell strategy: PowerShell preferred over cmd.exe (0xc0000142 mitigation).
+16. Shell strategy: node.exe + CLI JS > standalone claude.exe > PowerShell + claude.ps1 > pwsh + claude.ps1 > cmd + claude.cmd.
 17. Composer disabled until session.status is pty-ready/claude-active.
 18. PTY tail max 32KB/session. ErrorLog max 200. RuntimeEvents max 200.
 19. Stop kills child process + removes from registry. No orphans.
 20. Design tokens ONLY (`--cc-*`). No hard-coded colors.
+21. **ID Contract**: UiSessionId (ses-xxx) ≠ PtySessionId (pty-uuid) ≠ ClaudeSessionId (Claude's own) ≠ TraceId (trace-uuid). 后端 registry key = PtySessionId.
+22. **Single RuntimeBridge**: 前端唯一 Runtime 入口 = `RuntimeBridge.{startInteractiveSession,write,resize,ctrlC,ctrlD,stop,discover,listBackendSessions,probeContract,runContractTest}`。
+23. **Surface 禁止事项**: 禁止 Surface import `startPtyV2ClaudeSession`, `stopPtyV2`, `writePtyV2`, `resizePtyV2` 或任何 `interactionAdapter` 函数。
+24. **八荣八耻**: 每次修改前对照 `docs/engineering/12_EIGHT_HONORS_AND_EIGHT_SHAMES.md` 检查。
+25. **审计先行**: 修改业务代码前必须完成对应文件的审计报告。
 
 ## Debug log paths
 - Rust: `%TEMP%/ctrl-cc-runtime-debug.log`
@@ -37,7 +42,7 @@
 - Diagnostic bundle: `invoke('runtime_smoke_test')` or `collectDiagnosticsBundle()`
 
 ## Engineering docs (read before coding)
-@docs/engineering/00_READ_FIRST.md through @docs/engineering/11_AGENT_OPERATING_PROTOCOL.md
+@docs/engineering/00_READ_FIRST.md through @docs/engineering/12_EIGHT_HONORS_AND_EIGHT_SHAMES.md
 
 ---
 

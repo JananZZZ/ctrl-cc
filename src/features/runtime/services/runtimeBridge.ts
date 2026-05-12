@@ -4,12 +4,13 @@
  * Every surface (Projects, Workspace, Console, AI Dock, Resources) calls ONLY this API.
  */
 import { useRuntimeStore } from '../stores/runtimeStore';
-import { useWorkspaceStore } from '../../workspace/stores/workspaceStore';
 import { useSurfaceStore } from '../../../stores/surfaceStore';
 import { useSessionStore } from '../../../stores/sessionStore';
+import { useOpenSessionStore } from '../../../stores/openSessionStore';
 import { useRuntimeTraceStore, recordRuntimeError, recordRuntimeWarning } from '../stores/runtimeTraceStore';
 import { SessionIdFactory } from './runtimeContractProbe';
 import * as adapter from './interactionAdapter';
+import { invokeCommand } from '../../../services/invokeCommand';
 import type { RuntimeSession, StartInteractiveInput } from '../types/runtimeTypes';
 import { isRuntimeWritable } from '../types/runtimeTypes';
 
@@ -51,12 +52,27 @@ export async function startInteractiveClaudeSession(input: StartInteractiveInput
 
   useRuntimeStore.getState().addSession(session);
 
-  // Open workspace tab immediately — do NOT await PTY
-  useWorkspaceStore.getState().openSessionTab({
-    id: `tab_${session.id}`,
-    sessionId: session.id,
-    projectId: session.projectId,
-    title: session.name,
+  // Sync to legacy stores for backward compat
+  useSessionStore.getState().addSession({
+    id: session.id, projectId: session.projectId, title: session.name,
+    runtimeMode: 'pty-interactive', status: 'starting', model: 'sonnet',
+    permissionMode: 'default' as const, cwd: session.cwd,
+    inputTokens: 0, outputTokens: 0, totalCostUsd: 0,
+    fileChangeCount: 0, riskCount: 0, auditCount: 0, isPinned: false,
+    createdAt: session.createdAt, updatedAt: session.updatedAt, startedAt: session.startedAt ?? undefined,
+  });
+  invokeCommand('save_session_to_db', { session: {
+    id: session.id, projectId: session.projectId, title: session.name, cwd: session.cwd,
+    runtimeMode: 'pty-interactive', status: 'starting', model: 'sonnet',
+    permissionMode: 'default', inputTokens: 0, outputTokens: 0, totalCostUsd: 0,
+    fileChangeCount: 0, riskCount: 0, auditCount: 0, isPinned: false,
+    createdAt: session.createdAt, updatedAt: session.updatedAt, startedAt: session.startedAt ?? undefined,
+  } }).catch(() => {});
+
+  useOpenSessionStore.getState().openSession({
+    sessionId: session.id, projectId: session.projectId, projectName: input.projectName,
+    title: session.name, status: 'starting', viewMode: 'terminal',
+    pendingConfirms: 0, riskCount: 0, isPinned: false,
   });
 
   useSurfaceStore.getState().navigateTo('workspace');
@@ -98,7 +114,7 @@ export async function write(uiSessionId: string, data: string): Promise<void> {
   });
 
   try {
-    await adapter.writePtyV2(uiSessionId, data, session.traceId);
+    await adapter.writePtyV2(uiSessionId, data, session.ptySessionId, session.traceId);
 
     useRuntimeTraceStore.getState().append({
       traceId: session.traceId,
@@ -117,26 +133,51 @@ export async function write(uiSessionId: string, data: string): Promise<void> {
 }
 
 export async function sendCtrlC(sessionId: string): Promise<void> {
-  await adapter.sendCtrlCPtyV2(sessionId);
+  const s = useRuntimeStore.getState().sessions[sessionId];
+  await adapter.sendCtrlCPtyV2(sessionId, s?.ptySessionId ?? null);
 }
 
 export async function sendCtrlD(sessionId: string): Promise<void> {
-  await adapter.sendCtrlDPtyV2(sessionId);
+  const s = useRuntimeStore.getState().sessions[sessionId];
+  await adapter.sendCtrlDPtyV2(sessionId, s?.ptySessionId ?? null);
 }
 
 export async function stopInteractiveSession(sessionId: string): Promise<void> {
-  await adapter.stopPtyV2(sessionId);
+  const s = useRuntimeStore.getState().sessions[sessionId];
+  await adapter.stopPtyV2(sessionId, s?.ptySessionId ?? null);
   const state = useRuntimeStore.getState();
   state.patchSession(sessionId, { status: 'killed' });
 }
 
 export async function resizeInteractiveSession(sessionId: string, cols: number, rows: number): Promise<void> {
-  await adapter.resizePtyV2(sessionId, cols, rows);
+  const s = useRuntimeStore.getState().sessions[sessionId];
+  await adapter.resizePtyV2(sessionId, cols, rows, s?.ptySessionId ?? null);
 }
 
 export function openRuntimeSessionInWorkspace(_sessionId: string): void {
   useSurfaceStore.getState().navigateTo('workspace');
 }
+
+// v9.0: RuntimeBridge namespace object — THE single entry point for all surfaces
+export const RuntimeBridge = {
+  startInteractiveSession: startInteractiveClaudeSession,
+  write,
+  resize: resizeInteractiveSession,
+  ctrlC: sendCtrlC,
+  ctrlD: sendCtrlD,
+  stop: stopInteractiveSession,
+  discover: async () => invokeCommand('runtime_discover_claude'),
+  listBackendSessions: async () => invokeCommand('runtime_list_pty_sessions'),
+  probeContract: async () => {
+    const { probeRuntimeContract } = await import('./runtimeContractProbe');
+    return probeRuntimeContract();
+  },
+  runContractTest: async (_project: unknown) => {
+    // Contract test: create session, check ptySessionId, write echo, verify, stop
+    const ids = SessionIdFactory.newSessionIds();
+    return { ids, status: 'not-implemented' as const };
+  },
+};
 
 export function getRuntimeSession(sessionId: string): RuntimeSession | null {
   return useRuntimeStore.getState().sessions[sessionId] ?? null;
@@ -156,6 +197,9 @@ async function startSessionInBackground(session: RuntimeSession, _input: StartIn
 
     await adapter.startPtyV2ClaudeSession({
       sessionId: session.id,
+      uiSessionId: session.id,
+      ptySessionId: session.ptySessionId!,
+      traceId: session.traceId,
       projectId: session.projectId,
       cwd: session.cwd,
     });

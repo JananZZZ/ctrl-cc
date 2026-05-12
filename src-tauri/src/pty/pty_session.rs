@@ -222,12 +222,14 @@ impl PtySessionHandle {
     /// 不阻塞读取、不等待握手、不调用 child.wait()、无 sleep。
     /// 监管线程在后台异步读取 PTY 输出并通过 Tauri 事件推送到前端。
     pub fn spawn(options: PtyStartOptions, app: AppHandle) -> Result<Self, AppError> {
-        runtime_debug_log(&format!("pty.start session={}", options.session_id));
+        // v9.0 ID contract: backend registry key = pty_session_id (pty-uuid)
+        let id = options.pty_session_id.clone();
+        let ui_session_id = options.ui_session_id.clone();
+        let trace_id = options.trace_id.clone();
+        runtime_trace_log(&trace_id, &ui_session_id, &id, "pty.spawn.start", "ok", "");
+        runtime_debug_log(&format!("pty.start ui={} pty={}", ui_session_id, id));
 
-        // Use frontend session_id directly as registry key — not a separate UUID.
-        // This ensures write/lookup by ses-xxx always finds the session in the HashMap.
-        let id = options.session_id.clone();
-        let log_uuid = Uuid::new_v4().to_string();  // for log file naming only
+        let log_uuid = Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
         let log_writer = PtyLogWriter::new(&log_uuid)?;
         let pty_system = native_pty_system();
@@ -236,7 +238,8 @@ impl PtySessionHandle {
 
         let _ = app.emit("ctrlcc://log", serde_json::json!({
             "step": "pty-create-start", "claudePath": claude_path,
-            "cwd": valid_cwd, "sessionId": options.session_id, "ts": now
+            "cwd": valid_cwd, "uiSessionId": ui_session_id, "ptySessionId": id,
+            "sessionId": ui_session_id, "ts": now
         }));
 
         let rows = 500u16; let cols = 200u16;
@@ -262,9 +265,10 @@ impl PtySessionHandle {
         runtime_debug_log(&format!("pty.spawn.ok pid={:?}", child.process_id()));
 
         let pid = child.process_id();
+        runtime_trace_log(&trace_id, &ui_session_id, &id, "pty.spawn.shell.ok", "ok", "");
         let _ = app.emit("ctrlcc://log", serde_json::json!({
-            "step": "pty-process-created", "sessionId": options.session_id,
-            "ptyId": id, "pid": pid, "cwd": valid_cwd,
+            "step": "pty-process-created", "uiSessionId": ui_session_id, "ptySessionId": id,
+            "sessionId": ui_session_id, "ptyId": id, "pid": pid, "cwd": valid_cwd,
             "ts": chrono::Utc::now().to_rfc3339()
         }));
 
@@ -283,9 +287,12 @@ impl PtySessionHandle {
         log_writer.write_command(&command)?;
 
         let info = PtySessionInfo {
-            id: id.clone(), session_id: options.session_id.clone(),
+            id: id.clone(),
+            pty_session_id: id.clone(),
+            ui_session_id: ui_session_id.clone(),
             project_id: options.project_id.clone(), cwd: valid_cwd.clone(),
             command, rows, cols, status: PtySessionStatus::Starting, pid, created_at: now,
+            session_id: Some(ui_session_id.clone()), // backward compat
         };
 
         let status = Arc::new(Mutex::new(PtySessionStatus::Starting));
@@ -295,19 +302,20 @@ impl PtySessionHandle {
 
         // Phase 3: 启动监管线程 — 异步读取 PTY 输出
         let inner = PtyInner { reader, child, slave: pty_pair.slave };
-        let session_id_sv = info.session_id.clone();
-        let pty_id_sv = info.id.clone();
+        let ui_sid_sv = ui_session_id.clone();
+        let pty_sid_sv = id.clone();
 
         #[cfg(feature = "tokio-pty")]
-        { supervise_pty_output_async(inner, app.clone(), session_id_sv, pty_id_sv, running.clone(), log_writer.clone(), status.clone()); }
+        { supervise_pty_output_async(inner, app.clone(), ui_sid_sv, pty_sid_sv, running.clone(), log_writer.clone(), status.clone()); }
         #[cfg(not(feature = "tokio-pty"))]
-        { std::thread::spawn(move || { supervise_pty_output(inner, app.clone(), session_id_sv, pty_id_sv, running.clone(), log_writer.clone(), status.clone()); }); }
+        { std::thread::spawn(move || { supervise_pty_output(inner, app.clone(), ui_sid_sv, pty_sid_sv, running.clone(), log_writer.clone(), status.clone()); }); }
 
         let _ = app.emit("pty://status", serde_json::json!({
-            "session_id": info.session_id, "pty_id": info.id, "status": "starting"
+            "uiSessionId": ui_session_id, "ptySessionId": id,
+            "session_id": ui_session_id, "pty_id": id, "status": "starting"
         }));
 
-        runtime_debug_log(&format!("pty.return session={}", options.session_id));
+        runtime_debug_log(&format!("pty.return ui={} pty={}", ui_session_id, id));
         Ok(Self { info, status, master: master_arc, writer: writer_arc, running, log_writer })
     }
 
@@ -339,19 +347,19 @@ impl PtySessionHandle {
 // PTY raw output → pty://data → usePtyTerminal → term.write()
 
 fn supervise_pty_output(
-    inner: PtyInner, app: AppHandle, session_id: String, pty_id: String,
+    inner: PtyInner, app: AppHandle, ui_session_id: String, pty_session_id: String,
     running: Arc<Mutex<bool>>, log_writer: PtyLogWriter, status: Arc<Mutex<PtySessionStatus>>,
 ) {
-    runtime_debug_log(&format!("pty.reader.start session={}", session_id));
-    // _slave 必须存活于此线程的整个生命周期
+    runtime_debug_log(&format!("pty.reader.start ui={} pty={}", ui_session_id, pty_session_id));
     let PtyInner { mut reader, child: mut pty_child, slave: _slave } = inner;
     let mut buf = [0u8; 4096];
     let mut parser = PtySemanticParser::new();
-    parser.set_session_id(&session_id);
+    parser.set_session_id(&ui_session_id);
 
     if let Ok(mut s) = status.lock() { *s = PtySessionStatus::Running; }
     let _ = app.emit("pty://status", serde_json::json!({
-        "session_id": session_id, "pty_id": pty_id, "status": "running"
+        "uiSessionId": ui_session_id, "ptySessionId": pty_session_id,
+        "session_id": ui_session_id, "pty_id": pty_session_id, "status": "running"
     }));
 
     let mut first_byte = true;
@@ -359,25 +367,26 @@ fn supervise_pty_output(
         if !running.lock().map(|r| *r).unwrap_or(false) { break; }
         match reader.read(&mut buf) {
             Ok(0) => {
-                runtime_debug_log(&format!("pty.eof session={}", session_id));
+                runtime_debug_log(&format!("pty.eof ui={}", ui_session_id));
                 break;
             }
             Ok(n) => {
                 if first_byte {
                     first_byte = false;
-                    runtime_debug_log(&format!("pty.first-byte session={} len={}", session_id, n));
+                    runtime_debug_log(&format!("pty.first-byte ui={} len={}", ui_session_id, n));
                 }
                 let raw = buf[..n].to_vec();
                 log_writer.write_raw(&raw);
                 let text = String::from_utf8_lossy(&raw).to_string();
                 log_writer.write_utf8(&text);
-                // PTY raw output → xterm only (not into React state / ErrorLog)
                 let _ = app.emit("pty://data", serde_json::json!({
-                    "session_id": session_id, "pty_id": pty_id, "data": text
+                    "uiSessionId": ui_session_id, "ptySessionId": pty_session_id,
+                    "session_id": ui_session_id, "pty_id": pty_session_id, "data": text
                 }));
                 if let Some(event) = parser.feed(&text) {
                     let _ = app.emit("pty://semantic-event", serde_json::json!({
-                        "session_id": session_id, "pty_id": pty_id, "event": event
+                        "uiSessionId": ui_session_id, "ptySessionId": pty_session_id,
+                        "session_id": ui_session_id, "pty_id": pty_session_id, "event": event
                     }));
                 }
             }
@@ -385,9 +394,10 @@ fn supervise_pty_output(
                 std::thread::sleep(std::time::Duration::from_millis(10));
             }
             Err(e) => {
-                runtime_debug_log(&format!("pty.error session={} {}", session_id, e));
+                runtime_debug_log(&format!("pty.error ui={} {}", ui_session_id, e));
                 let _ = app.emit("pty://error", serde_json::json!({
-                    "session_id": session_id, "pty_id": pty_id, "message": format!("PTY read error: {}", e)
+                    "uiSessionId": ui_session_id, "ptySessionId": pty_session_id,
+                    "session_id": ui_session_id, "pty_id": pty_session_id, "message": format!("PTY read error: {}", e)
                 }));
                 break;
             }
@@ -395,19 +405,20 @@ fn supervise_pty_output(
     }
 
     let exit_code = pty_child.wait().ok().map(|s| if s.success() { 0 } else { 1 });
-    runtime_debug_log(&format!("pty.exit session={} code={:?}", session_id, exit_code));
+    runtime_debug_log(&format!("pty.exit ui={} code={:?}", ui_session_id, exit_code));
     if let Ok(mut s) = status.lock() { *s = PtySessionStatus::Exited { code: exit_code.unwrap_or(0) }; }
     let _ = app.emit("pty://exit", serde_json::json!({
-        "session_id": session_id, "pty_id": pty_id, "exit_code": exit_code
+        "uiSessionId": ui_session_id, "ptySessionId": pty_session_id,
+        "session_id": ui_session_id, "pty_id": pty_session_id, "exit_code": exit_code
     }));
 }
 
 #[cfg(feature = "tokio-pty")]
 fn supervise_pty_output_async(
-    inner: PtyInner, app: AppHandle, session_id: String, pty_id: String,
+    inner: PtyInner, app: AppHandle, ui_session_id: String, pty_session_id: String,
     running: Arc<Mutex<bool>>, log_writer: PtyLogWriter, status: Arc<Mutex<PtySessionStatus>>,
 ) {
     tokio::task::spawn_blocking(move || {
-        supervise_pty_output(inner, app, session_id, pty_id, running, log_writer, status);
+        supervise_pty_output(inner, app, ui_session_id, pty_session_id, running, log_writer, status);
     });
 }

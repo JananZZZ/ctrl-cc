@@ -1,0 +1,1395 @@
+[
+  {
+    "path": ".claude/commands/preflight.md",
+    "ext": ".md",
+    "bytes": 477,
+    "lines": 10,
+    "sha256": "7baf06ca6bb714a82d8462d18f972edfb102f91133d98e90bb80572e07fa740f"
+  },
+  {
+    "path": ".claude/commands/pty-audit.md",
+    "ext": ".md",
+    "bytes": 316,
+    "lines": 6,
+    "sha256": "cf3361565bd1705ca96b9fea9bc8b73b9a1142abc312550fc748f86ca5802184"
+  },
+  {
+    "path": ".claude/commands/react-audit.md",
+    "ext": ".md",
+    "bytes": 346,
+    "lines": 6,
+    "sha256": "e09baae22928137f72f620a7cbedc0ac23c4c067e2115ea121462bf04cfb3dcf"
+  },
+  {
+    "path": ".claude/commands/release-gate.md",
+    "ext": ".md",
+    "bytes": 341,
+    "lines": 11,
+    "sha256": "06abba7dc8234ec3f9fa7815b6f174580b4b715ea113edb63c679c9b9351aa08"
+  },
+  {
+    "path": ".claude/commands/runtime-audit.md",
+    "ext": ".md",
+    "bytes": 332,
+    "lines": 6,
+    "sha256": "9a448af990e00c670b7fb027485a68bb69cee972640580ae274cd8ca4d700c06"
+  },
+  {
+    "path": ".claude/commands/stability-check.md",
+    "ext": ".md",
+    "bytes": 318,
+    "lines": 6,
+    "sha256": "770f6b892af7cdbd99ce5771b20afbbf7016a7bcd02d3606a5795e72e96ad809"
+  },
+  {
+    "path": ".claude/rules/observability.md",
+    "ext": ".md",
+    "bytes": 316,
+    "lines": 6,
+    "sha256": "a3eca03bb033451e25802b53064941c7567fdfce69aded96537e520fbc8412ef"
+  },
+  {
+    "path": ".claude/rules/react-stability.md",
+    "ext": ".md",
+    "bytes": 267,
+    "lines": 8,
+    "sha256": "d11f1cae2b60b6bcdc7e5c143f1c336c5a17a7196725274f5b8e77ed69a4be07"
+  },
+  {
+    "path": ".claude/rules/runtime-bridge.md",
+    "ext": ".md",
+    "bytes": 310,
+    "lines": 7,
+    "sha256": "7caca6816fa284400125a04bdb9c36d69c173be27399cc81b0b5766c5485115d"
+  },
+  {
+    "path": ".claude/rules/tauri-rust.md",
+    "ext": ".md",
+    "bytes": 281,
+    "lines": 7,
+    "sha256": "10db5b92c08642ea13151b8f1ff8b653324b1c1ef30e984a72ba5b7f04878d79"
+  },
+  {
+    "path": ".claude/rules/ui-theme.md",
+    "ext": ".md",
+    "bytes": 307,
+    "lines": 6,
+    "sha256": "e5d9bf2b8d276ad3588e59565bbbb7f34d3940d55d95a20bb8d7502b43ca1ea6"
+  },
+  {
+    "path": "CLAUDE.md",
+    "ext": ".md",
+    "bytes": 9908,
+    "lines": 220,
+    "sha256": "2a9181587d85814ab9916ebd014f322d1ae2750fd6112e4376bacdfcbe63fded"
+  },
+  {
+    "path": "docs/architecture.md",
+    "ext": ".md",
+    "bytes": 2840,
+    "lines": 70,
+    "sha256": "705832a95dc88a19c95e583a2153eeed979f7d481d01065633be06160b836920"
+  },
+  {
+    "path": "docs/claude-capability-probe.md",
+    "ext": ".md",
+    "bytes": 1057,
+    "lines": 46,
+    "sha256": "60b0930d80b8f653655c743b5998883d453165993d203abc297fec0325123f29"
+  },
+  {
+    "path": "docs/Ctrl-CC_Ultimate_Fix_Plan.md",
+    "ext": ".md",
+    "bytes": 11517,
+    "lines": 358,
+    "sha256": "52c27e1d7a881c175d42d34a37910964cd40acd1ede2d2ba6789a89e9b3868ce"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/00_Ctrl-CC_vNext_Global_Execution_Principles.md",
+    "ext": ".md",
+    "bytes": 9009,
+    "lines": 349,
+    "sha256": "be8f50e0e86ba13d30bee42fa4e96cde4ce93d5decd87d447607db65ae77507e"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/01_Part1_New_Project_Initialization.md",
+    "ext": ".md",
+    "bytes": 5694,
+    "lines": 284,
+    "sha256": "91c97a7e97fa1cab9afd80e51fdfcc853bc5d27614e96c7d9bf2428218dae39f"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/02_Part2_Projects_Surface_Top_Project_Management.md",
+    "ext": ".md",
+    "bytes": 9758,
+    "lines": 479,
+    "sha256": "85ffda2244b3b58b6360f3d79d7fb73d77f0fd28e78057de231e8ce9c10d54fb"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/03_Part3_Workspace_Chat_Terminal_Top_Experience.md",
+    "ext": ".md",
+    "bytes": 8108,
+    "lines": 196,
+    "sha256": "7d1a48f55a39f3e13425c7923e7a8ea83e4d7c02a963b4961f9018669b0c16bb"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/04_Part4_PTY_Runtime_ClaudeCode_Real_Connection.md",
+    "ext": ".md",
+    "bytes": 4241,
+    "lines": 188,
+    "sha256": "02e75d4a67274b511cf5f1aa8f6bbfc68a22750dbbdacba98ec5b8cf359d4af0"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/05_Part5_Surface_Integration_AI_Dock_Global_Logic.md",
+    "ext": ".md",
+    "bytes": 5887,
+    "lines": 150,
+    "sha256": "002b80a95efe024378a3c6246ad28a2a8aab855283a5743844ba23c1afaf63c4"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/06_Part6_Physical_UI_Testing_Release_Acceptance.md",
+    "ext": ".md",
+    "bytes": 4897,
+    "lines": 110,
+    "sha256": "fd2d5571b4ecdde1d29a7a44865184ddd658f403f5ac6aab20a1cda01c171bf0"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "ext": ".md",
+    "bytes": 57311,
+    "lines": 1735,
+    "sha256": "5b680cae1f2a8268a6896944f8a2e424a17f6513e984c800aacf9413f4301288"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "ext": ".md",
+    "bytes": 86786,
+    "lines": 3253,
+    "sha256": "1f0d3da526be1d2d88531066e08c455fcdbfa1a7917e186663c430526037e5be"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "ext": ".md",
+    "bytes": 53667,
+    "lines": 2115,
+    "sha256": "98bb28491d84598c180b030de4a2f90ee69733380c6dcba45600c1621367e548"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "ext": ".md",
+    "bytes": 35125,
+    "lines": 1476,
+    "sha256": "819a029ba2a0949aa03a54aa49cc0d1bed4827fea1f90ee6eb477e297d4a7f7b"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "ext": ".md",
+    "bytes": 71460,
+    "lines": 2905,
+    "sha256": "d71ac3171237aab1396c6ce69ea9fb1c4e204f025bde54e3f8976959a5c0d174"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "ext": ".md",
+    "bytes": 16695,
+    "lines": 726,
+    "sha256": "e890f9a029ff5b98e52a8978dfad4bfc65b5560d48c735432e943027236fdeb5"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Resources_Surface_Supreme_Redesign_Execution_Plan.md",
+    "ext": ".md",
+    "bytes": 24172,
+    "lines": 1253,
+    "sha256": "7c423021235706f909d968f8bf36e918ea8373bf7284a43048f8837ad13b7b00"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_Deep_Audit_Supreme_Fix_8.md",
+    "ext": ".md",
+    "bytes": 21051,
+    "lines": 981,
+    "sha256": "e4d68adbf5880dd9f02fead52991cce45c314f8c5b369fb232f9f7077d4ec80c"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_Next_Fix_After_Chat_Opened.md",
+    "ext": ".md",
+    "bytes": 9074,
+    "lines": 410,
+    "sha256": "66a01fb03635d5249fee5e8423c5457b2dfa7b9cc8a7d8aa4accd66294740cb5"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "ext": ".md",
+    "bytes": 18362,
+    "lines": 665,
+    "sha256": "5b20906c8542d57885ab6aaa7783865ffac01a0af0bd58e9e11c3e40fab8e1e9"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "ext": ".md",
+    "bytes": 23017,
+    "lines": 852,
+    "sha256": "c9ddaf71bff650320f3b486f06393e5d6ef593caa94db75e3ca6078ae602079d"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "ext": ".md",
+    "bytes": 15280,
+    "lines": 642,
+    "sha256": "bf23ea047674de212ad928dc993adbbf55ebf140148b231cb88a3ba0985f0950"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionNotFound_RuntimeMapping_Fix.md",
+    "ext": ".md",
+    "bytes": 15309,
+    "lines": 623,
+    "sha256": "6149b1e4b6113d0448e50c45b0422a1a2c3e9fc5395671a4fb9b1b04d9e4256a"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_6.md",
+    "ext": ".md",
+    "bytes": 16271,
+    "lines": 973,
+    "sha256": "2c32a779107dcf479675d9b1699fdcaf6702c262a1ea7daf4b25c94c84c85049"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "ext": ".md",
+    "bytes": 29410,
+    "lines": 1350,
+    "sha256": "0ecfd141c856b93dec8dea24d3d3cdd1226336fe7c9d273e83daefe7cfbba2f0"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_100_200_500_Architecture.md",
+    "ext": ".md",
+    "bytes": 20206,
+    "lines": 1159,
+    "sha256": "b0a398520946c162b309fe8d29c5060a40d436a5b0fa5069f62e614042b06805"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "ext": ".md",
+    "bytes": 20873,
+    "lines": 976,
+    "sha256": "1682aa8eb74b6fd6deb753718b4137b4fba83cecd478147ae9cdea5999900673"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Complete_Rebuild_Execution_FULL.md",
+    "ext": ".md",
+    "bytes": 47691,
+    "lines": 1780,
+    "sha256": "a1950be580bc4601aa4695945cc5c323e4fa586aaa0c5a24fbe202eb08c4f76c"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Four_Theme_Visual_System_Plan.md",
+    "ext": ".md",
+    "bytes": 24854,
+    "lines": 1381,
+    "sha256": "7bb9c9972a2983032fd75dcdb8f169f5b6d170405a6ba797d56445cc713e6689"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Session_Monitor_Official_Aligned_Execution.md",
+    "ext": ".md",
+    "bytes": 29469,
+    "lines": 1608,
+    "sha256": "5aaddea94584f668200c9d0c35001be7a072b9aae844a7be75251c6a4c63e71e"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/gemini-code-1778266546446.md",
+    "ext": ".md",
+    "bytes": 1574,
+    "lines": 35,
+    "sha256": "ba6db326206f9b643164fa8806292bf1a1b24b319c1eb85782d6e34a13fe908b"
+  },
+  {
+    "path": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Gemini-DeepresearchGUI.md",
+    "ext": ".md",
+    "bytes": 24129,
+    "lines": 129,
+    "sha256": "da7c6feb64d1aa7e7cc08939886ddb31dd96cc3a46ef24c0c0c06145350e7919"
+  },
+  {
+    "path": "docs/development-roadmap.md",
+    "ext": ".md",
+    "bytes": 1209,
+    "lines": 40,
+    "sha256": "999c75489400ae5298964c5b324f441c1c12c648d16e67d4ed261e8cce9b5044"
+  },
+  {
+    "path": "docs/engineering/00_READ_FIRST.md",
+    "ext": ".md",
+    "bytes": 832,
+    "lines": 22,
+    "sha256": "a18a2b6ee30e1377ba3acdf3b5ac29f332d29b711582afb3d6edd7afeb987090"
+  },
+  {
+    "path": "docs/engineering/01_ARCHITECTURE_PRINCIPLES.md",
+    "ext": ".md",
+    "bytes": 1175,
+    "lines": 21,
+    "sha256": "ec82aaf9f7fff2572ffa35881dd6ec8645273bc61ecbcea7780538783b35301b"
+  },
+  {
+    "path": "docs/engineering/02_RUNTIME_BRIDGE_CONTRACT.md",
+    "ext": ".md",
+    "bytes": 1322,
+    "lines": 41,
+    "sha256": "a129169ca24bd7c3256bb9e37ac4b285657adb0701b43289d9c26374f9152090"
+  },
+  {
+    "path": "docs/engineering/03_REACT_STABILITY_RULES.md",
+    "ext": ".md",
+    "bytes": 1000,
+    "lines": 32,
+    "sha256": "635ae14bd843dbdebb2128f2988b46f4c321c5c3535841a6479b4e18276a6dbf"
+  },
+  {
+    "path": "docs/engineering/04_TAURI_RUST_BACKEND_RULES.md",
+    "ext": ".md",
+    "bytes": 850,
+    "lines": 29,
+    "sha256": "c336d4bfdb0e33c19c6f48c78413a3ebd9861237afcf0793b3bc55fb5741fe01"
+  },
+  {
+    "path": "docs/engineering/05_PTY_AND_CLAUDE_CLI_RULES.md",
+    "ext": ".md",
+    "bytes": 938,
+    "lines": 24,
+    "sha256": "31a32ee1f115decdae0d90c48715d46b510e03ec3202e2f794211b895e2c6cf9"
+  },
+  {
+    "path": "docs/engineering/06_OBSERVABILITY_AND_DIAGNOSTICS.md",
+    "ext": ".md",
+    "bytes": 747,
+    "lines": 19,
+    "sha256": "0712374e34081e82026abd56393b95e98d7ee493bf4fe11ca1e500535e1ca682"
+  },
+  {
+    "path": "docs/engineering/07_PERFORMANCE_BUDGET.md",
+    "ext": ".md",
+    "bytes": 564,
+    "lines": 24,
+    "sha256": "14acd9acac9d95c8afa68ec7bf967e923bd7a635468ae0fab8416271f284d44a"
+  },
+  {
+    "path": "docs/engineering/08_UI_UX_AND_THEME_RULES.md",
+    "ext": ".md",
+    "bytes": 666,
+    "lines": 14,
+    "sha256": "a6cee6a36a3189d4cc2541ac829a3c6809c210740bff43f699a58a619457cfc9"
+  },
+  {
+    "path": "docs/engineering/09_TESTING_AND_ACCEPTANCE_GATES.md",
+    "ext": ".md",
+    "bytes": 693,
+    "lines": 18,
+    "sha256": "9e911799d501af0b33722466bc8d5241d8e3fadf3e7177b09cf40cc746cf6d4e"
+  },
+  {
+    "path": "docs/engineering/10_DEBUGGING_PROTOCOL.md",
+    "ext": ".md",
+    "bytes": 783,
+    "lines": 13,
+    "sha256": "422ea1e46cf9648910d2a114a7f5c5e9d9e753e28fbbbb077856b01778cca9b7"
+  },
+  {
+    "path": "docs/engineering/11_AGENT_OPERATING_PROTOCOL.md",
+    "ext": ".md",
+    "bytes": 898,
+    "lines": 24,
+    "sha256": "7b21a55364e80252865941213cba173c443fedd60281be0d81b51ae9bcc6b618"
+  },
+  {
+    "path": "docs/runtime-audit.md",
+    "ext": ".md",
+    "bytes": 4673,
+    "lines": 102,
+    "sha256": "3b1bcd0351d366a1e046ce86c2eda7f0946083c68fa7f449570c90e1e98e3ada"
+  },
+  {
+    "path": "docs/runtime-pty-first.md",
+    "ext": ".md",
+    "bytes": 3048,
+    "lines": 99,
+    "sha256": "d1b99eb4764c942b396de469d521c3ba983ef2b6c0fc39541c64d469567ab58d"
+  },
+  {
+    "path": "docs/surface-design.md",
+    "ext": ".md",
+    "bytes": 3191,
+    "lines": 77,
+    "sha256": "bb8bf5ab38fbd663f86953678096998302e97eeb52a169f38f3d9786921b0b66"
+  },
+  {
+    "path": "docs/visual-language.md",
+    "ext": ".md",
+    "bytes": 2201,
+    "lines": 59,
+    "sha256": "b7f3ab2f5464d26397daf43979aa5ed74dc0bf4d644d0f12dadbd5982b33f006"
+  },
+  {
+    "path": "e2e/playwright.config.ts",
+    "ext": ".ts",
+    "bytes": 333,
+    "lines": 16,
+    "sha256": "b6fa62ec5419fdf8a63a028a6412432267b544310ccd1948790fe8e6cebabd36"
+  },
+  {
+    "path": "e2e/tests/app.spec.ts",
+    "ext": ".ts",
+    "bytes": 1908,
+    "lines": 55,
+    "sha256": "002c5813dd78680c0230060f05812ca6450327d9bdcbe70e4739395e27777288"
+  },
+  {
+    "path": "package-lock.json",
+    "ext": ".json",
+    "bytes": 113944,
+    "lines": 3371,
+    "sha256": "f140c6c067512cd4977562cfa50f84b1f14aa1fa61ef2356b6b9c20eaaebc15f"
+  },
+  {
+    "path": "package.json",
+    "ext": ".json",
+    "bytes": 1284,
+    "lines": 48,
+    "sha256": "d8e8a0b6de91a157abcb2ad614694e2f883886e945bd2b8ee22db821515b5ac2"
+  },
+  {
+    "path": "src-tauri/build.rs",
+    "ext": ".rs",
+    "bytes": 39,
+    "lines": 4,
+    "sha256": "487059eaf8a947b80f20a9aacac038a5047b2ad69d2401b827376c67d6fe847f"
+  },
+  {
+    "path": "src-tauri/capabilities/default.json",
+    "ext": ".json",
+    "bytes": 419,
+    "lines": 20,
+    "sha256": "fc7cdd1ab615796a79cd04e67dfd06d4a85f5e36139149be156105e14b065c15"
+  },
+  {
+    "path": "src-tauri/Cargo.toml",
+    "ext": ".toml",
+    "bytes": 1010,
+    "lines": 40,
+    "sha256": "1e4a2404850639ac76cba2cad6b79bb6c6115abee37d7b55a3cb11255f596f96"
+  },
+  {
+    "path": "src-tauri/gen/schemas/acl-manifests.json",
+    "ext": ".json",
+    "bytes": 143687,
+    "lines": 1,
+    "sha256": "e60c4d69006760aabe75197b9fc29374381ca7cc46ec7acfc39d607d086fd7e1"
+  },
+  {
+    "path": "src-tauri/gen/schemas/capabilities.json",
+    "ext": ".json",
+    "bytes": 342,
+    "lines": 1,
+    "sha256": "9804ace0dc464f68bf081ea3cbc9c7fd989923720409a1b51c4491b543516383"
+  },
+  {
+    "path": "src-tauri/gen/schemas/desktop-schema.json",
+    "ext": ".json",
+    "bytes": 415866,
+    "lines": 6284,
+    "sha256": "f468944d1c580a8b6c655c65e4f118c3b7b82e28c0c42f249023289f095950e8"
+  },
+  {
+    "path": "src-tauri/gen/schemas/windows-schema.json",
+    "ext": ".json",
+    "bytes": 415866,
+    "lines": 6284,
+    "sha256": "f468944d1c580a8b6c655c65e4f118c3b7b82e28c0c42f249023289f095950e8"
+  },
+  {
+    "path": "src-tauri/src/commands/audit_export.rs",
+    "ext": ".rs",
+    "bytes": 1529,
+    "lines": 51,
+    "sha256": "55b8c14b27757acc0101d088488e26c1baea571fdebe45b7bf076d553b4f1f35"
+  },
+  {
+    "path": "src-tauri/src/commands/credential_guard.rs",
+    "ext": ".rs",
+    "bytes": 1460,
+    "lines": 45,
+    "sha256": "4753a7d498a1805c4b97bf3bbcc936f70520ab854b9862810cb832f74e0d683d"
+  },
+  {
+    "path": "src-tauri/src/commands/db_commands.rs",
+    "ext": ".rs",
+    "bytes": 1318,
+    "lines": 43,
+    "sha256": "b0cd1c8a89ef0ea16d49a0f4bc0c67d0c8ec001fa3138e481bf7ed79e1c86df5"
+  },
+  {
+    "path": "src-tauri/src/commands/discovery.rs",
+    "ext": ".rs",
+    "bytes": 6981,
+    "lines": 172,
+    "sha256": "968ab563860d91ecf1f40c88c2c95747e409a293351e721c750e85f8ac320fdf"
+  },
+  {
+    "path": "src-tauri/src/commands/file_lock.rs",
+    "ext": ".rs",
+    "bytes": 2098,
+    "lines": 61,
+    "sha256": "1b3b1b9cc5598cf44a5afb77bdd21c359b181e4fe109b0225ee3ec67b8db233f"
+  },
+  {
+    "path": "src-tauri/src/commands/fs_commands.rs",
+    "ext": ".rs",
+    "bytes": 3997,
+    "lines": 135,
+    "sha256": "ab29fcbb88a4a7ee661f961fad880304394745afb68a1c64724aa2f0ab48874d"
+  },
+  {
+    "path": "src-tauri/src/commands/git_commands.rs",
+    "ext": ".rs",
+    "bytes": 2917,
+    "lines": 96,
+    "sha256": "7fa4ef68ac6da82dfb54baf9a8ca5bfde6fde80c160017f58e5b1ef2908ff232"
+  },
+  {
+    "path": "src-tauri/src/commands/hooks_collector.rs",
+    "ext": ".rs",
+    "bytes": 1698,
+    "lines": 61,
+    "sha256": "0db40e3b2dfd542953475800dee2b6b9bdb1824822086eb199d13d3ce69d0782"
+  },
+  {
+    "path": "src-tauri/src/commands/mod.rs",
+    "ext": ".rs",
+    "bytes": 405,
+    "lines": 19,
+    "sha256": "2649761e3d2abb1b49ac3d4a303e350424608f88123a0ed6e57aa607f190ce0b"
+  },
+  {
+    "path": "src-tauri/src/commands/permission_center.rs",
+    "ext": ".rs",
+    "bytes": 4456,
+    "lines": 101,
+    "sha256": "511e75d7127a5e20472196e545ebf3888f4d295d6909262005665c433cb4b3d4"
+  },
+  {
+    "path": "src-tauri/src/commands/process_watcher.rs",
+    "ext": ".rs",
+    "bytes": 3240,
+    "lines": 92,
+    "sha256": "0e9ba8fc197f3a3434e658c0397bd881b7bf04faba96605841b7badc2ecbd857"
+  },
+  {
+    "path": "src-tauri/src/commands/risk_engine.rs",
+    "ext": ".rs",
+    "bytes": 2673,
+    "lines": 76,
+    "sha256": "e482d12e91e9ef0f1cebba67fe7d06bbd82624d108143ecbfac37e6493077393"
+  },
+  {
+    "path": "src-tauri/src/commands/scanner.rs",
+    "ext": ".rs",
+    "bytes": 6644,
+    "lines": 162,
+    "sha256": "66dd2c93b7c3f8dfc7d86a3553e6cd3031346b3d16afc18e0a49acb9abc58b95"
+  },
+  {
+    "path": "src-tauri/src/commands/session_replay.rs",
+    "ext": ".rs",
+    "bytes": 2343,
+    "lines": 72,
+    "sha256": "53d8119ddc475fcef609a7c8458a2fcf81fa5ddf3d21fb2e5e8fdd675904f3e8"
+  },
+  {
+    "path": "src-tauri/src/commands/statusline.rs",
+    "ext": ".rs",
+    "bytes": 3745,
+    "lines": 102,
+    "sha256": "b6f7269c4ebe0f115ca1aa79f0c91761d0688f991d13a5c042d7c85d244c87a3"
+  },
+  {
+    "path": "src-tauri/src/commands/system_commands.rs",
+    "ext": ".rs",
+    "bytes": 2554,
+    "lines": 75,
+    "sha256": "13f1b95e33a08432c61eb0ecaf79abaecdc16cd7bded753827f57e607b5458c6"
+  },
+  {
+    "path": "src-tauri/src/commands/watchdog.rs",
+    "ext": ".rs",
+    "bytes": 3248,
+    "lines": 92,
+    "sha256": "3af0addfe9b12d439eedfe29a25a04bcbaa0d13abe89000e3ef4a52dc6643798"
+  },
+  {
+    "path": "src-tauri/src/commands/watcher.rs",
+    "ext": ".rs",
+    "bytes": 2431,
+    "lines": 77,
+    "sha256": "befb7e7467af7bb9d744e2dd0c5ec50acae2218003579de3fa49c3f9b5cea161"
+  },
+  {
+    "path": "src-tauri/src/commands/worktree.rs",
+    "ext": ".rs",
+    "bytes": 2929,
+    "lines": 82,
+    "sha256": "f5c4fdc1257ed211370dffa4551c4b8590ebdb83d39c23aeb1df896a18e73604"
+  },
+  {
+    "path": "src-tauri/src/database/mod.rs",
+    "ext": ".rs",
+    "bytes": 10937,
+    "lines": 221,
+    "sha256": "07a5dfc0bc0aef0b11c0fcc5f03e133b2cb5c7575cec850e3cec3523d231ff2d"
+  },
+  {
+    "path": "src-tauri/src/error.rs",
+    "ext": ".rs",
+    "bytes": 891,
+    "lines": 45,
+    "sha256": "13a14e969d233fe6cf8f9d63af1314ffe36089ef783552d36425f57ba0486dd7"
+  },
+  {
+    "path": "src-tauri/src/main.rs",
+    "ext": ".rs",
+    "bytes": 9243,
+    "lines": 208,
+    "sha256": "ee97d3f2ac7fb7c3463d6c11c58cc9372ca9cc10d5df7d18b08183af2c4a4ab7"
+  },
+  {
+    "path": "src-tauri/src/pty/mod.rs",
+    "ext": ".rs",
+    "bytes": 154,
+    "lines": 9,
+    "sha256": "f1568461a6396cd521f26ab0714c83b53491c9f96029f6f72590bbca94188c2f"
+  },
+  {
+    "path": "src-tauri/src/pty/pty_commands.rs",
+    "ext": ".rs",
+    "bytes": 3894,
+    "lines": 145,
+    "sha256": "73721f5ae82d21f2c779d5804bc1cec5f803e9eee02efa6d330657f03398b288"
+  },
+  {
+    "path": "src-tauri/src/pty/pty_log.rs",
+    "ext": ".rs",
+    "bytes": 5319,
+    "lines": 145,
+    "sha256": "e0bcc9073771d1ea4d1d2ea42f434c4975888786e3b359666498b96e621b2b25"
+  },
+  {
+    "path": "src-tauri/src/pty/pty_manager.rs",
+    "ext": ".rs",
+    "bytes": 5527,
+    "lines": 140,
+    "sha256": "64850125bf4fbd18951e2d3e4a5f8c0c9c9bcb164d1ad7ab23bed06fec1c52d8"
+  },
+  {
+    "path": "src-tauri/src/pty/pty_parser.rs",
+    "ext": ".rs",
+    "bytes": 9036,
+    "lines": 261,
+    "sha256": "fe871ee95d644f801ead75ade1a633434359e7e1b37460ec3699fa0cd72f8ebc"
+  },
+  {
+    "path": "src-tauri/src/pty/pty_session.rs",
+    "ext": ".rs",
+    "bytes": 19283,
+    "lines": 414,
+    "sha256": "f514b072aafb98c335ce1783a52deb3220043a4a47daa92cc54a3a9c0dee18f1"
+  },
+  {
+    "path": "src-tauri/src/pty/pty_types.rs",
+    "ext": ".rs",
+    "bytes": 3036,
+    "lines": 136,
+    "sha256": "bf30013539ece276fd3f78da807d3e6c1e2dbc14f4f5e731257d4d14f80a4eae"
+  },
+  {
+    "path": "src-tauri/src/runtime/claude_discovery.rs",
+    "ext": ".rs",
+    "bytes": 5484,
+    "lines": 162,
+    "sha256": "7192e449617d7e0a4d2d5a4bf76fedf85bd311d123f3ba339b771195facc16df"
+  },
+  {
+    "path": "src-tauri/src/runtime/claude_runner.rs",
+    "ext": ".rs",
+    "bytes": 5554,
+    "lines": 158,
+    "sha256": "aa01fc12e1b21f626c2eaba4b297ebe01f81b2955feb47a90c8b9208778499b6"
+  },
+  {
+    "path": "src-tauri/src/runtime/commands.rs",
+    "ext": ".rs",
+    "bytes": 5998,
+    "lines": 181,
+    "sha256": "aa1a4b1200d79dc894a93a198bd65fa086e1164c7840d8ae0b2fd66b632c2e8e"
+  },
+  {
+    "path": "src-tauri/src/runtime/event_payloads.rs",
+    "ext": ".rs",
+    "bytes": 1416,
+    "lines": 65,
+    "sha256": "65ae3a6a7204274a492c4f505a83d3af1386a926997a59db376f17356b1d1990"
+  },
+  {
+    "path": "src-tauri/src/runtime/event_types.rs",
+    "ext": ".rs",
+    "bytes": 4014,
+    "lines": 150,
+    "sha256": "5d4ca76b14f4f0d09b699e4101c3081e5ddfd842aab5905a8ec0af88b5a66d50"
+  },
+  {
+    "path": "src-tauri/src/runtime/mod.rs",
+    "ext": ".rs",
+    "bytes": 184,
+    "lines": 9,
+    "sha256": "3629becc83c42fd34545ba016125cbeb607d329054004165f677bbb2b0748bdd"
+  },
+  {
+    "path": "src-tauri/src/runtime/ndjson_parser.rs",
+    "ext": ".rs",
+    "bytes": 8915,
+    "lines": 172,
+    "sha256": "39061c83fb687488140a1f02b7175fc281f85a9fc3c62c89db72fe0907925b45"
+  },
+  {
+    "path": "src-tauri/src/runtime/pty_session.rs",
+    "ext": ".rs",
+    "bytes": 10389,
+    "lines": 297,
+    "sha256": "c86e75688d67f935a23ae264aa0e142d16dbf2e88583dd739448e61de96ac884"
+  },
+  {
+    "path": "src-tauri/src/runtime/structured_runtime.rs",
+    "ext": ".rs",
+    "bytes": 3747,
+    "lines": 113,
+    "sha256": "4f39e9badf19b9c5e30eb0aab31945c1cf872d463a83faf11bd6b130884c1edc"
+  },
+  {
+    "path": "src-tauri/tauri.conf.json",
+    "ext": ".json",
+    "bytes": 1080,
+    "lines": 46,
+    "sha256": "a2efc7ccdb22e3d156af41420929a381e4551480282701a28ff1f553050a3bc1"
+  },
+  {
+    "path": "src/app/App.tsx",
+    "ext": ".tsx",
+    "bytes": 6915,
+    "lines": 153,
+    "sha256": "ea502f628818b9650609666882f51d7afd2d0a43217abb2d0a0e4beaf4dc4050"
+  },
+  {
+    "path": "src/app/AppShell.tsx",
+    "ext": ".tsx",
+    "bytes": 1185,
+    "lines": 27,
+    "sha256": "52bfab15829a0db45bd047dc9a70b262d62c5bb518de26f83b012f7963238cdd"
+  },
+  {
+    "path": "src/app/SurfaceHost.tsx",
+    "ext": ".tsx",
+    "bytes": 1166,
+    "lines": 33,
+    "sha256": "3ce1cfa3bb5d7121faa734ec2bf5a6644cee0dda0c1d2c60399993ad2de62796"
+  },
+  {
+    "path": "src/components/dock/AIDock.tsx",
+    "ext": ".tsx",
+    "bytes": 5049,
+    "lines": 61,
+    "sha256": "c053e934a002241d83e05448810743dfbc2837f1024eb4b36972d310de948b66"
+  },
+  {
+    "path": "src/components/error/ErrorBoundary.tsx",
+    "ext": ".tsx",
+    "bytes": 3397,
+    "lines": 77,
+    "sha256": "fe13e6aba76684c4549eff1fd13298a3e507d38fc4f1400063b8590294396a60"
+  },
+  {
+    "path": "src/components/error/ErrorLogPanel.tsx",
+    "ext": ".tsx",
+    "bytes": 9453,
+    "lines": 145,
+    "sha256": "611e5c8c101bc40954f7f52c47da4c7b156d8e87c152ac9535f90fde3dcfbba3"
+  },
+  {
+    "path": "src/components/error/ErrorModal.tsx",
+    "ext": ".tsx",
+    "bytes": 2647,
+    "lines": 58,
+    "sha256": "8a51b281dd6b57141e8de9834fb021f1952898fe47c4f173de9dab9c2ddfa141"
+  },
+  {
+    "path": "src/components/error/ErrorToast.tsx",
+    "ext": ".tsx",
+    "bytes": 3540,
+    "lines": 80,
+    "sha256": "d410980ad99dc831a1f39c75822c18a0725237e3b1ba56166a06ed454a8151ac"
+  },
+  {
+    "path": "src/components/error/index.ts",
+    "ext": ".ts",
+    "bytes": 184,
+    "lines": 5,
+    "sha256": "99a20234039e6acba2bc32e1c34a091543363054866b21ee70814cf6d8ced8f9"
+  },
+  {
+    "path": "src/components/layout/LeftSurfaceRail.tsx",
+    "ext": ".tsx",
+    "bytes": 2458,
+    "lines": 71,
+    "sha256": "e0da3bc9c83d12fc69512d6ff534c70bb99fcd3a4b11c08b269f0d0b3b37ff93"
+  },
+  {
+    "path": "src/components/ui/CcBadge.tsx",
+    "ext": ".tsx",
+    "bytes": 1153,
+    "lines": 35,
+    "sha256": "e7c90e12ae400b3db09c671b8d1fb081355299ac4f164528c2b3f3df46daa002"
+  },
+  {
+    "path": "src/components/ui/CcButton.tsx",
+    "ext": ".tsx",
+    "bytes": 1504,
+    "lines": 34,
+    "sha256": "a23929323a5002d7ea904f86e932792210be7d1a5949618e428c6000f80ae644"
+  },
+  {
+    "path": "src/components/ui/CcCard.tsx",
+    "ext": ".tsx",
+    "bytes": 558,
+    "lines": 25,
+    "sha256": "6aeeeaf879780cea76d5d42aa890c92e77b65d5ba4b14d9a950090ac6df13c5f"
+  },
+  {
+    "path": "src/components/ui/CcEmptyState.tsx",
+    "ext": ".tsx",
+    "bytes": 703,
+    "lines": 21,
+    "sha256": "966da9f261963d0c1fa570f4e24f4958711003e2020d3899432d25b64d5553c4"
+  },
+  {
+    "path": "src/components/ui/CcStatusDot.tsx",
+    "ext": ".tsx",
+    "bytes": 705,
+    "lines": 27,
+    "sha256": "303fcd3780a411239ec1c3f40dccedf20a1a49b51dbd4efa23402bc5e8553862"
+  },
+  {
+    "path": "src/debug/useRenderLoopGuard.ts",
+    "ext": ".ts",
+    "bytes": 1224,
+    "lines": 36,
+    "sha256": "2363a330bc2fee0dc2a1827bee5f91a3a7faa0251f4902be947f13324c9acb09"
+  },
+  {
+    "path": "src/design/index.ts",
+    "ext": ".ts",
+    "bytes": 188,
+    "lines": 4,
+    "sha256": "8dd95750294fd1b7f1f492816085a8e29701edebda319ceaa6c697f872a5c016"
+  },
+  {
+    "path": "src/design/theme-registry.ts",
+    "ext": ".ts",
+    "bytes": 1664,
+    "lines": 46,
+    "sha256": "92b452abbb6f10e1441a1b95414f34a7d63de93da24a4b8c5787353b8a329420"
+  },
+  {
+    "path": "src/design/theme-types.ts",
+    "ext": ".ts",
+    "bytes": 305,
+    "lines": 16,
+    "sha256": "08c20ae65f18ed9b5e30c5489091b3485e1f8b8c0d44dffde668da63581d46db"
+  },
+  {
+    "path": "src/design/xterm-themes.ts",
+    "ext": ".ts",
+    "bytes": 763,
+    "lines": 36,
+    "sha256": "259e007c83a421c6f5ca99bf2892bf1fb9f09077b4c74ac4fcf51f374aa98f0b"
+  },
+  {
+    "path": "src/features/chat/ChatBlockRenderer.tsx",
+    "ext": ".tsx",
+    "bytes": 9095,
+    "lines": 92,
+    "sha256": "80f6d5565fba6282cd9f3050d160fd7181fb70beae1b1bf129446a1f24bae1da"
+  },
+  {
+    "path": "src/features/chat/index.ts",
+    "ext": ".ts",
+    "bytes": 53,
+    "lines": 2,
+    "sha256": "76214728cd3c92180d59ee9ab9e51fd3361255288f45eee602f34f811db8005f"
+  },
+  {
+    "path": "src/features/chat/MarkdownRenderer.tsx",
+    "ext": ".tsx",
+    "bytes": 4549,
+    "lines": 84,
+    "sha256": "5d9a038c99bfc9a520a8622e9ec58cdb820c7ef2ee7a33d639dbab28f3c03e2e"
+  },
+  {
+    "path": "src/features/chat/StreamCoalescer.ts",
+    "ext": ".ts",
+    "bytes": 1321,
+    "lines": 51,
+    "sha256": "0b02b8be63ee82eb83444bbdbf5f53348940ec91e1a8738c5dd829bba3122b79"
+  },
+  {
+    "path": "src/features/composer/CommandPalette.tsx",
+    "ext": ".tsx",
+    "bytes": 5197,
+    "lines": 94,
+    "sha256": "8e4f705cb50b745d643469b7f6551ce02e6bce374bb50e9b8d424973d50628c9"
+  },
+  {
+    "path": "src/features/composer/ResourcePicker.tsx",
+    "ext": ".tsx",
+    "bytes": 2862,
+    "lines": 67,
+    "sha256": "6c70cccb5721a1c02cc5eaa1bf017ea3429f01ae46839055f3a41b404bd5d845"
+  },
+  {
+    "path": "src/features/console/services/consoleRuntimeActions.ts",
+    "ext": ".ts",
+    "bytes": 399,
+    "lines": 12,
+    "sha256": "d2862232477af4438508ac1ade90a640bd27cbc9e1d61f95a14341fbb306594e"
+  },
+  {
+    "path": "src/features/dock/services/dockActionBridge.ts",
+    "ext": ".ts",
+    "bytes": 429,
+    "lines": 13,
+    "sha256": "f7fe0a9e376b7af34155917155c1faa463a2724fba519e521fb81dc63657f2e0"
+  },
+  {
+    "path": "src/features/projects/services/projectRuntimeActions.ts",
+    "ext": ".ts",
+    "bytes": 486,
+    "lines": 16,
+    "sha256": "0e776d4fb931efa1361e2a7193c19482c27b01bc84940c0619b591bcb731aaa1"
+  },
+  {
+    "path": "src/features/resources/services/resourceActivationBridge.ts",
+    "ext": ".ts",
+    "bytes": 499,
+    "lines": 13,
+    "sha256": "e4561664f1020868f5899e001201c32b6e2f040db5aeb0abb615dc482cdddb76"
+  },
+  {
+    "path": "src/features/runtime/components/RuntimeDiagnosticsPanel.tsx",
+    "ext": ".tsx",
+    "bytes": 10515,
+    "lines": 188,
+    "sha256": "4a3c231a19d2d7440c0562318fccba3ed689dc6dc1a8424c7ff4f80df9754892"
+  },
+  {
+    "path": "src/features/runtime/services/interactionAdapter.ts",
+    "ext": ".ts",
+    "bytes": 1367,
+    "lines": 39,
+    "sha256": "26363f426723a70e25fd12b6488b4c634fc8d24ec45ae472f887852a07aa83ef"
+  },
+  {
+    "path": "src/features/runtime/services/runtimeBridge.ts",
+    "ext": ".ts",
+    "bytes": 6792,
+    "lines": 177,
+    "sha256": "a79298ae611745563ae4275cba8b5cd3cc182c2195594033941f867da4ba170b"
+  },
+  {
+    "path": "src/features/runtime/services/runtimeContractProbe.ts",
+    "ext": ".ts",
+    "bytes": 3033,
+    "lines": 95,
+    "sha256": "c14e4eb09defd4bee3c7f5f2c1c53ab791b047a157f8d7135a5277415414af1c"
+  },
+  {
+    "path": "src/features/runtime/services/runtimeDebug.ts",
+    "ext": ".ts",
+    "bytes": 258,
+    "lines": 9,
+    "sha256": "392ad8b250c3f3f8dae9822d368cbe527d6c5fa1268f3bca4e54eba729560ad7"
+  },
+  {
+    "path": "src/features/runtime/services/runtimeDiagnostics.ts",
+    "ext": ".ts",
+    "bytes": 1498,
+    "lines": 52,
+    "sha256": "d8d79d02c6e2969ab533043e6faf07da7cd3a23933c6fd7fdaca4e494a22720d"
+  },
+  {
+    "path": "src/features/runtime/services/runtimeEventBridge.ts",
+    "ext": ".ts",
+    "bytes": 511,
+    "lines": 13,
+    "sha256": "648f4cc9b6e03384aba6aa0e20640ec834ddaaad163417a4b40aabf11e249d25"
+  },
+  {
+    "path": "src/features/runtime/services/runtimeFlags.ts",
+    "ext": ".ts",
+    "bytes": 364,
+    "lines": 9,
+    "sha256": "843bb939312699930d51390c7d4bc654185162444cae422cec3d5000f1ab3544"
+  },
+  {
+    "path": "src/features/runtime/services/runtimeKernel.ts",
+    "ext": ".ts",
+    "bytes": 2650,
+    "lines": 71,
+    "sha256": "2e7e119ae3fca43ecd6b2998423af4f5ec24add18878a1932caf0902ab571e23"
+  },
+  {
+    "path": "src/features/runtime/services/sessionRegistry.ts",
+    "ext": ".ts",
+    "bytes": 670,
+    "lines": 17,
+    "sha256": "054eafc0c7d42300dfd70f196103cf80af7db53070a00e954abced4456fadab2"
+  },
+  {
+    "path": "src/features/runtime/services/structuredAdapter.ts",
+    "ext": ".ts",
+    "bytes": 808,
+    "lines": 26,
+    "sha256": "79e3da1f5fa5f0ec5d9b414dfb9bd4344bfb304994e24e1e2320afe59af25963"
+  },
+  {
+    "path": "src/features/runtime/services/telemetryNormalizer.ts",
+    "ext": ".ts",
+    "bytes": 788,
+    "lines": 27,
+    "sha256": "16ce8426c94604daf03dcd77c4876cd5519dcd5aec4bd319c72c61aac27fd398"
+  },
+  {
+    "path": "src/features/runtime/stores/runtimeStore.ts",
+    "ext": ".ts",
+    "bytes": 2267,
+    "lines": 71,
+    "sha256": "5354608dd470ff2649c23162cfaad8dbdd7cfe49eb0e0a38ebfd12ae44cd61c4"
+  },
+  {
+    "path": "src/features/runtime/stores/runtimeTraceStore.ts",
+    "ext": ".ts",
+    "bytes": 1827,
+    "lines": 74,
+    "sha256": "9b0396f3ce568667247d59c34dfc2924a95c94b22446ed0aba8f0ea7e868f233"
+  },
+  {
+    "path": "src/features/runtime/types/runtimeTraceTypes.ts",
+    "ext": ".ts",
+    "bytes": 544,
+    "lines": 26,
+    "sha256": "d52fc97832ce3dede665810e733048c162685d118624b9ab47240ae248b346bc"
+  },
+  {
+    "path": "src/features/runtime/types/runtimeTypes.ts",
+    "ext": ".ts",
+    "bytes": 1765,
+    "lines": 78,
+    "sha256": "37527657b52c19f6ff02bb414184aa041eae506ab0fd74ad4ad270362a21f0f4"
+  },
+  {
+    "path": "src/features/terminal/usePtyTerminal.ts",
+    "ext": ".ts",
+    "bytes": 6968,
+    "lines": 168,
+    "sha256": "fb191e84aa6b52b2b1bb17692dc5de21d9a8261d40486ba140264633fb422a73"
+  },
+  {
+    "path": "src/features/workspace/stores/workspaceStore.ts",
+    "ext": ".ts",
+    "bytes": 1800,
+    "lines": 53,
+    "sha256": "daa8683ed4a4af31d4626d8a57ea3aba9e5e6f17c6f3fcff33377f1330505fc7"
+  },
+  {
+    "path": "src/i18n/index.ts",
+    "ext": ".ts",
+    "bytes": 544,
+    "lines": 20,
+    "sha256": "6d67dd87c4c6d7e3355c020eced86843b023054aaab6aedb5dc39ee2b5025e8b"
+  },
+  {
+    "path": "src/i18n/locales/en.json",
+    "ext": ".json",
+    "bytes": 10335,
+    "lines": 1,
+    "sha256": "b5e05254be23fb0cebf7523fde516af041b83803e83cfb37c730c1058d737618"
+  },
+  {
+    "path": "src/i18n/locales/zh.json",
+    "ext": ".json",
+    "bytes": 10388,
+    "lines": 1,
+    "sha256": "57d06184f02321fbec67ee2a7b44bc6084d367414494635fc109fdbed15ec3a8"
+  },
+  {
+    "path": "src/main.tsx",
+    "ext": ".tsx",
+    "bytes": 239,
+    "lines": 9,
+    "sha256": "97703fa637507ea1a4c3876ceefa862db1a3d11237860dcf74b4f77d0c88735c"
+  },
+  {
+    "path": "src/services/invokeCommand.ts",
+    "ext": ".ts",
+    "bytes": 1691,
+    "lines": 55,
+    "sha256": "ddd89feb2489b13d1085acc0248f1cc7d1d75ee65966ecc9597752f1e1d349ee"
+  },
+  {
+    "path": "src/stores/appStore.ts",
+    "ext": ".ts",
+    "bytes": 1142,
+    "lines": 39,
+    "sha256": "912368eb34f785b359131e921b5f270259ddb8f6580c74f96601eeeb72f54494"
+  },
+  {
+    "path": "src/stores/auditStore.ts",
+    "ext": ".ts",
+    "bytes": 1015,
+    "lines": 30,
+    "sha256": "e22206ddfbc4520f13ae004a12b17360f8e4260a66e2172b4e90548756e2ce29"
+  },
+  {
+    "path": "src/stores/errorStore.ts",
+    "ext": ".ts",
+    "bytes": 2035,
+    "lines": 57,
+    "sha256": "afe6a4a3550fa254d8351a1d91ee77644697e9c41c2790025e19bd7319bac23d"
+  },
+  {
+    "path": "src/stores/openSessionStore.ts",
+    "ext": ".ts",
+    "bytes": 1812,
+    "lines": 53,
+    "sha256": "d1fc507acaa281f85753bab35bdf685d94de14bbcea65d7d2bad849c3b8e8429"
+  },
+  {
+    "path": "src/stores/projectStore.ts",
+    "ext": ".ts",
+    "bytes": 2063,
+    "lines": 58,
+    "sha256": "7be39d4448e30602485847669897c833895dfddf0097adc46451a4c5687cccda"
+  },
+  {
+    "path": "src/stores/sessionStore.ts",
+    "ext": ".ts",
+    "bytes": 2098,
+    "lines": 49,
+    "sha256": "3b51149c3084b682607d348ff9999c4d3729f81cb010c6b9c25c73026da04680"
+  },
+  {
+    "path": "src/stores/surfaceStore.ts",
+    "ext": ".ts",
+    "bytes": 533,
+    "lines": 18,
+    "sha256": "ef588a5aac578f88f6cd8ac0df0fe10710ad8c4786b9279f1cff6036f91e75a1"
+  },
+  {
+    "path": "src/styles/error.css",
+    "ext": ".css",
+    "bytes": 381,
+    "lines": 15,
+    "sha256": "bcf181132a82abff9cf543b071eedcd43d5944764a78ca3e3ac234012b75a03d"
+  },
+  {
+    "path": "src/styles/global.css",
+    "ext": ".css",
+    "bytes": 7495,
+    "lines": 161,
+    "sha256": "9e0a92a4812747c355e01d88fba7742afc346f266c2267bce8ae8f0e9805fc9b"
+  },
+  {
+    "path": "src/styles/terminal.css",
+    "ext": ".css",
+    "bytes": 1134,
+    "lines": 51,
+    "sha256": "1d82bf0fde4846c45ed45d0cb10d980506429336742693de7e347f6d784ca1be"
+  },
+  {
+    "path": "src/styles/tokens.css",
+    "ext": ".css",
+    "bytes": 9775,
+    "lines": 250,
+    "sha256": "c3cc25b25797ccac70c2cdd070d7d4ce3e23eeeb6dfa71bc05b98dd6768286b9"
+  },
+  {
+    "path": "src/surfaces/canvas/CanvasSurface.tsx",
+    "ext": ".tsx",
+    "bytes": 8417,
+    "lines": 117,
+    "sha256": "4bc107178c866669ab134a45e99d06c22778c41a5b238ec2f38f46b7a86b8fc2"
+  },
+  {
+    "path": "src/surfaces/console/ConsoleSurface.tsx",
+    "ext": ".tsx",
+    "bytes": 11043,
+    "lines": 125,
+    "sha256": "89739825c5f6185d38136c739ff10245ea6245213da8e510f3a65b04247b71df"
+  },
+  {
+    "path": "src/surfaces/github/GitHubSurface.tsx",
+    "ext": ".tsx",
+    "bytes": 2046,
+    "lines": 39,
+    "sha256": "4b39fc533d6568c065d60ee1251256834d5b2015dcbcf3339d842de8bfeedf9f"
+  },
+  {
+    "path": "src/surfaces/projects/ImportSessionDialog.tsx",
+    "ext": ".tsx",
+    "bytes": 4419,
+    "lines": 112,
+    "sha256": "990d3ed54e3d09e309beaa66cb482cc04c8e35f91a2f0c4857ff61b81cd8b0c5"
+  },
+  {
+    "path": "src/surfaces/projects/NewProjectDialog.tsx",
+    "ext": ".tsx",
+    "bytes": 5170,
+    "lines": 134,
+    "sha256": "a594397c20b8722d956698bcd07545193e4c80bca4221e667a6b172cba34e14f"
+  },
+  {
+    "path": "src/surfaces/projects/ProjectDetailPanel.tsx",
+    "ext": ".tsx",
+    "bytes": 15345,
+    "lines": 234,
+    "sha256": "59d837c19ff86993d7cd00d9bb580703f51578cc72c2ecf6ed5934996059f64a"
+  },
+  {
+    "path": "src/surfaces/projects/ProjectManagementRail.tsx",
+    "ext": ".tsx",
+    "bytes": 5825,
+    "lines": 113,
+    "sha256": "bc30e8dbcbf1deb95f04ddeac46037fdb8dae97aca15afe1b39e7069ceb667fe"
+  },
+  {
+    "path": "src/surfaces/projects/ProjectsSurface.tsx",
+    "ext": ".tsx",
+    "bytes": 9552,
+    "lines": 202,
+    "sha256": "055b3ccb5f20620bca0001829874377066cedd7a527ecdf71047b8333e3b636e"
+  },
+  {
+    "path": "src/surfaces/projects/ProjectsTopBar.tsx",
+    "ext": ".tsx",
+    "bytes": 2626,
+    "lines": 66,
+    "sha256": "ae2b93652eff4e5487713a3a109af25cd4c399b43487c875722b54ea5b723915"
+  },
+  {
+    "path": "src/surfaces/projects/SessionManagementRail.tsx",
+    "ext": ".tsx",
+    "bytes": 7304,
+    "lines": 129,
+    "sha256": "37ef38b2e4d0c2246f8a664d2d95ba2f45085940c02e62d7a3ec1a86c281da0d"
+  },
+  {
+    "path": "src/surfaces/resources/ResourcesSurface.tsx",
+    "ext": ".tsx",
+    "bytes": 13096,
+    "lines": 197,
+    "sha256": "4a3d839adcdc50e1e7295a428b33f7aca39f6fc203c867561f708b9034d8526e"
+  },
+  {
+    "path": "src/surfaces/settings/SettingsSurface.tsx",
+    "ext": ".tsx",
+    "bytes": 16924,
+    "lines": 319,
+    "sha256": "e14fc07461dba1336317c7314d7125ad9c59e924d518526fc68f6446781afb03"
+  },
+  {
+    "path": "src/surfaces/workspace/ChatView.tsx",
+    "ext": ".tsx",
+    "bytes": 1267,
+    "lines": 26,
+    "sha256": "7b88088fcbc038d267e5996cb6897a604a1993dba92e5e196398eba64af5538b"
+  },
+  {
+    "path": "src/surfaces/workspace/ComposerBar.tsx",
+    "ext": ".tsx",
+    "bytes": 6257,
+    "lines": 123,
+    "sha256": "59e50a57ebe69b88f28ae111cbad8f430060dfddb3421f858a8529ec7c920b40"
+  },
+  {
+    "path": "src/surfaces/workspace/NewSessionDialog.tsx",
+    "ext": ".tsx",
+    "bytes": 4556,
+    "lines": 107,
+    "sha256": "6d466af8db5ea6057d5ef8dce5dd9a96d50cc296c2d60f7e888fe6df2f3ba5b3"
+  },
+  {
+    "path": "src/surfaces/workspace/OpenSessionTabs.tsx",
+    "ext": ".tsx",
+    "bytes": 2995,
+    "lines": 63,
+    "sha256": "7bbcc62d5fda3033f1b2532afea606fe7f08610bb74ea4c60faa9226331c37be"
+  },
+  {
+    "path": "src/surfaces/workspace/SessionInspector.tsx",
+    "ext": ".tsx",
+    "bytes": 14259,
+    "lines": 210,
+    "sha256": "e3653160fc6110ac2aca7a926d952b85b81943137c89ff62a9215708e516654b"
+  },
+  {
+    "path": "src/surfaces/workspace/TerminalView.tsx",
+    "ext": ".tsx",
+    "bytes": 2790,
+    "lines": 52,
+    "sha256": "6d933c3282be1de19b024baec64526a491480a4fe64d68ee4b8958a13364757f"
+  },
+  {
+    "path": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "ext": ".tsx",
+    "bytes": 14780,
+    "lines": 272,
+    "sha256": "e9ff4a5769dabf3d8985af73c711635eed5ca25a99facb8519b8d9c6d2bfa6a1"
+  },
+  {
+    "path": "src/types/domain.ts",
+    "ext": ".ts",
+    "bytes": 5026,
+    "lines": 192,
+    "sha256": "be2bc8f87d01ffa77f7ad7dd083c3e87fecec8fc42b172ee35b1cf390c7f618d"
+  },
+  {
+    "path": "src/types/index.ts",
+    "ext": ".ts",
+    "bytes": 26,
+    "lines": 2,
+    "sha256": "01a8a1efaa74541169713dc1d938acef949984a2ac994174f2e0dbb92dbb1ae0"
+  },
+  {
+    "path": "tsconfig.json",
+    "ext": ".json",
+    "bytes": 581,
+    "lines": 25,
+    "sha256": "fe3f9f42c737ea4452e13f187620035b480b6f00067e070567b39d3c466bc0f4"
+  },
+  {
+    "path": "tsconfig.node.json",
+    "ext": ".json",
+    "bytes": 213,
+    "lines": 11,
+    "sha256": "9e2abb169ea87b7190613a1d4da57ca608463a453bd4231fa3aeee5e308370dd"
+  },
+  {
+    "path": "vite.config.ts",
+    "ext": ".ts",
+    "bytes": 360,
+    "lines": 20,
+    "sha256": "a133a58a197ab3da3e1286a5c632080bfa46fa03ed47bedade1259fea07db46c"
+  }
+]

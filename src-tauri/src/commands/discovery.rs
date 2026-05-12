@@ -92,7 +92,10 @@ pub fn runtime_discover_claude() -> Result<DiscoveryMatrix, String> {
     let candidates = find_claude_candidates();
     matrix.claude_candidates = candidates;
 
-    if let Some(best) = matrix.claude_candidates.iter().find(|c| c.found && c.version_ok) {
+    let priority_order = ["node_direct", "claude_js", "claude", "claude.ps1", "claude.cmd", "npx"];
+    if let Some(best) = priority_order.iter()
+        .find_map(|name| matrix.claude_candidates.iter().find(|c| c.name == *name && c.found && c.version_ok))
+    {
         matrix.selected_candidate = Some(best.name.clone());
         matrix.overall_status = format!("found via {} using {}", best.name, matrix.selected_strategy.as_deref().unwrap_or("unknown"));
     } else if matrix.claude_candidates.iter().any(|c| c.found) {
@@ -106,8 +109,54 @@ pub fn runtime_discover_claude() -> Result<DiscoveryMatrix, String> {
 
 fn find_claude_candidates() -> Vec<ClaudeCandidate> {
     let mut candidates = vec![];
+    let appdata = std::env::var("APPDATA").unwrap_or_default();
+    let npm_prefix = std::env::var("NPM_PREFIX").ok()
+        .or_else(|| std::env::var("npm_config_prefix").ok())
+        .unwrap_or_else(|| format!("{}\\npm", appdata));
 
-    // 1. claude (bare — relies on PATHEXT on Windows)
+    // v9.0 Priority 0: node.exe + Claude CLI JS — avoids cmd.exe 0xc0000142 entirely
+    let node_available = which::which("node");
+    let cli_js_candidates = find_claude_cli_js(&npm_prefix, &appdata);
+    if node_available.is_ok() && !cli_js_candidates.is_empty() {
+        let node_path = node_available.as_ref().unwrap().to_string_lossy().to_string();
+        let best_js = &cli_js_candidates[0];
+        candidates.push(ClaudeCandidate {
+            name: "node_direct".into(),
+            path: format!("{} | {}", node_path, best_js),
+            found: true,
+            version_ok: true,
+            version_text: Some("node.exe + Claude CLI JS (direct — safest, no cmd.exe)".into()),
+            error: None,
+            runnable_by: "node.exe (no shell wrapper)".into(),
+        });
+    } else {
+        candidates.push(ClaudeCandidate {
+            name: "node_direct".into(),
+            path: format!("node={} js_candidates={}",
+                node_available.as_ref().map(|p| p.to_string_lossy().to_string()).unwrap_or_default(),
+                cli_js_candidates.len()),
+            found: false,
+            version_ok: false,
+            version_text: None,
+            error: Some(if node_available.is_err() { "node.exe not found in PATH".into() } else { "Claude CLI JS not found".into() }),
+            runnable_by: "node.exe (no shell wrapper)".into(),
+        });
+    }
+
+    // Priority 1: standalone claude.exe
+    let claude_exe = std::path::PathBuf::from(&npm_prefix).join("node_modules").join("@anthropic-ai").join("claude-code").join("cli.js");
+    let exe_found = claude_exe.exists();
+    candidates.push(ClaudeCandidate {
+        name: "claude_js".into(),
+        path: claude_exe.to_string_lossy().to_string(),
+        found: exe_found,
+        version_ok: exe_found,
+        version_text: if exe_found { Some("Claude CLI JS entry found".into()) } else { None },
+        error: if exe_found { None } else { Some("@anthropic-ai/claude-code not found in npm prefix".into()) },
+        runnable_by: "node.exe (direct JS)".into(),
+    });
+
+    // Priority 2: claude (bare — relies on PATHEXT on Windows, likely cmd wrapper)
     let which_result = which::which("claude");
     let (found, path, version_ok, version_text, error) = probe_candidate("claude", which_result.ok().as_ref().map(|p| p.to_str().unwrap_or("")));
     candidates.push(ClaudeCandidate {
@@ -115,16 +164,7 @@ fn find_claude_candidates() -> Vec<ClaudeCandidate> {
         runnable_by: "any shell (via PATHEXT)".into(),
     });
 
-    // 2. claude.cmd (npm global)
-    let appdata = std::env::var("APPDATA").unwrap_or_default();
-    let cmd_path = std::path::PathBuf::from(&appdata).join("npm").join("claude.cmd");
-    let (found, path, version_ok, version_text, error) = probe_candidate("claude.cmd (npm)", Some(cmd_path.to_str().unwrap_or("")));
-    candidates.push(ClaudeCandidate {
-        name: "claude.cmd".into(), path, found, version_ok, version_text, error,
-        runnable_by: "cmd.exe, PowerShell".into(),
-    });
-
-    // 3. claude.ps1
+    // Priority 3: claude.ps1 (PowerShell — avoids cmd.exe)
     let ps1_path = std::path::PathBuf::from(&appdata).join("npm").join("claude.ps1");
     let (found, path, version_ok, version_text, error) = probe_candidate("claude.ps1", Some(ps1_path.to_str().unwrap_or("")));
     candidates.push(ClaudeCandidate {
@@ -132,7 +172,15 @@ fn find_claude_candidates() -> Vec<ClaudeCandidate> {
         runnable_by: "PowerShell".into(),
     });
 
-    // 4. npx fallback
+    // Priority 4: claude.cmd (npm global — requires cmd.exe, 0xc0000142 risk)
+    let cmd_path = std::path::PathBuf::from(&appdata).join("npm").join("claude.cmd");
+    let (found, path, version_ok, version_text, error) = probe_candidate("claude.cmd (npm)", Some(cmd_path.to_str().unwrap_or("")));
+    candidates.push(ClaudeCandidate {
+        name: "claude.cmd".into(), path, found, version_ok, version_text, error,
+        runnable_by: "cmd.exe, PowerShell (0xc0000142 risk)".into(),
+    });
+
+    // Priority 5: npx fallback
     let npx_available = which::which("npx").ok();
     candidates.push(ClaudeCandidate {
         name: "npx".into(),
@@ -145,6 +193,23 @@ fn find_claude_candidates() -> Vec<ClaudeCandidate> {
     });
 
     candidates
+}
+
+/// Find Claude CLI JS entry points in npm installation paths.
+fn find_claude_cli_js(npm_prefix: &str, appdata: &str) -> Vec<String> {
+    let mut paths = vec![];
+    let bases = [
+        format!("{}\\node_modules\\@anthropic-ai\\claude-code\\cli.js", npm_prefix),
+        format!("{}\\node_modules\\@anthropic-ai\\claude-code\\bin\\claude.js", npm_prefix),
+        format!("{}\\npm\\node_modules\\@anthropic-ai\\claude-code\\cli.js", appdata),
+        format!("{}\\npm\\node_modules\\@anthropic-ai\\claude-code\\bin\\claude.js", appdata),
+    ];
+    for p in &bases {
+        if std::path::Path::new(p).exists() {
+            paths.push(p.clone());
+        }
+    }
+    paths
 }
 
 fn probe_candidate(name: &str, path: Option<&str>) -> (bool, String, bool, Option<String>, Option<String>) {

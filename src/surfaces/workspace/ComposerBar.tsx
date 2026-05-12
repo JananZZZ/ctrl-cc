@@ -5,11 +5,13 @@ import { ResourcePicker } from '../../features/composer/ResourcePicker';
 import { CommandPalette } from '../../features/composer/CommandPalette';
 import type { PermissionMode, RuntimeMode } from '../../types';
 
+export type SendResult = { ok: true } | { ok: false; error: string };
+
 interface Props {
   viewMode: 'chat' | 'terminal' | 'split' | 'structured-task';
   sessionRuntimeMode?: 'pty-interactive' | 'structured-print';
   disabled?: boolean;
-  onSend: (text: string, config: { model: string; effort: string; permissionMode: PermissionMode; runtimeMode: RuntimeMode }) => void;
+  onSend: (text: string, config: { model: string; effort: string; permissionMode: PermissionMode; runtimeMode: RuntimeMode }) => Promise<SendResult>;
 }
 
 const MODELS = ['sonnet', 'opus', 'haiku'] as const;
@@ -20,6 +22,8 @@ const PERM_KEYS: Record<string, string> = { default: 'composerBar.permDefault', 
 export function ComposerBar({ viewMode, sessionRuntimeMode, disabled, onSend }: Props) {
   const { t } = useTranslation();
   const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const [model, setModel] = useState<string>(() => localStorage.getItem('ctrl-cc-model') || 'sonnet');
   const [effort, setEffort] = useState<string>(() => localStorage.getItem('ctrl-cc-effort') || 'medium');
   const [permissionMode, setPermissionMode] = useState<PermissionMode>(() => (localStorage.getItem('ctrl-cc-permMode') as PermissionMode) || 'default');
@@ -30,11 +34,18 @@ export function ComposerBar({ viewMode, sessionRuntimeMode, disabled, onSend }: 
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const trimmed = text.trim();
-    if (!trimmed) return;
-    onSend(trimmed, { model, effort, permissionMode, runtimeMode });
-    setText('');
+    if (!trimmed || sending) return;
+    setSending(true);
+    setSendError(null);
+    const result = await onSend(trimmed, { model, effort, permissionMode, runtimeMode });
+    if (result.ok) {
+      setText('');
+    } else {
+      setSendError(result.error);
+    }
+    setSending(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -96,14 +107,17 @@ export function ComposerBar({ viewMode, sessionRuntimeMode, disabled, onSend }: 
           fontFamily: 'var(--cc-font-sans)',
         }}
       />
+      {sendError && (
+        <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-red)', padding: '0 8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 200 }}>{sendError}</span>
+      )}
       <CcButton
         data-testid="chat-send-button"
         variant="primary"
         size="sm"
         onClick={handleSend}
-        disabled={disabled || !text.trim()}
+        disabled={disabled || !text.trim() || sending}
       >
-        {t('composerBar.send')}
+        {sending ? t('composerBar.sending') : t('composerBar.send')}
       </CcButton>
     </div>
   );

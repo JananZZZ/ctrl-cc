@@ -6,7 +6,7 @@ import { SearchAddon } from '@xterm/addon-search';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { SerializeAddon } from '@xterm/addon-serialize';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import { writePtyV2, resizePtyV2, sendCtrlCPtyV2, sendCtrlDPtyV2 } from '../runtime/services/interactionAdapter';
+import { RuntimeBridge } from '../runtime/services/runtimeBridge';
 import { warnLog } from '../../services/invokeCommand';
 import '@xterm/xterm/css/xterm.css';
 
@@ -123,9 +123,9 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     listen<PtyErrorPayload>('pty://error', () => { setStatus('failed'); }).then((fn) => unlisteners.push(fn));
 
     term.onData((data) => {
-      writePtyV2(sessionId, data).catch((e) => {
+      RuntimeBridge.write(sessionId, data).catch((e: unknown) => {
         warnLog('pty', 'PTY write failed', String(e));
-        term.writeln(`\x1b[31m[Ctrl-CC] Write failed: ${e}\x1b[0m`);
+        term.writeln(`\x1b[31m[Ctrl-CC] Write failed: ${String(e)}\x1b[0m`);
       });
     });
 
@@ -136,7 +136,7 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
         fit.fit();
         const dims = fit.proposeDimensions();
         if (dims?.rows && dims?.cols) {
-          resizePtyV2(sessionId, dims.cols, dims.rows).catch((e) => warnLog('pty', 'PTY resize failed', String(e)));
+          RuntimeBridge.resize(sessionId, dims.cols, dims.rows).catch((e: unknown) => warnLog('pty', 'PTY resize failed', String(e)));
         }
       }, 120);
     });
@@ -154,9 +154,9 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     };
   }, [sessionId, container]);
 
-  const write = useCallback((data: string) => { writePtyV2(sessionId!, data).catch((e) => warnLog('pty', 'PTY write failed', String(e))); }, [sessionId]);
-  const sendCtrlC = useCallback(() => { sendCtrlCPtyV2(sessionId!).catch((e) => warnLog('pty', 'Ctrl+C failed', String(e))); }, [sessionId]);
-  const sendCtrlD = useCallback(() => { sendCtrlDPtyV2(sessionId!).catch((e) => warnLog('pty', 'Ctrl+D failed', String(e))); }, [sessionId]);
+  const write = useCallback((data: string) => { RuntimeBridge.write(sessionId!, data).catch((e: unknown) => warnLog('pty', 'PTY write failed', String(e))); }, [sessionId]);
+  const sendCtrlC = useCallback(() => { RuntimeBridge.ctrlC(sessionId!).catch((e: unknown) => warnLog('pty', 'Ctrl+C failed', String(e))); }, [sessionId]);
+  const sendCtrlD = useCallback(() => { RuntimeBridge.ctrlD(sessionId!).catch((e: unknown) => warnLog('pty', 'Ctrl+D failed', String(e))); }, [sessionId]);
   const clear = useCallback(() => { termRef.current?.clear(); }, []);
   const searchFn = useCallback((query: string) => { searchRef.current?.findNext(query); }, []);
   const serializeFn = useCallback(() => serializeRef.current?.serialize() ?? '', []);

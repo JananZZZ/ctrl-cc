@@ -6,7 +6,7 @@ import { useOpenSessionStore } from '../../stores/openSessionStore';
 import { useSurfaceStore } from '../../stores/surfaceStore';
 import { useErrorStore } from '../../stores/errorStore';
 import { invokeCommand } from '../../services/invokeCommand';
-import { startPtyV2ClaudeSession } from '../../features/runtime/services/interactionAdapter';
+import { RuntimeBridge } from '../../features/runtime/services/runtimeBridge';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 import { ProjectsTopBar } from './ProjectsTopBar';
 import { ProjectManagementRail } from './ProjectManagementRail';
@@ -90,56 +90,26 @@ export function ProjectsSurface() {
     if (creatingSession) return;
     setCreatingSession(true);
     const proj = useProjectStore.getState().projects.find((p) => p.id === projectId);
-    const sessionId = `ses-${Date.now()}`;
     const cwd = proj?.path || '.';
-    const title = cwd.split(/[/\\]/).pop() || t('workspace.startSession');
 
-    // Step 1: Create session record immediately (no await on PTY)
-    const newSes = {
-      id: sessionId, projectId, title,
-      runtimeMode: 'pty-interactive' as const, status: 'starting' as const, model: 'sonnet',
-      permissionMode: 'default' as const, cwd,
-      inputTokens: 0, outputTokens: 0, totalCostUsd: 0,
-      fileChangeCount: 0, riskCount: 0, auditCount: 0, isPinned: false,
-      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), startedAt: new Date().toISOString(),
-    };
-    addSession(newSes);
-    invokeCommand('save_session_to_db', { session: newSes }).catch((e) => console.warn('save_session failed:', e));
-
-    // Step 2: Open workspace tab + navigate immediately
-    openSession({ sessionId, projectId, projectName: proj?.name || t('workspace.project'), title, status: 'starting', viewMode: 'terminal', pendingConfirms: 0, riskCount: 0, isPinned: false });
-    navigateTo('workspace');
-
-    // Step 3: Background PTY start — does NOT block UI
-    startPtyV2ClaudeSession({
-      sessionId, projectId, cwd, cliPath: 'claude', extraArgs: [],
-    }).then((info) => {
-      if (info?.sessionId) {
-        try { useSessionStore.getState().updateSession(sessionId, { status: 'running' as const }); } catch {}
-      }
-    }).catch((e) => {
-      try {
-        useErrorStore.getState().addError({ severity: 'error', source: 'session', title: t('error.createSessionFailed'), detail: String(e) });
-        useSessionStore.getState().updateSession(sessionId, { status: 'failed' as const });
-      } catch {}
+    // v9.0: All session creation through RuntimeBridge — single entry point
+    RuntimeBridge.startInteractiveSession({
+      projectId, projectName: proj?.name || t('workspace.project'), cwd,
+      mode: 'new', sessionName: cwd.split(/[/\\]/).pop() || undefined,
+    }).catch((e: unknown) => {
+      try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: t('error.createSessionFailed'), detail: String(e) }); } catch {}
     }).finally(() => setCreatingSession(false));
   };
 
   const handleResumeSession = (sessionId: string) => {
     const ses = sessions.find((s) => s.id === sessionId);
     if (!ses) return;
-    const newId = `resume-${Date.now()}`;
-    // Step 1: Create record + navigate immediately
-    addSession({ ...ses, id: newId, status: 'starting', startedAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-    openSession({ sessionId: newId, projectId: ses.projectId, projectName: ses.title, title: ses.title + ' (Resume)', status: 'starting', viewMode: 'terminal', pendingConfirms: 0, riskCount: ses.riskCount, isPinned: false });
-    navigateTo('workspace');
-    // Step 2: Background PTY
-    startPtyV2ClaudeSession({
-      sessionId: newId, projectId: ses.projectId, cwd: ses.cwd, cliPath: 'claude', extraArgs: ses.claudeSessionId ? ['--resume', ses.claudeSessionId] : [],
-    }).then(() => {
-      try { useSessionStore.getState().updateSession(newId, { status: 'running' as const }); } catch {}
-    }).catch((e) => {
-      try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: t('error.resumeSessionFailed'), detail: String(e) }); } catch {}
+    RuntimeBridge.startInteractiveSession({
+      projectId: ses.projectId, projectName: ses.title, cwd: ses.cwd,
+      mode: 'resume', resumeTarget: ses.claudeSessionId,
+      sessionName: ses.title + ' (Resume)',
+    }).catch((e: unknown) => {
+      try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: t('error.createSessionFailed'), detail: String(e) }); } catch {}
     });
   };
 

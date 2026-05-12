@@ -1,0 +1,3848 @@
+[
+  {
+    "file": ".claude/rules/tauri-rust.md",
+    "line": 3,
+    "rule": "child-wait",
+    "text": "- No child.wait() / reader loop / Mutex-hold-read in commands"
+  },
+  {
+    "file": "docs/Ctrl-CC_Ultimate_Fix_Plan.md",
+    "line": 235,
+    "rule": "direct-pty-invoke",
+    "text": "→ invokeCommand('pty_start_claude_session', { sessionId, projectId, cliPath: 'claude', cwd, extraArgs: [] })"
+  },
+  {
+    "file": "docs/Ctrl-CC_Ultimate_Fix_Plan.md",
+    "line": 240,
+    "rule": "raw-pty-event",
+    "text": "→ emit pty://data 事件"
+  },
+  {
+    "file": "docs/Ctrl-CC_Ultimate_Fix_Plan.md",
+    "line": 243,
+    "rule": "runtime-write-bypass",
+    "text": "→ 在 xterm 中直接输入 → xterm.onData → pty_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_Ultimate_Fix_Plan.md",
+    "line": 244,
+    "rule": "runtime-write-bypass",
+    "text": "→ 或在 ComposerBar 输入 → pty_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_Ultimate_Fix_Plan.md",
+    "line": 252,
+    "rule": "direct-pty-invoke",
+    "text": "await invokeCommand('pty_start_claude_session', {"
+  },
+  {
+    "file": "docs/Ctrl-CC_Ultimate_Fix_Plan.md",
+    "line": 263,
+    "rule": "direct-pty-invoke",
+    "text": "await invokeCommand('pty_start_claude_session', {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/03_Part3_Workspace_Chat_Terminal_Top_Experience.md",
+    "line": 123,
+    "rule": "runtime-write-bypass",
+    "text": "ChatComposer 输入：runtimeMode = pty-interactive → pty_write(text + Enter)；runtimeMode = structured-print → claude -p task。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/03_Part3_Workspace_Chat_Terminal_Top_Experience.md",
+    "line": 125,
+    "rule": "runtime-write-bypass",
+    "text": "Terminal 中直接输入：xterm.onData → pty_write。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/04_Part4_PTY_Runtime_ClaudeCode_Real_Connection.md",
+    "line": 44,
+    "rule": "runtime-write-bypass",
+    "text": "pty_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/04_Part4_PTY_Runtime_ClaudeCode_Real_Connection.md",
+    "line": 57,
+    "rule": "raw-pty-event",
+    "text": "pty://data"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/04_Part4_PTY_Runtime_ClaudeCode_Real_Connection.md",
+    "line": 58,
+    "rule": "raw-pty-event",
+    "text": "pty://exit"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/04_Part4_PTY_Runtime_ClaudeCode_Real_Connection.md",
+    "line": 59,
+    "rule": "raw-pty-event",
+    "text": "pty://error"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/04_Part4_PTY_Runtime_ClaudeCode_Real_Connection.md",
+    "line": 60,
+    "rule": "raw-pty-event",
+    "text": "pty://status"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/04_Part4_PTY_Runtime_ClaudeCode_Real_Connection.md",
+    "line": 103,
+    "rule": "runtime-write-bypass",
+    "text": "→ pty_write(sessionId, text + \"\\r\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/04_Part4_PTY_Runtime_ClaudeCode_Real_Connection.md",
+    "line": 162,
+    "rule": "runtime-write-bypass",
+    "text": "3. 实现 pty_start_claude_session、pty_write、pty_resize、pty_send_ctrl_c、pty_stop 等 commands。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 75,
+    "rule": "tauri-listen",
+    "text": "└── listen(\"dock.snapshot\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 76,
+    "rule": "react-setstate",
+    "text": "└── dockStore.setSnapshot(snapshot)"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 102,
+    "rule": "runtime-write-bypass",
+    "text": "-> pty_write / pty_kill / openSessionTab"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 538,
+    "rule": "react-setstate",
+    "text": "export async function setDockAlwaysOnTop(enabled: boolean) {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 546,
+    "rule": "react-setstate",
+    "text": "export async function setDockMode(mode: DockMode) {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 587,
+    "rule": "zustand-create",
+    "text": "export const useDockStore = create<DockState>((set, get) => ({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 784,
+    "rule": "react-setstate",
+    "text": "publisherTimer = window.setInterval(async () => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 840,
+    "rule": "tauri-listen",
+    "text": "const unlisten = await listen(\"dock.action\", async (event) => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 855,
+    "rule": "react-setstate",
+    "text": "useDockStore.getState().setMode(action.mode);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 860,
+    "rule": "react-setstate",
+    "text": "useDockStore.getState().setVisible(true);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 864,
+    "rule": "react-setstate",
+    "text": "useDockStore.getState().setVisible(false);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 932,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 934,
+    "rule": "react-setstate",
+    "text": "listen(\"dock.snapshot\", (event) => setSnapshot(event.payload as AIDockSnapshot)).then((fn) => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 934,
+    "rule": "tauri-listen",
+    "text": "listen(\"dock.snapshot\", (event) => setSnapshot(event.payload as AIDockSnapshot)).then((fn) => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 1110,
+    "rule": "react-setstate",
+    "text": "<button key={s.sessionId} className={s.sessionId === selected?.sessionId ? \"selected\" : \"\"} onClick={() => setSelectedSessionId(s.sessionId)}>"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 1204,
+    "rule": "react-setstate",
+    "text": "setValue(\"\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 1209,
+    "rule": "react-setstate",
+    "text": "<textarea value={value} onChange={(e) => setValue(e.target.value)} placeholder={`发送到当前 Claude PTY：${session.sessionName}`} onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === \"Enter\") { e.preventDefault(); submit(); } }} />"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 1430,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 1615,
+    "rule": "runtime-write-bypass",
+    "text": "[ ] Dock Ctrl+C 调用 pty_write(\"\\x03\")。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_AI_Dock_Workspace_Chat_Runtime_Integrated_Supreme_Plan.md",
+    "line": 1697,
+    "rule": "runtime-write-bypass",
+    "text": "6. Dock Ctrl+C 调用 pty_write(\"\\x03\")。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 529,
+    "rule": "zustand-create",
+    "text": "export const useConsoleStore = create<ConsoleState>((set) => ({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 577,
+    "rule": "zustand-create",
+    "text": "export const useRuntimeStore = create<RuntimeState>((set) => ({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 1086,
+    "rule": "react-setstate",
+    "text": "d.setDate(now.getDate() - i);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 1102,
+    "rule": "react-setstate",
+    "text": "y.setDate(end.getDate() - 1);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 1109,
+    "rule": "react-setstate",
+    "text": "if (range === \"1m\") start.setDate(end.getDate() - 30);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 1110,
+    "rule": "react-setstate",
+    "text": "else if (range === \"6m\") start.setDate(end.getDate() - 180);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 1111,
+    "rule": "react-setstate",
+    "text": "else if (range === \"1y\") start.setDate(end.getDate() - 365);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 1113,
+    "rule": "react-setstate",
+    "text": "else start.setDate(end.getDate() - 7);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 1468,
+    "rule": "react-setstate",
+    "text": "<button className={mode === \"daily\" ? \"active\" : \"\"} onClick={() => setMode(\"daily\")}>"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 1471,
+    "rule": "react-setstate",
+    "text": "<button className={mode === \"pro\" ? \"active\" : \"\"} onClick={() => setMode(\"pro\")}>"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 2069,
+    "rule": "react-setstate",
+    "text": "<button key={r.value} className={range === r.value ? \"active\" : \"\"} onClick={() => setRange(r.value)}>"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 2900,
+    "rule": "runtime-write-bypass",
+    "text": "2. pty_write(ptySessionId, \"\\x03\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 3141,
+    "rule": "runtime-write-bypass",
+    "text": "9. ActiveWorkPanel 接 openExistingSessionInWorkspace / pty_write Ctrl+C / pty_kill stop。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Console_Workspace_Chat_Runtime_Integrated_Execution_Plan.md",
+    "line": 3190,
+    "rule": "runtime-write-bypass",
+    "text": "[ ] ActiveWorkPanel 的 Ctrl+C 调用 pty_write(\"\\x03\")，不只是改 UI。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 589,
+    "rule": "mutex-lock",
+    "text": "self.sessions.lock().insert(session_id.clone(), session);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 595,
+    "rule": "mutex-lock",
+    "text": "let sessions = self.sessions.lock();"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 600,
+    "rule": "mutex-lock",
+    "text": "let mut writer = session.writer.lock();"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 610,
+    "rule": "mutex-lock",
+    "text": "let sessions = self.sessions.lock();"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 629,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = self.sessions.lock();"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 636,
+    "rule": "mutex-lock",
+    "text": "let mut writer = session.writer.lock();"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 776,
+    "rule": "child-wait",
+    "text": "let _ = child.wait();"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 847,
+    "rule": "runtime-write-bypass",
+    "text": "fn pty_write("
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 885,
+    "rule": "runtime-write-bypass",
+    "text": "pty_write,"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 991,
+    "rule": "runtime-write-bypass",
+    "text": "return invoke<void>(\"pty_write\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1028,
+    "rule": "tauri-listen",
+    "text": "return listen<PtyOutputPayload>(\"ctrlcc://pty-output\", (event) => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1036,
+    "rule": "tauri-listen",
+    "text": "return listen<PtyExitPayload>(\"ctrlcc://pty-exit\", (event) => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1044,
+    "rule": "tauri-listen",
+    "text": "return listen<PtyErrorPayload>(\"ctrlcc://pty-error\", (event) => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1202,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1204,
+    "rule": "react-setstate",
+    "text": "setSessionId(sessionIdRef.current);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1207,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1275,
+    "rule": "react-setstate",
+    "text": "setStatus(\"stopped\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1284,
+    "rule": "react-setstate",
+    "text": "setStatus(\"error\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1303,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1312,
+    "rule": "react-setstate",
+    "text": "setStatus(\"starting\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1327,
+    "rule": "react-setstate",
+    "text": "setSessionId(res.session_id);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1328,
+    "rule": "react-setstate",
+    "text": "setStatus(\"running\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1333,
+    "rule": "react-setstate",
+    "text": "setStatus(\"error\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1343,
+    "rule": "react-setstate",
+    "text": "setStatus(\"stopped\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1419,
+    "rule": "react-setstate",
+    "text": "setValue(\"\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1441,
+    "rule": "react-setstate",
+    "text": "onChange={(event) => setValue(event.target.value)}"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1504,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1506,
+    "rule": "react-setstate",
+    "text": "setCapability({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 1983,
+    "rule": "runtime-write-bypass",
+    "text": "- pty_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Final_Executable_Runtime_Rebuild_Plan-final plan.md",
+    "line": 2004,
+    "rule": "runtime-write-bypass",
+    "text": "- xterm onData 必须调用 pty_write。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 49,
+    "rule": "direct-interaction-adapter",
+    "text": "import { startPtyV2ClaudeSession, stopPtyV2 } from '../../features/runtime/services/interactionAdapter';"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 58,
+    "rule": "direct-interaction-adapter",
+    "text": "终端路径：usePtyTerminal -> interactionAdapter.writePtyV2"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 68,
+    "rule": "direct-interaction-adapter",
+    "text": "import { startPtyV2ClaudeSession } from '../../features/runtime/services/interactionAdapter';"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 77,
+    "rule": "direct-interaction-adapter",
+    "text": "startPtyV2ClaudeSession"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 95,
+    "rule": "direct-interaction-adapter",
+    "text": "await adapter.startPtyV2ClaudeSession({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 105,
+    "rule": "direct-interaction-adapter",
+    "text": "await adapter.writePtyV2(uiSessionId, data, session.traceId);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 144,
+    "rule": "direct-interaction-adapter",
+    "text": "writePtyV2(sessionId, data)"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 375,
+    "rule": "direct-interaction-adapter",
+    "text": "{ id: \"direct-interaction-adapter\", re: /startPtyV2ClaudeSession|writePtyV2|stopPtyV2|resizePtyV2/ },"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 376,
+    "rule": "runtime-write-bypass",
+    "text": "{ id: \"runtime-write-bypass\", re: /pty_v2_write|pty_write/ },"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 380,
+    "rule": "tauri-listen",
+    "text": "{ id: \"tauri-listen\", re: /listen<|listen\\(/ },"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 514,
+    "rule": "runtime-write-bypass",
+    "text": "pty_v2_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 550,
+    "rule": "direct-interaction-adapter",
+    "text": "import { startPtyV2ClaudeSession, stopPtyV2, writePtyV2 } from ..."
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 766,
+    "rule": "raw-pty-event",
+    "text": "app.emit(\"pty://status\", json!({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 775,
+    "rule": "raw-pty-event",
+    "text": "`pty://data` 也必须同时包含："
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 1075,
+    "rule": "direct-interaction-adapter",
+    "text": "startPtyV2ClaudeSession"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 1109,
+    "rule": "direct-interaction-adapter",
+    "text": "startPtyV2ClaudeSession"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 1110,
+    "rule": "direct-interaction-adapter",
+    "text": "stopPtyV2"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 1128,
+    "rule": "direct-interaction-adapter",
+    "text": "不再 import `writePtyV2`。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Industrial_Runtime_Rebuild_9_Full_Audit_and_Final_Plan.md",
+    "line": 1157,
+    "rule": "react-setstate",
+    "text": "if result.ok setText(\"\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 802,
+    "rule": "mutex-lock",
+    "text": "if self.sessions.lock().contains_key(&req.session_id) {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 861,
+    "rule": "mutex-lock",
+    "text": "self.sessions.lock().insert("
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 876,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = self.sessions.lock();"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 887,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = self.sessions.lock();"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 904,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = self.sessions.lock();"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 941,
+    "rule": "runtime-write-bypass",
+    "text": "pub fn pty_write("
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 993,
+    "rule": "runtime-write-bypass",
+    "text": "use commands::pty_runtime::{pty_kill, pty_resize, pty_start_claude, pty_write};"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1003,
+    "rule": "runtime-write-bypass",
+    "text": "pty_write,"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1081,
+    "rule": "direct-pty-invoke",
+    "text": "await invoke(\"pty_start_claude\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1094,
+    "rule": "direct-pty-invoke",
+    "text": "await invoke(\"pty_write\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1094,
+    "rule": "runtime-write-bypass",
+    "text": "await invoke(\"pty_write\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1130,
+    "rule": "direct-pty-invoke",
+    "text": "return invoke(\"pty_write\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1130,
+    "rule": "runtime-write-bypass",
+    "text": "return invoke(\"pty_write\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1137,
+    "rule": "direct-pty-invoke",
+    "text": "return invoke(\"pty_kill\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1143,
+    "rule": "direct-pty-invoke",
+    "text": "return invoke(\"pty_resize\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1179,
+    "rule": "tauri-listen",
+    "text": "const unlistenOutput = await listen(\"pty.output\", (event) => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1194,
+    "rule": "tauri-listen",
+    "text": "const unlistenExit = await listen(\"pty.exit\", (event) => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1212,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1257,
+    "rule": "zustand-create",
+    "text": "export const useProjectsStore = create<ProjectsState>((set, get) => ({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1343,
+    "rule": "zustand-create",
+    "text": "export const useWorkspaceStore = create<WorkspaceState>((set) => ({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1605,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1652,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1697,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1754,
+    "rule": "react-setstate",
+    "text": "setValue(\"\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 1761,
+    "rule": "react-setstate",
+    "text": "onChange={(e) => setValue(e.target.value)}"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Projects_Surface_Supreme_Redesign_Execution_Plan.md",
+    "line": 2057,
+    "rule": "react-setstate",
+    "text": "<button onClick={() => setError(null)}>关闭</button>"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 115,
+    "rule": "react-setstate",
+    "text": "localStorage.setItem(\"ctrlcc:last-react-error\", JSON.stringify(payload, null, 2));"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 172,
+    "rule": "react-setstate",
+    "text": "localStorage.setItem("
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 192,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 328,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 336,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 350,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 358,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 401,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 402,
+    "rule": "react-setstate",
+    "text": "const timer = setInterval(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 403,
+    "rule": "react-setstate",
+    "text": "setSnapshot(buildSnapshot());"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 411,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 412,
+    "rule": "react-setstate",
+    "text": "const timer = window.setInterval(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 528,
+    "rule": "react-setstate",
+    "text": "setRunning(true);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 530,
+    "rule": "react-setstate",
+    "text": "setResult(await invoke(\"runtime_smoke_test\"));"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 532,
+    "rule": "react-setstate",
+    "text": "setResult({ error: String(e) });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 534,
+    "rule": "react-setstate",
+    "text": "setRunning(false);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_React185_Surgical_Fix_and_Runtime_Recovery.md",
+    "line": 649,
+    "rule": "react-setstate",
+    "text": "resizeTimer = window.setTimeout(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_Deep_Audit_Supreme_Fix_8.md",
+    "line": 238,
+    "rule": "zustand-create",
+    "text": "export const useRuntimeTraceStore = create<RuntimeTraceState>((set, get) => ({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_Deep_Audit_Supreme_Fix_8.md",
+    "line": 632,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = self.sessions.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_Next_Fix_After_Chat_Opened.md",
+    "line": 343,
+    "rule": "runtime-write-bypass",
+    "text": "- 禁止 ChatComposer 直接 pty_v2_write(ses-xxx)。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 12,
+    "rule": "runtime-write-bypass",
+    "text": "1. `src/features/runtime` 和 `workspace` 为空，但 `main.rs` 已经注册了新的 runtime PTY 命令：`pty_start_claude / pty_write / pty_resize / pty_stop / structured_run`。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 13,
+    "rule": "runtime-write-bypass",
+    "text": "2. 同一个 `main.rs` 里又注册了旧 PTY 命令：`pty_start_claude_session / pty_v2_write / pty_v2_resize / pty_send_ctrl_c / pty_send_ctrl_d / pty_v2_stop / pty_get_status / pty_get_raw_log / pty_list_sessions`。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 14,
+    "rule": "runtime-write-bypass",
+    "text": "3. 当前前端 `usePtyTerminal` 监听的是旧事件：`pty://data / pty://status / pty://exit / pty://error`，并写入旧命令：`pty_v2_write / pty_v2_resize / pty_send_ctrl_c / pty_send_ctrl_d`。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 14,
+    "rule": "raw-pty-event",
+    "text": "3. 当前前端 `usePtyTerminal` 监听的是旧事件：`pty://data / pty://status / pty://exit / pty://error`，并写入旧命令：`pty_v2_write / pty_v2_resize / pty_send_ctrl_c / pty_send_ctrl_d`。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 15,
+    "rule": "raw-pty-event",
+    "text": "4. 因此如果 Projects 页面调用了新的 `pty_start_claude`，而 Workspace Terminal 监听旧事件 `pty://data`，Terminal 永远收不到输出；如果 Projects 仍调用旧命令但流程里阻塞等待，就会未响应。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 48,
+    "rule": "runtime-write-bypass",
+    "text": "- pty_v2_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 53,
+    "rule": "raw-pty-event",
+    "text": "- event: pty://data / pty://status / pty://exit / pty://error"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 70,
+    "rule": "runtime-write-bypass",
+    "text": "pty_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 139,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_start_claude_session', {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 150,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_v2_write', { sessionId, data });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 150,
+    "rule": "runtime-write-bypass",
+    "text": "return invokeCommand('pty_v2_write', { sessionId, data });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 154,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_v2_resize', { sessionId, cols, rows });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 158,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_send_ctrl_c', { sessionId });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 162,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_send_ctrl_d', { sessionId });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 166,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_v2_stop', { sessionId });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 221,
+    "rule": "zustand-create",
+    "text": "export const useWorkspaceStore = create<WorkspaceState>((set) => ({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 264,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 304,
+    "rule": "react-setstate",
+    "text": "setBusy(true);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 307,
+    "rule": "react-setstate",
+    "text": "setText('');"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 309,
+    "rule": "react-setstate",
+    "text": "setBusy(false);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 317,
+    "rule": "react-setstate",
+    "text": "onChange={(e) => setText(e.target.value)}"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 519,
+    "rule": "raw-pty-event",
+    "text": "你当前 `usePtyTerminal` 基本方向是对的：它直接监听 `pty://data` 并 `term.write`，没有把 PTY raw output 送进 React 大状态，这是正确的。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 536,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 548,
+    "rule": "react-setstate",
+    "text": "resizeTimer = window.setTimeout(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 552,
+    "rule": "direct-pty-invoke",
+    "text": "invokeCommand('pty_v2_resize', { sessionId, rows: dims.rows, cols: dims.cols })"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 587,
+    "rule": "runtime-write-bypass",
+    "text": "// pty::pty_commands::pty_v2_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 594,
+    "rule": "runtime-write-bypass",
+    "text": "// pty_start_claude / pty_write / pty_resize / pty_stop"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 648,
+    "rule": "runtime-write-bypass",
+    "text": "当前 src/features/runtime 和 src/features/workspace 基本为空，但 main.rs 同时注册了两套 PTY/runtime 命令。前端 usePtyTerminal 实际监听旧 PTY 事件 pty://data/status/exit/error，并使用旧命令 pty_v2_write/resize/ctrl_c/ctrl_d。因此 P0 必须统一到旧 pty data plane。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 648,
+    "rule": "raw-pty-event",
+    "text": "当前 src/features/runtime 和 src/features/workspace 基本为空，但 main.rs 同时注册了两套 PTY/runtime 命令。前端 usePtyTerminal 实际监听旧 PTY 事件 pty://data/status/exit/error，并使用旧命令 pty_v2_write/resize/ctrl_c/ctrl_d。因此 P0 必须统一到旧 pty data plane。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 652,
+    "rule": "runtime-write-bypass",
+    "text": "1. 不再从 Projects 调用新的 pty_start_claude / pty_write / runtime structured chat 作为 interactive 会话路径。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 653,
+    "rule": "runtime-write-bypass",
+    "text": "2. 新建 src/features/runtime/services/ptyClient.ts，统一封装旧命令：pty_start_claude_session、pty_v2_write、pty_v2_resize、pty_send_ctrl_c、pty_send_ctrl_d、pty_v2_stop。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Runtime_PTY_Rescue_Audit_and_Fix_Plan.md",
+    "line": 660,
+    "rule": "runtime-write-bypass",
+    "text": "9. ChatComposer 只调用 pty_v2_write，不调用 claude -p。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 18,
+    "rule": "runtime-write-bypass",
+    "text": "- `pty_v2_write`"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 23,
+    "rule": "raw-pty-event",
+    "text": "- `pty://data / pty://status / pty://exit / pty://error`"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 27,
+    "rule": "runtime-write-bypass",
+    "text": "- `pty_write`"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 33,
+    "rule": "raw-pty-event",
+    "text": "- 监听 `pty://data`"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 34,
+    "rule": "runtime-write-bypass",
+    "text": "- 写入 `pty_v2_write`"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 83,
+    "rule": "runtime-write-bypass",
+    "text": "当前已经存在可用前端 hook：`usePtyTerminal` 使用 `pty://data` 和 `pty_v2_write`。因此 P0 不再让前端调用 `pty_start_claude / pty_write` 新命令，而是建立："
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 83,
+    "rule": "raw-pty-event",
+    "text": "当前已经存在可用前端 hook：`usePtyTerminal` 使用 `pty://data` 和 `pty_v2_write`。因此 P0 不再让前端调用 `pty_start_claude / pty_write` 新命令，而是建立："
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 91,
+    "rule": "runtime-write-bypass",
+    "text": "-> ChatComposer.pty_v2_write(sessionId, text + \"\\r\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 234,
+    "rule": "direct-interaction-adapter",
+    "text": "export async function startPtyV2ClaudeSession(input: {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 242,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand(\"pty_start_claude_session\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 252,
+    "rule": "direct-interaction-adapter",
+    "text": "export async function writePtyV2(sessionId: string, data: string) {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 253,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand(\"pty_v2_write\", { sessionId, data });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 253,
+    "rule": "runtime-write-bypass",
+    "text": "return invokeCommand(\"pty_v2_write\", { sessionId, data });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 256,
+    "rule": "direct-interaction-adapter",
+    "text": "export async function resizePtyV2(sessionId: string, rows: number, cols: number) {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 257,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand(\"pty_v2_resize\", { sessionId, rows, cols });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 261,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand(\"pty_send_ctrl_c\", { sessionId });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 264,
+    "rule": "direct-interaction-adapter",
+    "text": "export async function stopPtyV2(sessionId: string) {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 265,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand(\"pty_v2_stop\", { sessionId });"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 321,
+    "rule": "zustand-create",
+    "text": "export const useRuntimeStore = create<RuntimeState>((set) => ({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 398,
+    "rule": "zustand-create",
+    "text": "export const useWorkspaceStore = create<WorkspaceState>((set) => ({"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 557,
+    "rule": "react-setstate",
+    "text": "setComposerDraft(sessionId, \"\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 565,
+    "rule": "react-setstate",
+    "text": "onChange={(e) => setComposerDraft(sessionId, e.target.value)}"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 614,
+    "rule": "raw-pty-event",
+    "text": "不能把 `pty://data` 原始 chunk 转成 `assistant_delta`。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 651,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 662,
+    "rule": "react-setstate",
+    "text": "resizeTimer = window.setTimeout(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 666,
+    "rule": "direct-pty-invoke",
+    "text": "invokeCommand(\"pty_v2_resize\", { sessionId, rows: dims.rows, cols: dims.cols })"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 694,
+    "rule": "runtime-write-bypass",
+    "text": "pty_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 703,
+    "rule": "runtime-write-bypass",
+    "text": "pty_v2_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 779,
+    "rule": "runtime-write-bypass",
+    "text": "2. usePtyTerminal 使用旧 PTY 通道：pty://data + pty_v2_write。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 779,
+    "rule": "raw-pty-event",
+    "text": "2. usePtyTerminal 使用旧 PTY 通道：pty://data + pty_v2_write。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 787,
+    "rule": "runtime-write-bypass",
+    "text": "3. P0 只使用一套 PTY 通道：pty_start_claude_session + pty_v2_write + pty_v2_resize + pty_send_ctrl_c + pty_v2_stop + pty://data。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 787,
+    "rule": "raw-pty-event",
+    "text": "3. P0 只使用一套 PTY 通道：pty_start_claude_session + pty_v2_write + pty_v2_resize + pty_send_ctrl_c + pty_v2_stop + pty://data。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 788,
+    "rule": "runtime-write-bypass",
+    "text": "4. 前端禁止调用 pty_start_claude / pty_write / pty_resize / pty_stop。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 797,
+    "rule": "runtime-write-bypass",
+    "text": "1. rg 搜索 pty_start_claude、pty_write、pty_resize、pty_stop、pty_start_claude_session、pty_v2_write、usePtyTerminal、ChatBlockRenderer。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_RuntimeBridge_4_Supreme_OneStep_Execution_Plan.md",
+    "line": 830,
+    "rule": "runtime-write-bypass",
+    "text": "4. Workspace ChatComposer -> pty_v2_write 的证明"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 145,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 167,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 169,
+    "rule": "react-setstate",
+    "text": "setTab(\"errors\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 171,
+    "rule": "react-setstate",
+    "text": "setTab(\"overview\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 184,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 185,
+    "rule": "react-setstate",
+    "text": "setTab(\"overview\");"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 230,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 231,
+    "rule": "react-setstate",
+    "text": "setActions(actions);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 252,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 338,
+    "rule": "react-setstate",
+    "text": "<button className={tab === \"overview\" ? \"active\" : \"\"} onClick={() => setTab(\"overview\")}>Overview</button>"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 339,
+    "rule": "react-setstate",
+    "text": "<button className={tab === \"events\" ? \"active\" : \"\"} onClick={() => setTab(\"events\")}>Events</button>"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 340,
+    "rule": "react-setstate",
+    "text": "<button className={tab === \"diagnostics\" ? \"active\" : \"\"} onClick={() => setTab(\"diagnostics\")}>Diagnostics</button>"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 341,
+    "rule": "react-setstate",
+    "text": "<button className={tab === \"resources\" ? \"active\" : \"\"} onClick={() => setTab(\"resources\")}>Resources</button>"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 342,
+    "rule": "react-setstate",
+    "text": "<button className={tab === \"audit\" ? \"active\" : \"\"} onClick={() => setTab(\"audit\")}>Audit</button>"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 471,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 528,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionInspector_React185_Fix.md",
+    "line": 529,
+    "rule": "react-setstate",
+    "text": "setSurface(route.surface);"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionNotFound_RuntimeMapping_Fix.md",
+    "line": 75,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_v2_write\", { sessionId: uiSessionId, data })"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionNotFound_RuntimeMapping_Fix.md",
+    "line": 75,
+    "rule": "runtime-write-bypass",
+    "text": "invoke(\"pty_v2_write\", { sessionId: uiSessionId, data })"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionNotFound_RuntimeMapping_Fix.md",
+    "line": 212,
+    "rule": "runtime-write-bypass",
+    "text": "如果当前后端命令还叫 `pty_v2_write`，也必须由 Adapter 包装："
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionNotFound_RuntimeMapping_Fix.md",
+    "line": 215,
+    "rule": "direct-pty-invoke",
+    "text": "await invoke(\"pty_v2_write\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionNotFound_RuntimeMapping_Fix.md",
+    "line": 215,
+    "rule": "runtime-write-bypass",
+    "text": "await invoke(\"pty_v2_write\", {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionNotFound_RuntimeMapping_Fix.md",
+    "line": 300,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = self.sessions.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_SessionNotFound_RuntimeMapping_Fix.md",
+    "line": 373,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = self.sessions.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_6.md",
+    "line": 254,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_start_claude\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_6.md",
+    "line": 255,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_v2_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_6.md",
+    "line": 255,
+    "rule": "runtime-write-bypass",
+    "text": "invoke(\"pty_v2_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_6.md",
+    "line": 256,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_6.md",
+    "line": 256,
+    "rule": "runtime-write-bypass",
+    "text": "invoke(\"pty_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_6.md",
+    "line": 257,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"structured_run\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_6.md",
+    "line": 577,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_6.md",
+    "line": 579,
+    "rule": "tauri-listen",
+    "text": "listen(\"runtime:event\", handler).then((fn) => (dispose = fn));"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 296,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_start_claude\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 297,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 297,
+    "rule": "runtime-write-bypass",
+    "text": "invoke(\"pty_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 298,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_resize\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 299,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_stop\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 300,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_start_claude_session\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 301,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_v2_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 301,
+    "rule": "runtime-write-bypass",
+    "text": "invoke(\"pty_v2_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 302,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_v2_resize\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 303,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_send_ctrl_c\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 304,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_v2_stop\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 305,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"structured_run\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 429,
+    "rule": "child-wait",
+    "text": "1. child.wait()"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 1041,
+    "rule": "direct-pty-invoke",
+    "text": "[ ] 前端 surface 内没有 invoke(\"pty_*\")。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 1042,
+    "rule": "runtime-write-bypass",
+    "text": "[ ] ChatComposer 不直接调用 pty_v2_write。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Stability_First_Supreme_Architecture_7_ProjectMemory_Execution_Plan.md",
+    "line": 1307,
+    "rule": "runtime-write-bypass",
+    "text": "3. 不让 ChatComposer 直接调用 pty_v2_write。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_100_200_500_Architecture.md",
+    "line": 257,
+    "rule": "direct-pty-invoke",
+    "text": "→ invoke(\"pty_resize\", { sessionId, cols, rows, pixelWidth, pixelHeight })"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 30,
+    "rule": "runtime-write-bypass",
+    "text": "pty_v2_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 34,
+    "rule": "raw-pty-event",
+    "text": "pty://data"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 35,
+    "rule": "raw-pty-event",
+    "text": "pty://status"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 36,
+    "rule": "raw-pty-event",
+    "text": "pty://exit"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 37,
+    "rule": "raw-pty-event",
+    "text": "pty://error"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 41,
+    "rule": "runtime-write-bypass",
+    "text": "pty_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 253,
+    "rule": "runtime-write-bypass",
+    "text": "rg \"pty_write\""
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 257,
+    "rule": "runtime-write-bypass",
+    "text": "rg \"pty_v2_write\""
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 258,
+    "rule": "raw-pty-event",
+    "text": "rg \"pty://data\""
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 272,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_start_claude\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 273,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_start_claude_session\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 274,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_v2_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 274,
+    "rule": "runtime-write-bypass",
+    "text": "invoke(\"pty_v2_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 275,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_Supreme_RuntimeBridge_5_Final_No_Compromise_Plan.md",
+    "line": 275,
+    "rule": "runtime-write-bypass",
+    "text": "invoke(\"pty_write\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Complete_Rebuild_Execution_FULL.md",
+    "line": 1250,
+    "rule": "runtime-write-bypass",
+    "text": "ChatComposer 输入：runtimeMode = pty-interactive → pty_write(text + Enter)；runtimeMode = structured-print → claude -p task。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Complete_Rebuild_Execution_FULL.md",
+    "line": 1252,
+    "rule": "runtime-write-bypass",
+    "text": "Terminal 中直接输入：xterm.onData → pty_write。"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Complete_Rebuild_Execution_FULL.md",
+    "line": 1370,
+    "rule": "runtime-write-bypass",
+    "text": "pty_write"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Complete_Rebuild_Execution_FULL.md",
+    "line": 1383,
+    "rule": "raw-pty-event",
+    "text": "pty://data"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Complete_Rebuild_Execution_FULL.md",
+    "line": 1384,
+    "rule": "raw-pty-event",
+    "text": "pty://exit"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Complete_Rebuild_Execution_FULL.md",
+    "line": 1385,
+    "rule": "raw-pty-event",
+    "text": "pty://error"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Complete_Rebuild_Execution_FULL.md",
+    "line": 1386,
+    "rule": "raw-pty-event",
+    "text": "pty://status"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Complete_Rebuild_Execution_FULL.md",
+    "line": 1429,
+    "rule": "runtime-write-bypass",
+    "text": "→ pty_write(sessionId, text + \"\\r\")"
+  },
+  {
+    "file": "docs/Ctrl-CC_vNext_Complete_Rebuild_Execution_Pack/Ctrl-CC_vNext_Complete_Rebuild_Execution_FULL.md",
+    "line": 1488,
+    "rule": "runtime-write-bypass",
+    "text": "3. 实现 pty_start_claude_session、pty_write、pty_resize、pty_send_ctrl_c、pty_stop 等 commands。"
+  },
+  {
+    "file": "docs/engineering/02_RUNTIME_BRIDGE_CONTRACT.md",
+    "line": 21,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_start_claude\") / invoke(\"pty_write\") / invoke(\"pty_resize\") / invoke(\"pty_stop\")"
+  },
+  {
+    "file": "docs/engineering/02_RUNTIME_BRIDGE_CONTRACT.md",
+    "line": 21,
+    "rule": "runtime-write-bypass",
+    "text": "invoke(\"pty_start_claude\") / invoke(\"pty_write\") / invoke(\"pty_resize\") / invoke(\"pty_stop\")"
+  },
+  {
+    "file": "docs/engineering/02_RUNTIME_BRIDGE_CONTRACT.md",
+    "line": 22,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_start_claude_session\") / invoke(\"pty_v2_write\") / invoke(\"pty_v2_resize\")"
+  },
+  {
+    "file": "docs/engineering/02_RUNTIME_BRIDGE_CONTRACT.md",
+    "line": 22,
+    "rule": "runtime-write-bypass",
+    "text": "invoke(\"pty_start_claude_session\") / invoke(\"pty_v2_write\") / invoke(\"pty_v2_resize\")"
+  },
+  {
+    "file": "docs/engineering/02_RUNTIME_BRIDGE_CONTRACT.md",
+    "line": 23,
+    "rule": "direct-pty-invoke",
+    "text": "invoke(\"pty_send_ctrl_c\") / invoke(\"pty_v2_stop\") / invoke(\"structured_run\")"
+  },
+  {
+    "file": "docs/engineering/04_TAURI_RUST_BACKEND_RULES.md",
+    "line": 5,
+    "rule": "child-wait",
+    "text": "1. `child.wait()`"
+  },
+  {
+    "file": "docs/runtime-audit.md",
+    "line": 57,
+    "rule": "runtime-write-bypass",
+    "text": "**修复**: 添加 `runtimeMode === 'pty-interactive'` 分支调用 `pty_v2_write`。"
+  },
+  {
+    "file": "docs/runtime-audit.md",
+    "line": 81,
+    "rule": "raw-pty-event",
+    "text": "- PTY 事件 `pty://data`/`pty://status`/`pty://exit`/`pty://error` 正确使用 snake_case ✅"
+  },
+  {
+    "file": "docs/runtime-audit.md",
+    "line": 90,
+    "rule": "direct-pty-invoke",
+    "text": "→ invokeCommand('pty_start_claude_session', { sessionId, projectId, cliPath, cwd, extraArgs })"
+  },
+  {
+    "file": "docs/runtime-audit.md",
+    "line": 97,
+    "rule": "raw-pty-event",
+    "text": "→ 监听 pty://data → xterm.write(data)"
+  },
+  {
+    "file": "docs/runtime-audit.md",
+    "line": 98,
+    "rule": "runtime-write-bypass",
+    "text": "→ xterm.onData → pty_v2_write(sessionId, data)"
+  },
+  {
+    "file": "docs/runtime-pty-first.md",
+    "line": 45,
+    "rule": "runtime-write-bypass",
+    "text": "→ Tauri Command (pty_write / pty_resize / pty_send_ctrl_c ...)"
+  },
+  {
+    "file": "docs/runtime-pty-first.md",
+    "line": 74,
+    "rule": "runtime-write-bypass",
+    "text": "3. `pty_write` — 写入 stdin"
+  },
+  {
+    "file": "docs/runtime-pty-first.md",
+    "line": 85,
+    "rule": "raw-pty-event",
+    "text": "- `pty://data` — 原始字节输出"
+  },
+  {
+    "file": "docs/runtime-pty-first.md",
+    "line": 86,
+    "rule": "raw-pty-event",
+    "text": "- `pty://exit` — 会话退出"
+  },
+  {
+    "file": "docs/runtime-pty-first.md",
+    "line": 87,
+    "rule": "raw-pty-event",
+    "text": "- `pty://error` — 错误"
+  },
+  {
+    "file": "docs/runtime-pty-first.md",
+    "line": 88,
+    "rule": "raw-pty-event",
+    "text": "- `pty://status` — 状态变更"
+  },
+  {
+    "file": "src-tauri/src/commands/file_lock.rs",
+    "line": 23,
+    "rule": "mutex-lock",
+    "text": "let mut locks = self.locks.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/file_lock.rs",
+    "line": 37,
+    "rule": "mutex-lock",
+    "text": "let mut locks = self.locks.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/file_lock.rs",
+    "line": 43,
+    "rule": "mutex-lock",
+    "text": "pub fn list(&self) -> Vec<FileLock> { self.locks.lock().expect(\"mutex poisoned\").values().cloned().collect() }"
+  },
+  {
+    "file": "src-tauri/src/commands/hooks_collector.rs",
+    "line": 25,
+    "rule": "mutex-lock",
+    "text": "let mut events = self.events.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/hooks_collector.rs",
+    "line": 37,
+    "rule": "mutex-lock",
+    "text": "let events = self.events.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/permission_center.rs",
+    "line": 32,
+    "rule": "mutex-lock",
+    "text": "let allowlist = self.allowlist.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/permission_center.rs",
+    "line": 33,
+    "rule": "mutex-lock",
+    "text": "let denylist = self.denylist.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/permission_center.rs",
+    "line": 34,
+    "rule": "mutex-lock",
+    "text": "let level = *self.auto_trust_level.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/permission_center.rs",
+    "line": 57,
+    "rule": "mutex-lock",
+    "text": "pub fn add_rule(&self, rule: PermissionRule) { self.rules.lock().expect(\"mutex poisoned\").insert(rule.id.clone(), rule); }"
+  },
+  {
+    "file": "src-tauri/src/commands/permission_center.rs",
+    "line": 59,
+    "rule": "mutex-lock",
+    "text": "pub fn remove_rule(&self, id: &str) { self.rules.lock().expect(\"mutex poisoned\").remove(id); }"
+  },
+  {
+    "file": "src-tauri/src/commands/permission_center.rs",
+    "line": 60,
+    "rule": "mutex-lock",
+    "text": "pub fn list_rules(&self) -> Vec<PermissionRule> { self.rules.lock().expect(\"mutex poisoned\").values().cloned().collect() }"
+  },
+  {
+    "file": "src-tauri/src/commands/permission_center.rs",
+    "line": 61,
+    "rule": "mutex-lock",
+    "text": "pub fn set_auto_trust(&self, level: u32) { *self.auto_trust_level.lock().expect(\"mutex poisoned\") = level.min(5); }"
+  },
+  {
+    "file": "src-tauri/src/commands/permission_center.rs",
+    "line": 62,
+    "rule": "mutex-lock",
+    "text": "pub fn add_allow(&self, tool: String) { self.allowlist.lock().expect(\"mutex poisoned\").push(tool); }"
+  },
+  {
+    "file": "src-tauri/src/commands/permission_center.rs",
+    "line": 63,
+    "rule": "mutex-lock",
+    "text": "pub fn add_deny(&self, pattern: String) { self.denylist.lock().expect(\"mutex poisoned\").push(pattern); }"
+  },
+  {
+    "file": "src-tauri/src/commands/process_watcher.rs",
+    "line": 29,
+    "rule": "mutex-lock",
+    "text": "*self.running.lock().expect(\"mutex poisoned\") = true;"
+  },
+  {
+    "file": "src-tauri/src/commands/process_watcher.rs",
+    "line": 30,
+    "rule": "mutex-lock",
+    "text": "let _running = self.running.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/process_watcher.rs",
+    "line": 67,
+    "rule": "mutex-lock",
+    "text": "*self.handle.lock().expect(\"mutex poisoned\") = Some(handle);"
+  },
+  {
+    "file": "src-tauri/src/commands/process_watcher.rs",
+    "line": 71,
+    "rule": "mutex-lock",
+    "text": "*self.running.lock().expect(\"mutex poisoned\") = false;"
+  },
+  {
+    "file": "src-tauri/src/commands/session_replay.rs",
+    "line": 19,
+    "rule": "mutex-lock",
+    "text": "let db_conn = db.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/commands/session_replay.rs",
+    "line": 54,
+    "rule": "mutex-lock",
+    "text": "let db_conn = db.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/commands/statusline.rs",
+    "line": 39,
+    "rule": "mutex-lock",
+    "text": "*running.lock().expect(\"mutex poisoned\") = true;"
+  },
+  {
+    "file": "src-tauri/src/commands/statusline.rs",
+    "line": 44,
+    "rule": "mutex-lock",
+    "text": "while *r.lock().expect(\"mutex poisoned\") {"
+  },
+  {
+    "file": "src-tauri/src/commands/statusline.rs",
+    "line": 78,
+    "rule": "mutex-lock",
+    "text": "*self.handle.lock().expect(\"mutex poisoned\") = Some(handle);"
+  },
+  {
+    "file": "src-tauri/src/commands/statusline.rs",
+    "line": 82,
+    "rule": "mutex-lock",
+    "text": "*self.running.lock().expect(\"mutex poisoned\") = false;"
+  },
+  {
+    "file": "src-tauri/src/commands/watchdog.rs",
+    "line": 43,
+    "rule": "mutex-lock",
+    "text": "let max_total = *self.max_total.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/watchdog.rs",
+    "line": 44,
+    "rule": "mutex-lock",
+    "text": "let max_claude = *self.max_claude.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/watcher.rs",
+    "line": 25,
+    "rule": "mutex-lock",
+    "text": "let _running_map = self.running.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/watcher.rs",
+    "line": 27,
+    "rule": "mutex-lock",
+    "text": "let mut handles = self.handles.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/commands/watcher.rs",
+    "line": 55,
+    "rule": "mutex-lock",
+    "text": "let mut handles = self.handles.lock().expect(\"mutex poisoned\");"
+  },
+  {
+    "file": "src-tauri/src/database/mod.rs",
+    "line": 94,
+    "rule": "mutex-lock",
+    "text": "let db = conn.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/database/mod.rs",
+    "line": 108,
+    "rule": "mutex-lock",
+    "text": "let db = conn.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/database/mod.rs",
+    "line": 125,
+    "rule": "mutex-lock",
+    "text": "let db = conn.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/database/mod.rs",
+    "line": 145,
+    "rule": "mutex-lock",
+    "text": "let db = conn.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/database/mod.rs",
+    "line": 164,
+    "rule": "mutex-lock",
+    "text": "let db = conn.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/database/mod.rs",
+    "line": 172,
+    "rule": "mutex-lock",
+    "text": "let db = conn.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/database/mod.rs",
+    "line": 193,
+    "rule": "mutex-lock",
+    "text": "let db = conn.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/database/mod.rs",
+    "line": 216,
+    "rule": "mutex-lock",
+    "text": "let db = conn.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/main.rs",
+    "line": 36,
+    "rule": "runtime-write-bypass",
+    "text": "fn pty_write("
+  },
+  {
+    "file": "src-tauri/src/main.rs",
+    "line": 180,
+    "rule": "runtime-write-bypass",
+    "text": "pty::pty_commands::pty_v2_write,"
+  },
+  {
+    "file": "src-tauri/src/main.rs",
+    "line": 196,
+    "rule": "runtime-write-bypass",
+    "text": "// 前端禁止调用: pty_start_claude / pty_write / pty_resize / pty_stop"
+  },
+  {
+    "file": "src-tauri/src/main.rs",
+    "line": 199,
+    "rule": "runtime-write-bypass",
+    "text": "pty_write,"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_commands.rs",
+    "line": 39,
+    "rule": "runtime-write-bypass",
+    "text": "pub fn pty_v2_write("
+  },
+  {
+    "file": "src-tauri/src/pty/pty_commands.rs",
+    "line": 50,
+    "rule": "runtime-write-bypass",
+    "text": "\"pty_v2_write\", \"start\", \"\""
+  },
+  {
+    "file": "src-tauri/src/pty/pty_commands.rs",
+    "line": 57,
+    "rule": "runtime-write-bypass",
+    "text": "\"pty_v2_write\", \"success\", \"\""
+  },
+  {
+    "file": "src-tauri/src/pty/pty_commands.rs",
+    "line": 62,
+    "rule": "runtime-write-bypass",
+    "text": "\"pty_v2_write\", \"failed\", &e.to_string()"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_log.rs",
+    "line": 14,
+    "rule": "mutex-lock",
+    "text": "if w.lock().is_err() {"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 20,
+    "rule": "mutex-lock",
+    "text": "self.sessions.lock()"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 28,
+    "rule": "mutex-lock",
+    "text": "let sessions = self.sessions.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 33,
+    "rule": "mutex-lock",
+    "text": "let status = h.status.lock().map(|s| format!(\"{:?}\", s)).unwrap_or_else(|_| \"unknown\".into());"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 51,
+    "rule": "mutex-lock",
+    "text": "let sessions = self.sessions.lock()"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 62,
+    "rule": "mutex-lock",
+    "text": "let sessions = self.sessions.lock()"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 88,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = self.sessions.lock()"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 97,
+    "rule": "mutex-lock",
+    "text": "let sessions = self.sessions.lock().ok()?;"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 99,
+    "rule": "mutex-lock",
+    "text": ".and_then(|h| h.status.lock().ok().map(|s| s.clone()))"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 103,
+    "rule": "mutex-lock",
+    "text": "let sessions = self.sessions.lock().ok()?;"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 113,
+    "rule": "mutex-lock",
+    "text": "match self.sessions.lock() {"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_manager.rs",
+    "line": 121,
+    "rule": "mutex-lock",
+    "text": "if let Ok(mut sessions) = self.sessions.lock() { sessions.remove(id); }"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 222,
+    "rule": "child-wait",
+    "text": "/// 不阻塞读取、不等待握手、不调用 child.wait()、无 sleep。"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 306,
+    "rule": "raw-pty-event",
+    "text": "let _ = app.emit(\"pty://status\", serde_json::json!({"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 315,
+    "rule": "mutex-lock",
+    "text": "let mut w = self.writer.lock().map_err(|e| AppError::Process(format!(\"PTY writer lock: {}\", e)))?;"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 320,
+    "rule": "mutex-lock",
+    "text": "let master = self.master.lock().map_err(|e| AppError::Process(format!(\"PTY master lock: {}\", e)))?;"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 330,
+    "rule": "mutex-lock",
+    "text": "if let Ok(mut r) = self.running.lock() { *r = false; }"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 331,
+    "rule": "mutex-lock",
+    "text": "if let Ok(mut s) = self.status.lock() { *s = PtySessionStatus::Killed; }"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 339,
+    "rule": "raw-pty-event",
+    "text": "// PTY raw output → pty://data → usePtyTerminal → term.write()"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 352,
+    "rule": "mutex-lock",
+    "text": "if let Ok(mut s) = status.lock() { *s = PtySessionStatus::Running; }"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 353,
+    "rule": "raw-pty-event",
+    "text": "let _ = app.emit(\"pty://status\", serde_json::json!({"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 359,
+    "rule": "mutex-lock",
+    "text": "if !running.lock().map(|r| *r).unwrap_or(false) { break; }"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 375,
+    "rule": "raw-pty-event",
+    "text": "let _ = app.emit(\"pty://data\", serde_json::json!({"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 389,
+    "rule": "raw-pty-event",
+    "text": "let _ = app.emit(\"pty://error\", serde_json::json!({"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 397,
+    "rule": "child-wait",
+    "text": "let exit_code = pty_child.wait().ok().map(|s| if s.success() { 0 } else { 1 });"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 399,
+    "rule": "mutex-lock",
+    "text": "if let Ok(mut s) = status.lock() { *s = PtySessionStatus::Exited { code: exit_code.unwrap_or(0) }; }"
+  },
+  {
+    "file": "src-tauri/src/pty/pty_session.rs",
+    "line": 400,
+    "rule": "raw-pty-event",
+    "text": "let _ = app.emit(\"pty://exit\", serde_json::json!({"
+  },
+  {
+    "file": "src-tauri/src/runtime/claude_runner.rs",
+    "line": 91,
+    "rule": "mutex-lock",
+    "text": "if !*running_clone.lock().expect(\"mutex poisoned\") { break; }"
+  },
+  {
+    "file": "src-tauri/src/runtime/claude_runner.rs",
+    "line": 137,
+    "rule": "mutex-lock",
+    "text": "let mut stdin = self.stdin.lock().map_err(|e| AppError::Process(e.to_string()))?;"
+  },
+  {
+    "file": "src-tauri/src/runtime/claude_runner.rs",
+    "line": 146,
+    "rule": "mutex-lock",
+    "text": "*self.running.lock().expect(\"mutex poisoned\") = false;"
+  },
+  {
+    "file": "src-tauri/src/runtime/commands.rs",
+    "line": 51,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = manager.sessions.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/runtime/commands.rs",
+    "line": 70,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = manager.sessions.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/runtime/commands.rs",
+    "line": 177,
+    "rule": "mutex-lock",
+    "text": "let sessions = manager.sessions.lock().map_err(|e| e.to_string())?;"
+  },
+  {
+    "file": "src-tauri/src/runtime/pty_session.rs",
+    "line": 130,
+    "rule": "mutex-lock",
+    "text": "self.sessions.lock().insert(session_id.clone(), session);"
+  },
+  {
+    "file": "src-tauri/src/runtime/pty_session.rs",
+    "line": 136,
+    "rule": "mutex-lock",
+    "text": "let sessions = self.sessions.lock();"
+  },
+  {
+    "file": "src-tauri/src/runtime/pty_session.rs",
+    "line": 141,
+    "rule": "mutex-lock",
+    "text": "let mut writer = session.writer.lock();"
+  },
+  {
+    "file": "src-tauri/src/runtime/pty_session.rs",
+    "line": 151,
+    "rule": "mutex-lock",
+    "text": "let sessions = self.sessions.lock();"
+  },
+  {
+    "file": "src-tauri/src/runtime/pty_session.rs",
+    "line": 172,
+    "rule": "mutex-lock",
+    "text": "let mut sessions = self.sessions.lock();"
+  },
+  {
+    "file": "src-tauri/src/runtime/pty_session.rs",
+    "line": 181,
+    "rule": "mutex-lock",
+    "text": "let mut writer = session.writer.lock();"
+  },
+  {
+    "file": "src-tauri/src/runtime/structured_runtime.rs",
+    "line": 82,
+    "rule": "child-wait",
+    "text": "let exit_status = child.wait();"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "line": 20,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "line": 23,
+    "rule": "react-setstate",
+    "text": "document.documentElement.setAttribute('data-theme', savedTheme);"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "line": 27,
+    "rule": "react-setstate",
+    "text": "if (savedScale) document.documentElement.style.setProperty('--cc-font-scale', savedScale);"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "line": 37,
+    "rule": "react-setstate",
+    "text": "setProjects(rows as unknown as Project[]);"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "line": 74,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "line": 111,
+    "rule": "react-setstate",
+    "text": "if (cleaned.length > 0) setSessions(cleaned);"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "line": 116,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "line": 126,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "line": 133,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "line": 134,
+    "rule": "tauri-listen",
+    "text": "const unlisten = listen<Record<string, unknown>>('ctrlcc://log', (event) => {"
+  },
+  {
+    "file": "src/app/AppShell.tsx",
+    "line": 20,
+    "rule": "react-setstate",
+    "text": "<AIDock onOpenErrorLog={() => setShowLogPanel(true)} errorCount={unresolvedCount} />"
+  },
+  {
+    "file": "src/app/AppShell.tsx",
+    "line": 21,
+    "rule": "react-setstate",
+    "text": "<ErrorToast onOpenLog={() => setShowLogPanel(true)} />"
+  },
+  {
+    "file": "src/app/AppShell.tsx",
+    "line": 23,
+    "rule": "react-setstate",
+    "text": "<ErrorLogPanel open={showLogPanel} onClose={() => setShowLogPanel(false)} />"
+  },
+  {
+    "file": "src/components/dock/AIDock.tsx",
+    "line": 20,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/components/dock/AIDock.tsx",
+    "line": 21,
+    "rule": "react-setstate",
+    "text": "if (running.length === 0) setMode('quiet');"
+  },
+  {
+    "file": "src/components/dock/AIDock.tsx",
+    "line": 30,
+    "rule": "react-setstate",
+    "text": "<button onClick={() => setMode(mode === 'quiet' ? 'calm' : mode === 'calm' ? 'focus' : 'quiet')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-muted)', padding: 2, widt"
+  },
+  {
+    "file": "src/components/error/ErrorBoundary.tsx",
+    "line": 22,
+    "rule": "react-setstate",
+    "text": "this.setState({ stack });"
+  },
+  {
+    "file": "src/components/error/ErrorBoundary.tsx",
+    "line": 26,
+    "rule": "react-setstate",
+    "text": "localStorage.setItem('ctrlcc:last-react-error', JSON.stringify({"
+  },
+  {
+    "file": "src/components/error/ErrorBoundary.tsx",
+    "line": 32,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/components/error/ErrorBoundary.tsx",
+    "line": 42,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/components/error/ErrorLogPanel.tsx",
+    "line": 53,
+    "rule": "react-setstate",
+    "text": "<button key={tabId} onClick={() => setTab(tabId)} style={{ flex: 1, padding: '6px 12px', border: 'none', background: tab === tabId ? 'var(--cc-brand-soft)' : 'transparent', color: tab === tabId ? 'var(--cc-brand-strong)' : 'var(--cc-text-mu"
+  },
+  {
+    "file": "src/components/error/ErrorLogPanel.tsx",
+    "line": 61,
+    "rule": "react-setstate",
+    "text": "<FilterBtn active={filterSeverity === 'all'} onClick={() => setFilterSeverity('all')} label={t('errorLog.all')} />"
+  },
+  {
+    "file": "src/components/error/ErrorLogPanel.tsx",
+    "line": 63,
+    "rule": "react-setstate",
+    "text": "<FilterBtn key={s} active={filterSeverity === s} onClick={() => setFilterSeverity(s)} label={t(`errorLog.severity`, { context: s }) || s} color={SEVERITY_COLORS[s]} />"
+  },
+  {
+    "file": "src/components/error/ErrorLogPanel.tsx",
+    "line": 88,
+    "rule": "react-setstate",
+    "text": "}} onClick={() => setExpandedId(expandedId === e.id ? null : e.id)}>"
+  },
+  {
+    "file": "src/components/error/ErrorToast.tsx",
+    "line": 37,
+    "rule": "react-setstate",
+    "text": "onExpand={() => { setExpandedId(expandedId === e.id ? null : e.id); if (onOpenLog) onOpenLog(); }}"
+  },
+  {
+    "file": "src/components/error/ErrorToast.tsx",
+    "line": 38,
+    "rule": "react-setstate",
+    "text": "onDismiss={() => { dismissError(e.id); setExpandedId(null); }}"
+  },
+  {
+    "file": "src/components/error/ErrorToast.tsx",
+    "line": 50,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/components/error/ErrorToast.tsx",
+    "line": 52,
+    "rule": "react-setstate",
+    "text": "const t = setTimeout(onDismiss, autoDismiss);"
+  },
+  {
+    "file": "src/debug/useRenderLoopGuard.ts",
+    "line": 20,
+    "rule": "react-setstate",
+    "text": "localStorage.setItem('ctrlcc:render-loop', JSON.stringify({"
+  },
+  {
+    "file": "src/debug/useRenderLoopGuard.ts",
+    "line": 24,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/debug/useRenderLoopGuard.ts",
+    "line": 32,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/features/composer/CommandPalette.tsx",
+    "line": 51,
+    "rule": "react-setstate",
+    "text": "else if (e.key === 'ArrowDown') { setSelectedIdx((i) => Math.min(i + 1, filtered.length - 1)); e.preventDefault(); }"
+  },
+  {
+    "file": "src/features/composer/CommandPalette.tsx",
+    "line": 52,
+    "rule": "react-setstate",
+    "text": "else if (e.key === 'ArrowUp') { setSelectedIdx((i) => Math.max(i - 1, 0)); e.preventDefault(); }"
+  },
+  {
+    "file": "src/features/composer/CommandPalette.tsx",
+    "line": 61,
+    "rule": "react-setstate",
+    "text": "<input type=\"text\" value={search} onChange={(e) => { setSearch(e.target.value); setSelectedIdx(0); }}"
+  },
+  {
+    "file": "src/features/composer/ResourcePicker.tsx",
+    "line": 24,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/features/composer/ResourcePicker.tsx",
+    "line": 26,
+    "rule": "react-setstate",
+    "text": "setLoading(true);"
+  },
+  {
+    "file": "src/features/composer/ResourcePicker.tsx",
+    "line": 30,
+    "rule": "react-setstate",
+    "text": ".catch(() => setItems([]))"
+  },
+  {
+    "file": "src/features/composer/ResourcePicker.tsx",
+    "line": 31,
+    "rule": "react-setstate",
+    "text": ".finally(() => setLoading(false));"
+  },
+  {
+    "file": "src/features/composer/ResourcePicker.tsx",
+    "line": 42,
+    "rule": "react-setstate",
+    "text": "<input type=\"text\" value={search} onChange={(e) => setSearch(e.target.value)}"
+  },
+  {
+    "file": "src/features/runtime/components/RuntimeDiagnosticsPanel.tsx",
+    "line": 23,
+    "rule": "react-setstate",
+    "text": "setLoading(true);"
+  },
+  {
+    "file": "src/features/runtime/components/RuntimeDiagnosticsPanel.tsx",
+    "line": 24,
+    "rule": "react-setstate",
+    "text": "setError(null);"
+  },
+  {
+    "file": "src/features/runtime/components/RuntimeDiagnosticsPanel.tsx",
+    "line": 30,
+    "rule": "react-setstate",
+    "text": "setProbe(probeResult);"
+  },
+  {
+    "file": "src/features/runtime/components/RuntimeDiagnosticsPanel.tsx",
+    "line": 31,
+    "rule": "react-setstate",
+    "text": "setDiscovery(discoveryResult);"
+  },
+  {
+    "file": "src/features/runtime/components/RuntimeDiagnosticsPanel.tsx",
+    "line": 33,
+    "rule": "react-setstate",
+    "text": "setError(String(e));"
+  },
+  {
+    "file": "src/features/runtime/components/RuntimeDiagnosticsPanel.tsx",
+    "line": 35,
+    "rule": "react-setstate",
+    "text": "setLoading(false);"
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 4,
+    "rule": "runtime-write-bypass",
+    "text": "*  Only this file calls pty_start_claude_session / pty_v2_write / etc."
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 7,
+    "rule": "direct-interaction-adapter",
+    "text": "export async function startPtyV2ClaudeSession(input: {"
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 20,
+    "rule": "direct-interaction-adapter",
+    "text": "export async function writePtyV2(sessionId: string, data: string, traceId?: string | null) {"
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 21,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_v2_write', { sessionId, data, traceId: traceId ?? null });"
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 21,
+    "rule": "runtime-write-bypass",
+    "text": "return invokeCommand('pty_v2_write', { sessionId, data, traceId: traceId ?? null });"
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 24,
+    "rule": "direct-interaction-adapter",
+    "text": "export async function resizePtyV2(sessionId: string, cols: number, rows: number) {"
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 25,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_v2_resize', { sessionId, cols, rows });"
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 29,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_send_ctrl_c', { sessionId });"
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 33,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_send_ctrl_d', { sessionId });"
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 36,
+    "rule": "direct-interaction-adapter",
+    "text": "export async function stopPtyV2(sessionId: string) {"
+  },
+  {
+    "file": "src/features/runtime/services/interactionAdapter.ts",
+    "line": 37,
+    "rule": "direct-pty-invoke",
+    "text": "return invokeCommand('pty_v2_stop', { sessionId });"
+  },
+  {
+    "file": "src/features/runtime/services/runtimeBridge.ts",
+    "line": 101,
+    "rule": "direct-interaction-adapter",
+    "text": "await adapter.writePtyV2(uiSessionId, data, session.traceId);"
+  },
+  {
+    "file": "src/features/runtime/services/runtimeBridge.ts",
+    "line": 128,
+    "rule": "direct-interaction-adapter",
+    "text": "await adapter.stopPtyV2(sessionId);"
+  },
+  {
+    "file": "src/features/runtime/services/runtimeBridge.ts",
+    "line": 134,
+    "rule": "direct-interaction-adapter",
+    "text": "await adapter.resizePtyV2(sessionId, cols, rows);"
+  },
+  {
+    "file": "src/features/runtime/services/runtimeBridge.ts",
+    "line": 157,
+    "rule": "direct-interaction-adapter",
+    "text": "await adapter.startPtyV2ClaudeSession({"
+  },
+  {
+    "file": "src/features/runtime/services/runtimeDiagnostics.ts",
+    "line": 21,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/features/runtime/services/runtimeKernel.ts",
+    "line": 19,
+    "rule": "react-setstate",
+    "text": "setTimeout(() => reject(new Error(`Timeout: ${label} (${ms}ms)`)), ms)"
+  },
+  {
+    "file": "src/features/runtime/services/runtimeKernel.ts",
+    "line": 47,
+    "rule": "direct-interaction-adapter",
+    "text": "adapter.startPtyV2ClaudeSession({ sessionId, projectId, cwd }),"
+  },
+  {
+    "file": "src/features/runtime/stores/runtimeStore.ts",
+    "line": 17,
+    "rule": "zustand-create",
+    "text": "export const useRuntimeStore = create<RuntimeState>((set) => ({"
+  },
+  {
+    "file": "src/features/runtime/stores/runtimeTraceStore.ts",
+    "line": 11,
+    "rule": "zustand-create",
+    "text": "export const useRuntimeTraceStore = create<RuntimeTraceState>((set, get) => ({"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 9,
+    "rule": "direct-interaction-adapter",
+    "text": "import { writePtyV2, resizePtyV2, sendCtrlCPtyV2, sendCtrlDPtyV2 } from '../runtime/services/interactionAdapter';"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 68,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 101,
+    "rule": "error-swallow",
+    "text": "try { const wgl = new WebglAddon(); term.loadAddon(wgl); wgl.onContextLoss(() => wgl.dispose()); } catch {}"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 110,
+    "rule": "tauri-listen",
+    "text": "listen<PtyDataPayload>('pty://data', (e) => {"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 110,
+    "rule": "raw-pty-event",
+    "text": "listen<PtyDataPayload>('pty://data', (e) => {"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 115,
+    "rule": "tauri-listen",
+    "text": "listen<PtyStatusPayload>('pty://status', (e) => {"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 115,
+    "rule": "raw-pty-event",
+    "text": "listen<PtyStatusPayload>('pty://status', (e) => {"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 119,
+    "rule": "react-setstate",
+    "text": "setStatus(newStatus);"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 122,
+    "rule": "react-setstate",
+    "text": "listen<PtyExitPayload>('pty://exit', () => { setStatus('exited'); }).then((fn) => unlisteners.push(fn));"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 122,
+    "rule": "tauri-listen",
+    "text": "listen<PtyExitPayload>('pty://exit', () => { setStatus('exited'); }).then((fn) => unlisteners.push(fn));"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 122,
+    "rule": "raw-pty-event",
+    "text": "listen<PtyExitPayload>('pty://exit', () => { setStatus('exited'); }).then((fn) => unlisteners.push(fn));"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 123,
+    "rule": "react-setstate",
+    "text": "listen<PtyErrorPayload>('pty://error', () => { setStatus('failed'); }).then((fn) => unlisteners.push(fn));"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 123,
+    "rule": "tauri-listen",
+    "text": "listen<PtyErrorPayload>('pty://error', () => { setStatus('failed'); }).then((fn) => unlisteners.push(fn));"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 123,
+    "rule": "raw-pty-event",
+    "text": "listen<PtyErrorPayload>('pty://error', () => { setStatus('failed'); }).then((fn) => unlisteners.push(fn));"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 126,
+    "rule": "direct-interaction-adapter",
+    "text": "writePtyV2(sessionId, data).catch((e) => {"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 135,
+    "rule": "react-setstate",
+    "text": "resizeTimer = setTimeout(() => {"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 139,
+    "rule": "direct-interaction-adapter",
+    "text": "resizePtyV2(sessionId, dims.cols, dims.rows).catch((e) => warnLog('pty', 'PTY resize failed', String(e)));"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 145,
+    "rule": "react-setstate",
+    "text": "setReady(true);"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 153,
+    "rule": "react-setstate",
+    "text": "setReady(false);"
+  },
+  {
+    "file": "src/features/terminal/usePtyTerminal.ts",
+    "line": 157,
+    "rule": "direct-interaction-adapter",
+    "text": "const write = useCallback((data: string) => { writePtyV2(sessionId!, data).catch((e) => warnLog('pty', 'PTY write failed', String(e))); }, [sessionId]);"
+  },
+  {
+    "file": "src/features/workspace/stores/workspaceStore.ts",
+    "line": 17,
+    "rule": "zustand-create",
+    "text": "export const useWorkspaceStore = create<WorkspaceState>((set) => ({"
+  },
+  {
+    "file": "src/services/invokeCommand.ts",
+    "line": 13,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/services/invokeCommand.ts",
+    "line": 22,
+    "rule": "react-setstate",
+    "text": "setTimeout(() => reject(new Error(`Command \"${cmd}\" timed out`)), TIMEOUT_MS),"
+  },
+  {
+    "file": "src/services/invokeCommand.ts",
+    "line": 50,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/stores/appStore.ts",
+    "line": 26,
+    "rule": "zustand-create",
+    "text": "export const useAppStore = create<AppState>((set) => ({"
+  },
+  {
+    "file": "src/stores/auditStore.ts",
+    "line": 22,
+    "rule": "zustand-create",
+    "text": "export const useAuditStore = create<AuditState>((set, get) => ({"
+  },
+  {
+    "file": "src/stores/errorStore.ts",
+    "line": 26,
+    "rule": "zustand-create",
+    "text": "export const useErrorStore = create<ErrorState>((set, get) => ({"
+  },
+  {
+    "file": "src/stores/openSessionStore.ts",
+    "line": 14,
+    "rule": "zustand-create",
+    "text": "export const useOpenSessionStore = create<OpenSessionState>((set) => ({"
+  },
+  {
+    "file": "src/stores/projectStore.ts",
+    "line": 17,
+    "rule": "zustand-create",
+    "text": "export const useProjectStore = create<ProjectState>((set) => ({"
+  },
+  {
+    "file": "src/stores/sessionStore.ts",
+    "line": 13,
+    "rule": "zustand-create",
+    "text": "export const useSessionStore = create<SessionState>((set, get) => ({"
+  },
+  {
+    "file": "src/stores/surfaceStore.ts",
+    "line": 10,
+    "rule": "zustand-create",
+    "text": "export const useSurfaceStore = create<SurfaceState>((set) => ({"
+  },
+  {
+    "file": "src/surfaces/canvas/CanvasSurface.tsx",
+    "line": 48,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/surfaces/canvas/CanvasSurface.tsx",
+    "line": 79,
+    "rule": "react-setstate",
+    "text": "const hWheel = useCallback((e: React.WheelEvent) => { e.preventDefault(); setScale((s)=>Math.max(0.08,Math.min(5,s-e.deltaY*0.0008))); }, []);"
+  },
+  {
+    "file": "src/surfaces/canvas/CanvasSurface.tsx",
+    "line": 80,
+    "rule": "react-setstate",
+    "text": "const hDown = useCallback((e: React.MouseEvent) => { const p=getPos(e); const hit=nodes.find((n)=>Math.hypot(n.x-p.x,n.y-p.y)<n.size+10); if(hit){setSelectedNode(hit.id);setDragging('node');setDragStart(p);}else{setDragging('pan');setDragSt"
+  },
+  {
+    "file": "src/surfaces/canvas/CanvasSurface.tsx",
+    "line": 81,
+    "rule": "react-setstate",
+    "text": "const hMove = useCallback((e: React.MouseEvent) => { if(dragging==='pan'){setOffset({x:e.clientX-dragStart.x,y:e.clientY-dragStart.y});}else if(dragging==='node'&&selectedNode){const p=getPos(e);setNodePos((prev)=>({...prev,[selectedNode]:{"
+  },
+  {
+    "file": "src/surfaces/canvas/CanvasSurface.tsx",
+    "line": 82,
+    "rule": "react-setstate",
+    "text": "const hUp = useCallback(() => setDragging(null), []);"
+  },
+  {
+    "file": "src/surfaces/canvas/CanvasSurface.tsx",
+    "line": 95,
+    "rule": "react-setstate",
+    "text": "<button onClick={()=>{setScale(1);setOffset({x:0,y:0});}} style={bs}>{t('canvas.resetView')}</button>"
+  },
+  {
+    "file": "src/surfaces/canvas/CanvasSurface.tsx",
+    "line": 96,
+    "rule": "react-setstate",
+    "text": "<button onClick={()=>setScale((s)=>s+0.25)} style={bs}>+</button>"
+  },
+  {
+    "file": "src/surfaces/canvas/CanvasSurface.tsx",
+    "line": 97,
+    "rule": "react-setstate",
+    "text": "<button onClick={()=>setScale((s)=>Math.max(0.08,s-0.25))} style={bs}>-</button>"
+  },
+  {
+    "file": "src/surfaces/console/ConsoleSurface.tsx",
+    "line": 33,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/surfaces/console/ConsoleSurface.tsx",
+    "line": 38,
+    "rule": "react-setstate",
+    "text": "if (parsed.data) { setCap(parsed.data); setCapLoading(false); return; }"
+  },
+  {
+    "file": "src/surfaces/console/ConsoleSurface.tsx",
+    "line": 39,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/surfaces/console/ConsoleSurface.tsx",
+    "line": 42,
+    "rule": "react-setstate",
+    "text": ".then((c) => { setCap(c); localStorage.setItem('ctrl-cc-capability', JSON.stringify({ data: c, checkedAt: new Date().toISOString() })); })"
+  },
+  {
+    "file": "src/surfaces/console/ConsoleSurface.tsx",
+    "line": 43,
+    "rule": "react-setstate",
+    "text": ".catch(() => setCap({ version: null, exists: false, authStatus: null, supportsStreamJson: false, checkedAt: new Date().toISOString(), errors: ['Detection failed'] }))"
+  },
+  {
+    "file": "src/surfaces/console/ConsoleSurface.tsx",
+    "line": 44,
+    "rule": "react-setstate",
+    "text": ".finally(() => setCapLoading(false));"
+  },
+  {
+    "file": "src/surfaces/github/GitHubSurface.tsx",
+    "line": 17,
+    "rule": "react-setstate",
+    "text": "onChange={(e) => setInputUrl(e.target.value)}"
+  },
+  {
+    "file": "src/surfaces/github/GitHubSurface.tsx",
+    "line": 18,
+    "rule": "react-setstate",
+    "text": "onKeyDown={(e) => { if (e.key === 'Enter') setUrl(inputUrl); }}"
+  },
+  {
+    "file": "src/surfaces/github/GitHubSurface.tsx",
+    "line": 23,
+    "rule": "react-setstate",
+    "text": "onClick={() => setUrl(inputUrl)}"
+  },
+  {
+    "file": "src/surfaces/github/GitHubSurface.tsx",
+    "line": 29,
+    "rule": "react-setstate",
+    "text": "onClick={() => { setUrl('https://github.com'); setInputUrl('https://github.com'); }}"
+  },
+  {
+    "file": "src/surfaces/projects/ImportSessionDialog.tsx",
+    "line": 32,
+    "rule": "react-setstate",
+    "text": "setSelected(next);"
+  },
+  {
+    "file": "src/surfaces/projects/ImportSessionDialog.tsx",
+    "line": 38,
+    "rule": "react-setstate",
+    "text": "setSelected(new Set());"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 23,
+    "rule": "react-setstate",
+    "text": "setPicking(true);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 24,
+    "rule": "react-setstate",
+    "text": "setError(null);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 28,
+    "rule": "react-setstate",
+    "text": "setFolderPath(selected);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 31,
+    "rule": "react-setstate",
+    "text": "setName(folderName);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 36,
+    "rule": "react-setstate",
+    "text": "if (branch) setGitBranch(branch);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 40,
+    "rule": "react-setstate",
+    "text": "setError(`${t('projects.folderSelectFailed')}: ${String(e)}`);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 42,
+    "rule": "react-setstate",
+    "text": "setPicking(false);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 47,
+    "rule": "react-setstate",
+    "text": "if (!name.trim()) { setError(t('projects.pleaseEnterName')); return; }"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 48,
+    "rule": "react-setstate",
+    "text": "if (!folderPath.trim()) { setError(t('projects.pleaseSelectFolder')); return; }"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 50,
+    "rule": "react-setstate",
+    "text": "setName('');"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 51,
+    "rule": "react-setstate",
+    "text": "setFolderPath('');"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 52,
+    "rule": "react-setstate",
+    "text": "setGitBranch(undefined);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 53,
+    "rule": "react-setstate",
+    "text": "setError(null);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 57,
+    "rule": "react-setstate",
+    "text": "setName('');"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 58,
+    "rule": "react-setstate",
+    "text": "setFolderPath('');"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 59,
+    "rule": "react-setstate",
+    "text": "setGitBranch(undefined);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 60,
+    "rule": "react-setstate",
+    "text": "setError(null);"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 74,
+    "rule": "react-setstate",
+    "text": "onChange={(e) => setName(e.target.value)}"
+  },
+  {
+    "file": "src/surfaces/projects/NewProjectDialog.tsx",
+    "line": 88,
+    "rule": "react-setstate",
+    "text": "onChange={(e) => setFolderPath(e.target.value)}"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 9,
+    "rule": "direct-interaction-adapter",
+    "text": "import { startPtyV2ClaudeSession } from '../../features/runtime/services/interactionAdapter';"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 38,
+    "rule": "react-setstate",
+    "text": "setSelectedProjectId(id);"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 39,
+    "rule": "react-setstate",
+    "text": "setSelectedSessionId(null);"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 44,
+    "rule": "react-setstate",
+    "text": "setScanning(true);"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 45,
+    "rule": "react-setstate",
+    "text": "setShowImportDialog(true);"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 48,
+    "rule": "react-setstate",
+    "text": ".catch(() => setScannedSessions([]))"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 49,
+    "rule": "react-setstate",
+    "text": ".finally(() => setScanning(false));"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 69,
+    "rule": "react-setstate",
+    "text": "setShowNewProjectDialog(true);"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 83,
+    "rule": "react-setstate",
+    "text": "setShowNewProjectDialog(false);"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 91,
+    "rule": "react-setstate",
+    "text": "setCreatingSession(true);"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 114,
+    "rule": "direct-interaction-adapter",
+    "text": "startPtyV2ClaudeSession({"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 118,
+    "rule": "error-swallow",
+    "text": "try { useSessionStore.getState().updateSession(sessionId, { status: 'running' as const }); } catch {}"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 124,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 125,
+    "rule": "react-setstate",
+    "text": "}).finally(() => setCreatingSession(false));"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 137,
+    "rule": "direct-interaction-adapter",
+    "text": "startPtyV2ClaudeSession({"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 140,
+    "rule": "error-swallow",
+    "text": "try { useSessionStore.getState().updateSession(newId, { status: 'running' as const }); } catch {}"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 142,
+    "rule": "error-swallow",
+    "text": "try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: t('error.resumeSessionFailed'), detail: String(e) }); } catch {}"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 166,
+    "rule": "react-setstate",
+    "text": "onToggleCollapse={() => setProjectRailCollapsed((v) => !v)}"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 173,
+    "rule": "react-setstate",
+    "text": "onToggleCollapse={() => setSessionRailCollapsed((v) => !v)}"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 189,
+    "rule": "react-setstate",
+    "text": "onClose={() => setShowNewProjectDialog(false)}"
+  },
+  {
+    "file": "src/surfaces/projects/ProjectsSurface.tsx",
+    "line": 194,
+    "rule": "react-setstate",
+    "text": "onClose={() => setShowImportDialog(false)}"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 37,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => { invokeCommand<string>('get_home_dir').then(setHomeDir).catch(() => setHomeDir('')); }, []);"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 37,
+    "rule": "react-setstate",
+    "text": "useEffect(() => { invokeCommand<string>('get_home_dir').then(setHomeDir).catch(() => setHomeDir('')); }, []);"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 44,
+    "rule": "react-setstate",
+    "text": "setLoading(true); setError(null);"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 45,
+    "rule": "react-setstate",
+    "text": "try { setItems(await invokeCommand<ResourceItem[]>('list_directory', { path: basePath, maxDepth: 1 })); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 46,
+    "rule": "react-setstate",
+    "text": "catch (e) { setError(String(e)); setItems([]); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 47,
+    "rule": "react-setstate",
+    "text": "finally { setLoading(false); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 49,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => { loadItems(); }, [activeTab, homeDir]);"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 52,
+    "rule": "react-setstate",
+    "text": "setSelected(item); setEditing(false);"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 54,
+    "rule": "react-setstate",
+    "text": "try { setContent(await invokeCommand<string>('read_file_content', { path: item.path })); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 55,
+    "rule": "react-setstate",
+    "text": "catch { setContent(t('resources.cannotRead')); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 56,
+    "rule": "react-setstate",
+    "text": "} else { setContent(null); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 61,
+    "rule": "react-setstate",
+    "text": "try { await invokeCommand('write_file_content', { path: selected.path, content: editContent }); setContent(editContent); setEditing(false); setStatusMsg(t('common.save')); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 62,
+    "rule": "react-setstate",
+    "text": "catch (e) { setError(String(e)); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 67,
+    "rule": "react-setstate",
+    "text": "try { await invokeCommand('delete_file', { path: selected.path }); setSelected(null); setContent(null); loadItems(); setStatusMsg(t('common.delete')); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 68,
+    "rule": "react-setstate",
+    "text": "catch (e) { setError(String(e)); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 74,
+    "rule": "react-setstate",
+    "text": "try { await invokeCommand('write_file_content', { path: newPath, content: newContent }); setShowNewForm(false); setNewName(''); setNewContent(''); loadItems(); setStatusMsg(t('common.create')); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 75,
+    "rule": "react-setstate",
+    "text": "catch (e) { setError(String(e)); }"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 78,
+    "rule": "react-setstate",
+    "text": "const startEdit = () => { setEditContent(content || ''); setEditing(true); };"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 79,
+    "rule": "react-setstate",
+    "text": "const cancelEdit = () => { setEditing(false); };"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 88,
+    "rule": "react-setstate",
+    "text": "<CcButton size=\"sm\" onClick={() => setShowNewForm(true)}>+ {t('common.new')}</CcButton>"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 94,
+    "rule": "react-setstate",
+    "text": "<button key={tab.id} onClick={() => { setActiveTab(tab.id); setSelected(null); setContent(null); }}"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 148,
+    "rule": "react-setstate",
+    "text": "<textarea value={editContent} onChange={(e) => setEditContent(e.target.value)}"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 171,
+    "rule": "react-setstate",
+    "text": "<div style={{ marginBottom: 12 }}><label style={lbl}>{t('resources.name')}</label><input type=\"text\" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t('resources.fileNamePlaceholder')} autoFocus style={inp} /></div"
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 172,
+    "rule": "react-setstate",
+    "text": "<div style={{ marginBottom: 12 }}><label style={lbl}>{t('resources.content')}</label><textarea value={newContent} onChange={(e) => setNewContent(e.target.value)} placeholder={t('resources.fileContentPlaceholder')} rows={6} style={{ ...inp, "
+  },
+  {
+    "file": "src/surfaces/resources/ResourcesSurface.tsx",
+    "line": 174,
+    "rule": "react-setstate",
+    "text": "<CcButton variant=\"ghost\" onClick={() => setShowNewForm(false)}>{t('common.cancel')}</CcButton>"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 51,
+    "rule": "react-setstate",
+    "text": "setCapLoading(true);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 54,
+    "rule": "react-setstate",
+    "text": "setCap(c);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 55,
+    "rule": "react-setstate",
+    "text": "localStorage.setItem('ctrl-cc-capability', JSON.stringify({ data: c, checkedAt: new Date().toISOString() }));"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 56,
+    "rule": "react-setstate",
+    "text": "setStatusMsg(t('settings.envCheckComplete'));"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 58,
+    "rule": "react-setstate",
+    "text": ".catch(() => setCap({ version: null, exists: false, authStatus: null, supportsStreamJson: false, supportsMCP: false, supportsAgents: false, checkedAt: new Date().toISOString(), errors: ['Detection failed'] }))"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 59,
+    "rule": "react-setstate",
+    "text": ".finally(() => setCapLoading(false));"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 62,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 70,
+    "rule": "react-setstate",
+    "text": "if (age < 5 * 60 * 1000) { setCap(parsed.data); setCapLoading(false); return; }"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 72,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 77,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => { localStorage.setItem('ctrl-cc-model', model); }, [model]);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 77,
+    "rule": "react-setstate",
+    "text": "useEffect(() => { localStorage.setItem('ctrl-cc-model', model); }, [model]);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 78,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => { localStorage.setItem('ctrl-cc-effort', effort); }, [effort]);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 78,
+    "rule": "react-setstate",
+    "text": "useEffect(() => { localStorage.setItem('ctrl-cc-effort', effort); }, [effort]);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 79,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => { localStorage.setItem('ctrl-cc-permMode', permMode); }, [permMode]);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 79,
+    "rule": "react-setstate",
+    "text": "useEffect(() => { localStorage.setItem('ctrl-cc-permMode', permMode); }, [permMode]);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 80,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => { localStorage.setItem('ctrl-cc-autoTrust', String(autoTrust)); }, [autoTrust]);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 80,
+    "rule": "react-setstate",
+    "text": "useEffect(() => { localStorage.setItem('ctrl-cc-autoTrust', String(autoTrust)); }, [autoTrust]);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 83,
+    "rule": "react-setstate",
+    "text": "setCurrentTheme(themeId);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 84,
+    "rule": "react-setstate",
+    "text": "localStorage.setItem('ctrl-cc-theme', themeId);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 90,
+    "rule": "react-setstate",
+    "text": "localStorage.setItem('ctrlcc_lang', lang);"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 99,
+    "rule": "react-setstate",
+    "text": "setStatusMsg(t('settings.diagExported'));"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 103,
+    "rule": "react-setstate",
+    "text": "try { localStorage.clear(); setStatusMsg(t('settings.cacheCleared')); }"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 104,
+    "rule": "react-setstate",
+    "text": "catch { setStatusMsg(t('settings.cacheClearFailed')); }"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 210,
+    "rule": "react-setstate",
+    "text": "<input type=\"range\" min={10} max={24} value={fontSize} onChange={(e) => { const v = parseInt(e.target.value); setFontSize(v); const scale = v / 14; document.documentElement.style.setProperty('--cc-font-scale', String(scale)); localStorage.s"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 257,
+    "rule": "react-setstate",
+    "text": "<CcButton size=\"sm\" variant=\"ghost\" onClick={() => setStatusMsg('Permission Center active')}>{t('settings.manageRules')}</CcButton>"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 264,
+    "rule": "react-setstate",
+    "text": "<S label={t('settings.autoTrust')} value={String(autoTrust)} onChange={(v) => setAutoTrust(parseInt(v))} opts={['0', '1', '2', '3', '4', '5']} />"
+  },
+  {
+    "file": "src/surfaces/settings/SettingsSurface.tsx",
+    "line": 276,
+    "rule": "error-swallow",
+    "text": "<CcButton size=\"sm\" variant=\"ghost\" onClick={() => { try { const el = document.querySelector('[data-error-log]'); if (el) (el as HTMLElement).click(); } catch {} }}>{t('settings.viewErrorLog')}</CcButton>"
+  },
+  {
+    "file": "src/surfaces/workspace/ChatView.tsx",
+    "line": 12,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [events.length]);"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 37,
+    "rule": "react-setstate",
+    "text": "setText('');"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 47,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 60,
+    "rule": "react-setstate",
+    "text": "<select value={runtimeMode} onChange={(e) => setRuntimeMode(e.target.value as RuntimeMode)} style={selectStyle} title={t('composerBar.pty')}>"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 64,
+    "rule": "react-setstate",
+    "text": "<select value={model} onChange={(e) => setModel(e.target.value)} style={selectStyle} title={t('composerBar.model')}>"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 67,
+    "rule": "react-setstate",
+    "text": "<select value={effort} onChange={(e) => setEffort(e.target.value)} style={selectStyle} title={t('composerBar.effort')}>"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 70,
+    "rule": "react-setstate",
+    "text": "<select value={permissionMode} onChange={(e) => setPermissionMode(e.target.value as PermissionMode)} style={selectStyle} title={t('composerBar.permission')}>"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 74,
+    "rule": "react-setstate",
+    "text": "<button style={hintBtnStyle} title={t('composerBar.resourcePicker')} onClick={() => setShowResourcePicker(!showResourcePicker)}>@</button>"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 75,
+    "rule": "react-setstate",
+    "text": "<ResourcePicker open={showResourcePicker} onClose={() => setShowResourcePicker(false)} onSelect={(r) => { setText((t) => t + ' ' + r + ' '); inputRef.current?.focus(); }} />"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 78,
+    "rule": "react-setstate",
+    "text": "<button style={hintBtnStyle} title={t('composerBar.commandPalette')} onClick={() => setShowCommandPalette(!showCommandPalette)}>/</button>"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 79,
+    "rule": "react-setstate",
+    "text": "<CommandPalette open={showCommandPalette} onClose={() => setShowCommandPalette(false)} onSelect={(c) => { setText((t) => t + ' ' + c + ' '); inputRef.current?.focus(); }} />"
+  },
+  {
+    "file": "src/surfaces/workspace/ComposerBar.tsx",
+    "line": 86,
+    "rule": "react-setstate",
+    "text": "onChange={(e) => setText(e.target.value)}"
+  },
+  {
+    "file": "src/surfaces/workspace/TerminalView.tsx",
+    "line": 10,
+    "rule": "react-setstate",
+    "text": "const containerCb = useCallback((node: HTMLDivElement | null) => setContainer(node), []);"
+  },
+  {
+    "file": "src/surfaces/workspace/TerminalView.tsx",
+    "line": 15,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 7,
+    "rule": "direct-interaction-adapter",
+    "text": "import { startPtyV2ClaudeSession, stopPtyV2 } from '../../features/runtime/services/interactionAdapter';"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 80,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 82,
+    "rule": "react-setstate",
+    "text": "if (tab?.viewMode) setViewMode(tab.viewMode);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 85,
+    "rule": "react-useeffect",
+    "text": "useEffect(() => {"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 86,
+    "rule": "tauri-listen",
+    "text": "listen<RuntimeEvent>('runtime:event', (e) => {"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 88,
+    "rule": "react-setstate",
+    "text": "setRawEvents((prev) => {"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 107,
+    "rule": "react-setstate",
+    "text": "setError(`${t('workspace.sendFailed')}: Runtime not ready (status=${status}, ptySessionId=${ptyId})`);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 118,
+    "rule": "react-setstate",
+    "text": "setRawEvents((prev) => [...prev, {"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 126,
+    "rule": "react-setstate",
+    "text": "setError(`${t('workspace.sendFailed')}: ${msg}`);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 127,
+    "rule": "error-swallow",
+    "text": "try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: 'Send failed', detail: msg }); } catch {}"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 134,
+    "rule": "react-setstate",
+    "text": "setRawEvents((prev) => [...prev, {"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 142,
+    "rule": "react-setstate",
+    "text": "setError(`${t('workspace.sendFailed')}: ${msg}`);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 143,
+    "rule": "error-swallow",
+    "text": "try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: 'Send failed', detail: msg }); } catch {}"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 151,
+    "rule": "react-setstate",
+    "text": "setError(null);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 180,
+    "rule": "react-setstate",
+    "text": "setShowNewSessionDialog(false);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 181,
+    "rule": "react-setstate",
+    "text": "setShowNewProjectFromSession(false);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 182,
+    "rule": "react-setstate",
+    "text": "setStarting(true);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 185,
+    "rule": "direct-interaction-adapter",
+    "text": "startPtyV2ClaudeSession({ sessionId, projectId, cwd, cliPath: 'claude', extraArgs: [] }).then((info) => {"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 186,
+    "rule": "error-swallow",
+    "text": "try { useErrorStore.getState().addError({ severity: 'info', source: 'session', title: `${t('error.ptySessionCreated')}: ${info.sessionId?.slice(0, 8)}...`, detail: `CWD: ${cwd}` }); } catch {}"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 190,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 192,
+    "rule": "react-setstate",
+    "text": "setError(`${t('workspace.startFailed')}: ${String(err)}`);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 196,
+    "rule": "error-swallow",
+    "text": "} catch {}"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 197,
+    "rule": "react-setstate",
+    "text": "}).finally(() => setStarting(false));"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 201,
+    "rule": "direct-interaction-adapter",
+    "text": "stopPtyV2(sessionId).catch((e) => console.warn('pty_v2_stop failed:', e));"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 206,
+    "rule": "react-setstate",
+    "text": "setShowNewSessionDialog(true);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 214,
+    "rule": "react-setstate",
+    "text": "setShowNewSessionDialog(false);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 215,
+    "rule": "react-setstate",
+    "text": "setShowNewProjectFromSession(true);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 226,
+    "rule": "react-setstate",
+    "text": "setShowNewProjectFromSession(false);"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 250,
+    "rule": "react-setstate",
+    "text": "return <button key={mode} onClick={() => setViewMode(mode)} style={{ padding: '4px 14px', fontSize: 'var(--cc-font-xs)', fontWeight: a ? 600 : 400, border: 'none', borderBottom: a ? '2px solid var(--cc-navy)' : '2px solid transparent', back"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 261,
+    "rule": "react-setstate",
+    "text": "<SessionInspector session={activeSession} events={rawEvents.slice(0, 200)} collapsed={inspectorCollapsed} expanded={inspectorExpanded} onToggleCollapse={() => setInspectorCollapsed((v) => !v)} onToggleExpand={() => setInspectorExpanded((v) "
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 267,
+    "rule": "react-setstate",
+    "text": "<NewSessionDialog open={showNewSessionDialog} onClose={() => setShowNewSessionDialog(false)} onSelectProject={handleSelectProject} onCreateNew={handleCreateNewProject} />"
+  },
+  {
+    "file": "src/surfaces/workspace/WorkspaceSurface.tsx",
+    "line": 268,
+    "rule": "react-setstate",
+    "text": "<NewProjectDialog open={showNewProjectFromSession} onClose={() => setShowNewProjectFromSession(false)} onConfirm={handleConfirmNewProject} />"
+  }
+]
