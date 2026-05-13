@@ -38,7 +38,13 @@ impl PtySessionManager {
         let claude_path = discover_claude_path()
             .ok_or_else(|| anyhow!("claude not found in PATH. Install Claude Code CLI first."))?;
 
-        let session_id = Uuid::new_v4().to_string();
+        // v9.0 ID contract: use request's pty_session_id as registry key
+        let session_id = req.pty_session_id.clone()
+            .filter(|s| !s.is_empty())
+            .unwrap_or_else(|| format!("pty-{}", Uuid::new_v4()));
+        let ui_session_id = req.ui_session_id.clone()
+            .filter(|s| !s.is_empty())
+            .unwrap_or_else(|| format!("ses-{}", Uuid::new_v4()));
 
         let pty_system = native_pty_system();
         let pair = pty_system
@@ -79,6 +85,7 @@ impl PtySessionManager {
         let writer = Arc::new(Mutex::new(writer));
 
         let reader_session_id = session_id.clone();
+        let reader_ui_session_id = ui_session_id.clone();
         let reader_app = app.clone();
 
         std::thread::spawn(move || {
@@ -91,6 +98,8 @@ impl PtySessionManager {
                             "ctrlcc://pty-exit",
                             PtyExitPayload {
                                 session_id: reader_session_id.clone(),
+                                ui_session_id: Some(reader_ui_session_id.clone()),
+                                pty_session_id: Some(reader_session_id.clone()),
                                 code: None,
                                 message: "PTY reader reached EOF".to_string(),
                             },
@@ -103,6 +112,8 @@ impl PtySessionManager {
                             "ctrlcc://pty-output",
                             PtyOutputPayload {
                                 session_id: reader_session_id.clone(),
+                                ui_session_id: Some(reader_ui_session_id.clone()),
+                                pty_session_id: Some(reader_session_id.clone()),
                                 data,
                             },
                         );
@@ -112,6 +123,8 @@ impl PtySessionManager {
                             "ctrlcc://pty-error",
                             PtyErrorPayload {
                                 session_id: Some(reader_session_id.clone()),
+                                ui_session_id: Some(reader_ui_session_id.clone()),
+                                pty_session_id: Some(reader_session_id.clone()),
                                 message: format!("PTY read error: {e}"),
                             },
                         );
@@ -129,7 +142,11 @@ impl PtySessionManager {
 
         self.sessions.lock().insert(session_id.clone(), session);
 
-        Ok(StartClaudePtyResponse { session_id })
+        Ok(StartClaudePtyResponse {
+            session_id: session_id.clone(),
+            ui_session_id: ui_session_id.clone(),
+            pty_session_id: session_id,
+        })
     }
 
     pub fn write(&self, req: PtyWriteRequest) -> Result<()> {

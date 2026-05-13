@@ -3,12 +3,20 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize)]
 pub struct PtyOutputPayload {
     pub session_id: String,
+    #[serde(default)]
+    pub ui_session_id: Option<String>,
+    #[serde(default)]
+    pub pty_session_id: Option<String>,
     pub data: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
 pub struct PtyExitPayload {
     pub session_id: String,
+    #[serde(default)]
+    pub ui_session_id: Option<String>,
+    #[serde(default)]
+    pub pty_session_id: Option<String>,
     pub code: Option<i32>,
     pub message: String,
 }
@@ -16,6 +24,10 @@ pub struct PtyExitPayload {
 #[derive(Debug, Clone, Serialize)]
 pub struct PtyErrorPayload {
     pub session_id: Option<String>,
+    #[serde(default)]
+    pub ui_session_id: Option<String>,
+    #[serde(default)]
+    pub pty_session_id: Option<String>,
     pub message: String,
 }
 
@@ -36,11 +48,20 @@ pub struct StartClaudePtyRequest {
     pub cols: u16,
     pub rows: u16,
     pub session_name: Option<String>,
+    // v9.0 ID contract fields
+    #[serde(default)]
+    pub ui_session_id: Option<String>,
+    #[serde(default)]
+    pub pty_session_id: Option<String>,
+    #[serde(default)]
+    pub trace_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
 pub struct StartClaudePtyResponse {
     pub session_id: String,
+    pub ui_session_id: String,
+    pub pty_session_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
