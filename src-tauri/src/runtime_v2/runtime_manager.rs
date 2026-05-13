@@ -173,14 +173,14 @@ impl RuntimeManager {
                     }
                 }
             }
-
             if let Ok(mut sessions) = sessions_ref.lock() {
                 if let Some(handle) = sessions.get_mut(&pty_session_id) {
                     handle.reader_alive = false;
+                    handle.has_writer = false;
                     handle.status = "exited".into();
+                    handle.last_error = Some("PTY reader exited; writer is no longer valid".to_string());
                 }
             }
-
             let _ = app_for_reader.emit(
                 "pty://exit",
                 serde_json::json!({
@@ -224,10 +224,26 @@ impl RuntimeManager {
             )
         })?;
 
+        if handle.status == "exited" || handle.status == "failed" || !handle.reader_alive || !handle.has_writer {
+            return Err(format!(
+                "PTY session is not writable: {} (uiSessionId={}, status={}, readerAlive={}, hasWriter={})",
+                req.pty_session_id,
+                req.ui_session_id,
+                handle.status,
+                handle.reader_alive,
+                handle.has_writer
+            ));
+        }
+
+
         handle
             .writer
             .write_all(req.data.as_bytes())
-            .map_err(|e| format!("PTY write failed: {}", e))?;
+            .map_err(|e| {
+                handle.has_writer = false;
+                handle.last_error = Some(e.to_string());
+                format!("PTY write failed: {}", e)
+            })?;
 
         handle
             .writer
@@ -284,9 +300,14 @@ fn build_claude_args(req: &RuntimeStartInteractiveRequest) -> Vec<String> {
         args.push(permission.clone());
     }
 
+    // Do not force --model during PTY bootstrap.
+    // Some Claude Code CLI versions reject short model aliases and exit immediately.
     if let Some(model) = &req.model {
-        args.push("--model".into());
-        args.push(model.clone());
+        let m = model.trim();
+        if !m.is_empty() && m != "default" && m != "sonnet" && m != "opus" && m != "haiku" {
+            args.push("--model".into());
+            args.push(m.to_string());
+        }
     }
 
     match req.mode.as_str() {

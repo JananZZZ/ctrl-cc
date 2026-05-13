@@ -8,6 +8,7 @@ import { useSessionStore } from '../stores/sessionStore';
 import { invokeCommand, warnLog } from '../services/invokeCommand';
 import { useErrorStore } from '../stores/errorStore';
 import { listen } from '@tauri-apps/api/event';
+import { installRuntimeLifecycleBridge } from '../features/runtime/services/runtimeLifecycleBridge';
 import i18n from '../i18n';
 
 export function App() {
@@ -16,6 +17,17 @@ export function App() {
   const setProjects = useProjectStore((s) => s.setProjects);
   const projects = useProjectStore((s) => s.projects);
   const setSessions = useSessionStore((s) => s.setSessions);
+
+  // v13.0: Install runtime lifecycle bridge (pty://data, pty://exit, pty://error, runtime://session-status)
+  useEffect(() => {
+    let cleanup: undefined | (() => void);
+    installRuntimeLifecycleBridge().then((fn) => {
+      cleanup = fn;
+    }).catch((error) => {
+      console.error('[Ctrl-CC] installRuntimeLifecycleBridge failed', error);
+    });
+    return () => cleanup?.();
+  }, []);
 
   useEffect(() => {
     // Restore theme from localStorage, default to warm-sand

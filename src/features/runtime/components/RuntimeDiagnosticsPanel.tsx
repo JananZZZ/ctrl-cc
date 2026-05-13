@@ -29,7 +29,7 @@ export function RuntimeDiagnosticsPanel() {
       const result = await RuntimeBridge.runContractTest({
         projectId: 'diagnostic',
         projectName: 'Runtime Diagnostic',
-        cwd: await invoke('get_current_dir').catch(() => '.'),
+        cwd: String(await invoke('get_current_dir').catch(() => '.')),
       });
       setContractTestResult({ ok: true });
       void result;
@@ -47,7 +47,7 @@ export function RuntimeDiagnosticsPanel() {
     try {
       const [probeResult, discoveryResult] = await Promise.all([
         probeRuntimeContract(),
-        invoke<DiscoveryMatrix>('runtime_discover_claude').catch(() => null),
+        invoke<DiscoveryMatrix>('runtime_discover_claude_v2').catch(() => null),
       ]);
       setProbe(probeResult);
       setDiscovery(discoveryResult);
@@ -64,7 +64,7 @@ export function RuntimeDiagnosticsPanel() {
     try {
       const [probeResult, discoveryResult] = await Promise.all([
         probeRuntimeContract(),
-        invoke<DiscoveryMatrix>('runtime_discover_claude').catch(() => null),
+        invoke<DiscoveryMatrix>('runtime_discover_claude_v2').catch(() => null),
       ]);
       setProbe(probeResult);
       setDiscovery(discoveryResult);
@@ -94,29 +94,37 @@ export function RuntimeDiagnosticsPanel() {
         {error && <span style={{ color: 'var(--cc-red)' }}>{error}</span>}
       </div>
 
-      {/* Discovery Matrix */}
-      {discovery && (
-        <Section title={`Discovery Matrix — ${discovery.overallStatus}`}>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <strong style={{ fontSize: 'var(--cc-font-xs)' }}>Shell Strategies</strong>
-              {discovery.shellStrategies.map((s) => (
-                <div key={s.name} style={{ padding: '2px 4px', fontSize: 'var(--cc-font-xs)', color: s.available ? 'var(--cc-green)' : 'var(--cc-text-muted)' }}>
-                  {s.available ? '✅' : '❌'} {s.name}: {s.note}
-                  {discovery.selectedStrategy === s.name && <span style={{ color: 'var(--cc-brand)', marginLeft: 4 }}>← SELECTED</span>}
-                </div>
+      {/* v13.0: Launch Plan Matrix (v2 discovery) */}
+      {discovery && Array.isArray((discovery as any).plans) && (
+        <Section title="Launch Plan Matrix">
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                {['Plan', 'Program', 'Args Prefix', 'Canary', 'Version', 'Selected', 'Error'].map((h) => (
+                  <th key={h} style={thStyle}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(discovery as any).plans.map((p: any) => (
+                <tr key={p.id}>
+                  <td style={tdStyle}>{p.id}</td>
+                  <td style={tdStyle}>{p.program}</td>
+                  <td style={tdStyle}>{(p.argsPrefix ?? p.args_prefix ?? []).join(' ')}</td>
+                  <td style={tdStyle}>{p.canaryOk ? 'PASS' : (p.canaryOk === false ? 'FAIL' : 'NOT RUN')}</td>
+                  <td style={tdStyle}>{p.versionOk ? (p.versionText ?? 'OK') : 'FAIL'}</td>
+                  <td style={tdStyle}>{p.selected ? 'SELECTED' : '-'}</td>
+                  <td style={tdStyle}>{p.error ?? '-'}</td>
+                </tr>
               ))}
-            </div>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <strong style={{ fontSize: 'var(--cc-font-xs)' }}>Claude Candidates</strong>
-              {discovery.claudeCandidates.map((c) => (
-                <div key={c.name} style={{ padding: '2px 4px', fontSize: 'var(--cc-font-xs)', color: c.found ? (c.versionOk ? 'var(--cc-green)' : 'var(--cc-amber)') : 'var(--cc-red)' }}>
-                  {c.found ? (c.versionOk ? '✅' : '⚠️') : '❌'} {c.name}: {c.versionText ?? (c.error ?? 'not found')} ({c.runnableBy})
-                  {discovery.selectedCandidate === c.name && <span style={{ color: 'var(--cc-brand)', marginLeft: 4 }}>← SELECTED</span>}
-                </div>
-              ))}
-            </div>
-          </div>
+            </tbody>
+          </table>
+        </Section>
+      )}
+      {/* Legacy discovery: only show if old format */}
+      {discovery && (discovery as any).shellStrategies && (
+        <Section title={`Legacy Discovery — ${(discovery as any).overallStatus}`}>
+          <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>Old discovery format deprecated. Use Launch Plan Matrix above.</div>
         </Section>
       )}
 

@@ -1,11 +1,10 @@
 import { useSurfaceStore } from '../stores/surfaceStore';
 import { ErrorBoundary } from '../components/error/ErrorBoundary';
-// v12.0: Feature pages (active)
-import { ConsoleSurface } from '../features/console/pages/ConsoleSurface';
-import { ProjectsSurface } from '../features/projects/pages/ProjectsSurface';
-import { ResourcesSurface } from '../features/resources/pages/ResourcesSurface';
-// Legacy (workspace/canvas/github/settings until migration)
+
+import { ConsoleSurface } from '../surfaces/console/ConsoleSurface';
+import { ProjectsSurface } from '../surfaces/projects/ProjectsSurface';
 import { WorkspaceSurface } from '../surfaces/workspace/WorkspaceSurface';
+import { ResourcesSurface } from '../surfaces/resources/ResourcesSurface';
 import { CanvasSurface } from '../surfaces/canvas/CanvasSurface';
 import { GitHubSurface } from '../surfaces/github/GitHubSurface';
 import { SettingsSurface } from '../surfaces/settings/SettingsSurface';
@@ -25,7 +24,7 @@ export function SurfaceHost() {
   const Component = surfaces[activeSurface] ?? ConsoleSurface;
 
   return (
-    <div style={{ flex: 1, overflow: 'auto' }}>
+    <div style={{ flex: 1, overflow: 'hidden' }}>
       <ErrorBoundary key={activeSurface}>
         <Component />
       </ErrorBoundary>

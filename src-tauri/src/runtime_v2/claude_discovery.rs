@@ -45,6 +45,15 @@ pub fn discover_claude() -> RuntimeDiscoveryResult {
 
 pub fn select_launch_plan() -> Result<ClaudeLaunchPlan, String> {
     for plan in collect_launch_plans() {
+        let is_shell_wrapper =
+            plan.id.contains("powershell")
+            || plan.id.contains("pwsh")
+            || plan.id.contains("cmd");
+
+        if is_shell_wrapper && std::env::var("CTRL_CC_ALLOW_SHELL_WRAPPER").is_err() {
+            continue;
+        }
+
         if canary_launch_plan(&plan).is_ok() {
             return Ok(plan);
         }
@@ -77,6 +86,10 @@ fn collect_launch_plans() -> Vec<ClaudeLaunchPlan> {
             args_prefix: vec![cli_js.to_string_lossy().to_string()],
             reason: "Bypasses cmd.exe / powershell.exe shims".to_string(),
         });
+    }
+
+    if let Some(plan) = resolve_node_plan_from_claude_shim() {
+        plans.push(plan);
     }
 
     if let Some(claude_exe) = find_on_path("claude.exe") {
@@ -200,6 +213,63 @@ fn find_claude_cmd() -> Option<PathBuf> {
         .map(|p| p.join(r"npm\claude.cmd"))
         .filter(|p| p.exists())
         .or_else(|| find_on_path("claude.cmd"))
+}
+
+fn resolve_node_plan_from_claude_shim() -> Option<ClaudeLaunchPlan> {
+    let shim = find_on_path("claude.cmd")
+        .or_else(|| find_on_path("claude.ps1"))
+        .or_else(|| find_on_path("claude"));
+
+    let shim = shim?;
+    let content = std::fs::read_to_string(&shim).ok()?;
+
+    let node = find_node_exe()?;
+
+    let candidates = [
+        r"node_modules\@anthropic-ai\claude-code\cli.js",
+        r"node_modules\@anthropic-ai\claude-code\bin\claude.js",
+        r"node_modules\@anthropic-ai\claude-code\index.js",
+        r"node_modules/@anthropic-ai/claude-code/cli.js",
+        r"node_modules/@anthropic-ai/claude-code/bin/claude.js",
+        r"node_modules/@anthropic-ai/claude-code/index.js",
+    ];
+
+    let shim_dir = shim.parent()?.to_path_buf();
+
+    for rel in candidates {
+        if content.contains(rel) {
+            let p = shim_dir.join(rel);
+            if p.exists() {
+                return Some(ClaudeLaunchPlan {
+                    id: "direct-node-from-shim".to_string(),
+                    label: "Direct Node.js resolved from Claude npm shim".to_string(),
+                    program: node.to_string_lossy().to_string(),
+                    args_prefix: vec![p.to_string_lossy().to_string()],
+                    reason: format!("Resolved from shim {}", shim.to_string_lossy()),
+                });
+            }
+        }
+    }
+
+    let common = shim_dir
+        .join("node_modules")
+        .join("@anthropic-ai")
+        .join("claude-code");
+
+    for file in ["cli.js", "bin/claude.js", "index.js"] {
+        let p = common.join(file);
+        if p.exists() {
+            return Some(ClaudeLaunchPlan {
+                id: "direct-node-from-shim-dir".to_string(),
+                label: "Direct Node.js resolved from shim directory".to_string(),
+                program: node.to_string_lossy().to_string(),
+                args_prefix: vec![p.to_string_lossy().to_string()],
+                reason: format!("Resolved from shim dir {}", shim_dir.to_string_lossy()),
+            });
+        }
+    }
+
+    None
 }
 
 fn find_on_path(exe: &str) -> Option<PathBuf> {

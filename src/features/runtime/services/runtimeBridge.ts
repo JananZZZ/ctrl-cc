@@ -186,10 +186,41 @@ export const RuntimeBridge = {
     const { probeRuntimeContract } = await import('./runtimeContractProbe');
     return probeRuntimeContract();
   },
-  runContractTest: async (_project: unknown) => {
-    // Contract test: create session, check ptySessionId, write echo, verify, stop
-    const ids = SessionIdFactory.newSessionIds();
-    return { ids, status: 'not-implemented' as const };
+  runContractTest: async (project: { projectId?: string; projectName?: string; cwd?: string }) => {
+    const session = await startInteractiveClaudeSession({
+      projectId: project.projectId ?? 'diagnostic',
+      projectName: project.projectName ?? 'Runtime Diagnostic',
+      cwd: project.cwd ?? '.',
+      mode: 'new',
+      sessionName: 'runtime-contract-test',
+    });
+
+    const deadline = Date.now() + 8000;
+    while (Date.now() < deadline) {
+      const s = useRuntimeStore.getState().sessions[session.id];
+      if (s?.status === 'pty-ready' || s?.status === 'claude-active') break;
+      if (s?.status === 'failed' || s?.status === 'exited' || s?.status === 'discovery-failed') {
+        throw new Error(`Contract test failed during start: ${s.status} ${s.error ?? ''}`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+
+    const backend = await invokeCommand<Array<{
+      ptySessionId: string;
+      uiSessionId?: string | null;
+      status: string;
+      hasWriter: boolean;
+      readerAlive?: boolean;
+    }>>('runtime_list_sessions_v2');
+
+    const found = backend.find((b) => b.ptySessionId === session.ptySessionId);
+    if (!found) throw new Error(`Contract failed: backend missing ${session.ptySessionId}`);
+    if (found.status === 'exited' || found.status === 'failed') throw new Error(`Contract failed: backend status=${found.status}`);
+    if (!found.readerAlive) throw new Error('Contract failed: backend readerAlive=false');
+    if (!found.hasWriter) throw new Error('Contract failed: backend hasWriter=false');
+
+    await write(session.id, '\r');
+    return { ok: true as const, session, backend: found };
   },
 };
 
@@ -210,25 +241,50 @@ async function startSessionInBackground(session: RuntimeSession, _input: StartIn
     });
 
     let selectedStrategy: string | null = null;
+
     try {
-      const discovery = await invokeCommand<{ selectedStrategy?: string; selectedCandidate?: string }>('runtime_discover_claude');
-      selectedStrategy = discovery.selectedStrategy ?? discovery.selectedCandidate ?? null;
+      const discovery = await invokeCommand<{
+        selected?: { id: string; label: string; program: string; argsPrefix?: string[]; canaryOk?: boolean; versionOk?: boolean; error?: string | null } | null;
+        plans?: Array<{ id: string; canaryOk: boolean; versionOk: boolean; error?: string | null }>;
+        errors?: string[];
+      }>('runtime_discover_claude_v2');
+
+      if (!discovery.selected) {
+        const detail = discovery.errors?.join('\n') || 'No runnable Claude launch plan.';
+        throw new Error(detail);
+      }
+
+      selectedStrategy = discovery.selected.id;
+
       useRuntimeStore.getState().patchSession(session.id, {
         shellStrategy: selectedStrategy,
+        claudeCommand: discovery.selected.program,
         status: 'pty-starting',
       });
+
       useRuntimeTraceStore.getState().append({
-        traceId: session.traceId, source: "runtime-bridge", level: "info",
-        type: "discovery.ok", message: `Selected: ${selectedStrategy || 'default'}`,
-        uiSessionId: session.id, ptySessionId: session.ptySessionId,
+        traceId: session.traceId,
+        source: 'runtime-bridge',
+        level: 'info',
+        type: 'discovery.ok',
+        message: `Selected: ${selectedStrategy}`,
+        uiSessionId: session.id,
+        ptySessionId: session.ptySessionId,
       });
     } catch (discErr) {
+      const msg = String(discErr);
       useRuntimeTraceStore.getState().append({
-        traceId: session.traceId, source: "runtime-bridge", level: "warning",
-        type: "discovery.failed", message: `Discovery failed: ${String(discErr)}`,
-        uiSessionId: session.id, ptySessionId: session.ptySessionId,
+        traceId: session.traceId,
+        source: 'runtime-bridge',
+        level: 'error',
+        type: 'discovery.failed',
+        message: msg,
+        uiSessionId: session.id,
+        ptySessionId: session.ptySessionId,
       });
-      useRuntimeStore.getState().patchSession(session.id, { status: 'pty-starting' });
+      useRuntimeStore.getState().patchSession(session.id, { status: 'discovery-failed', error: msg });
+      useSessionStore.getState().updateSession(session.id, { status: 'failed' as const });
+      return;
     }
 
     // Phase 2: PTY start
@@ -255,7 +311,7 @@ async function startSessionInBackground(session: RuntimeSession, _input: StartIn
       },
     });
 
-    useRuntimeStore.getState().patchSession(session.id, { status: 'claude-active' });
+    useRuntimeStore.getState().patchSession(session.id, { status: 'pty-ready' });
 
     useRuntimeTraceStore.getState().append({
       traceId: session.traceId, source: "runtime-bridge", level: "info",

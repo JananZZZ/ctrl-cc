@@ -41,10 +41,42 @@ function buildXtermTheme() {
 
 export type PtyStatus = 'idle' | 'starting' | 'running' | 'waiting' | 'exited' | 'failed' | 'killed';
 
-interface PtyDataPayload { session_id: string; pty_id: string; data: string; }
-interface PtyStatusPayload { session_id: string; pty_id: string; status: string; }
-interface PtyExitPayload { session_id: string; pty_id: string; exit_code: number | null; }
-interface PtyErrorPayload { session_id: string; pty_id: string; message: string; }
+interface PtyDataPayload {
+  session_id?: string;
+  uiSessionId?: string;
+  pty_id?: string;
+  ptySessionId?: string;
+  data: string;
+}
+
+interface PtyStatusPayload {
+  session_id?: string;
+  uiSessionId?: string;
+  pty_id?: string;
+  ptySessionId?: string;
+  status: string;
+}
+
+interface PtyExitPayload {
+  session_id?: string;
+  uiSessionId?: string;
+  pty_id?: string;
+  ptySessionId?: string;
+  exit_code?: number | null;
+}
+
+interface PtyErrorPayload {
+  session_id?: string;
+  uiSessionId?: string;
+  pty_id?: string;
+  ptySessionId?: string;
+  message?: string;
+  error?: string;
+}
+
+function sameUiSession(payload: { session_id?: string; uiSessionId?: string }, sessionId: string) {
+  return payload.uiSessionId === sessionId || payload.session_id === sessionId;
+}
 
 interface PtyTerminalHandle {
   status: PtyStatus;
@@ -62,12 +94,15 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
   const fitRef = useRef<FitAddon | null>(null);
   const searchRef = useRef<SearchAddon | null>(null);
   const serializeRef = useRef<SerializeAddon | null>(null);
+  const deadRef = useRef(false);
   const [status, setStatus] = useState<PtyStatus>('idle');
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!container || !sessionId) return;
     if (termRef.current) return;
+
+    deadRef.current = false;
 
     const fit = new FitAddon();
     const search = new SearchAddon();
@@ -108,24 +143,44 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     const unlisteners: UnlistenFn[] = [];
 
     listen<PtyDataPayload>('pty://data', (e) => {
-      if (e.payload.session_id !== sessionId) return;
+      if (!sameUiSession(e.payload, sessionId)) return;
+      if (deadRef.current) return;
       term.write(e.payload.data);
     }).then((fn) => unlisteners.push(fn));
 
     listen<PtyStatusPayload>('pty://status', (e) => {
-      if (e.payload.session_id !== sessionId) return;
+      if (!sameUiSession(e.payload, sessionId)) return;
       const map: Record<string, PtyStatus> = { starting: 'starting', running: 'running', exited: 'exited', failed: 'failed', killed: 'killed' };
       const newStatus = map[e.payload.status] ?? 'idle';
       setStatus(newStatus);
     }).then((fn) => unlisteners.push(fn));
 
-    listen<PtyExitPayload>('pty://exit', () => { setStatus('exited'); }).then((fn) => unlisteners.push(fn));
-    listen<PtyErrorPayload>('pty://error', () => { setStatus('failed'); }).then((fn) => unlisteners.push(fn));
+    listen<PtyExitPayload>('pty://exit', (e) => {
+      if (!sameUiSession(e.payload, sessionId)) return;
+      deadRef.current = true;
+      setStatus('exited');
+    }).then((fn) => unlisteners.push(fn));
+
+    listen<PtyErrorPayload>('pty://error', (e) => {
+      if (!sameUiSession(e.payload, sessionId)) return;
+      deadRef.current = true;
+      setStatus('failed');
+    }).then((fn) => unlisteners.push(fn));
 
     term.onData((data) => {
+      if (deadRef.current) {
+        term.writeln('\x1b[33m[Ctrl-CC] This PTY session has exited. Start or resume a session before typing.\x1b[0m');
+        return;
+      }
+
       RuntimeBridge.write(sessionId, data).catch((e: unknown) => {
-        warnLog('pty', 'PTY write failed', String(e));
-        term.writeln(`\x1b[31m[Ctrl-CC] Write failed: ${String(e)}\x1b[0m`);
+        const msg = String(e);
+        warnLog('pty', 'PTY write failed', msg);
+        if (msg.includes('not writable') || msg.includes('exited') || msg.includes('os error 232') || msg.includes('管道')) {
+          deadRef.current = true;
+          setStatus('exited');
+        }
+        term.writeln(`\x1b[31m[Ctrl-CC] Write failed: ${msg}\x1b[0m`);
       });
     });
 
