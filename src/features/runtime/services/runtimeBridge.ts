@@ -187,8 +187,37 @@ export function getRuntimeSession(sessionId: string): RuntimeSession | null {
 
 async function startSessionInBackground(session: RuntimeSession, _input: StartInteractiveInput) {
   try {
-    useRuntimeStore.getState().patchSession(session.id, { status: 'pty-starting' });
+    // Phase 1: Discovery
+    useRuntimeStore.getState().patchSession(session.id, { status: 'discovering' });
+    useRuntimeTraceStore.getState().append({
+      traceId: session.traceId, source: "runtime-bridge", level: "info",
+      type: "discovery.start", message: "Starting Claude discovery",
+      uiSessionId: session.id, ptySessionId: session.ptySessionId,
+    });
 
+    let selectedStrategy: string | null = null;
+    try {
+      const discovery = await invokeCommand<{ selectedStrategy?: string; selectedCandidate?: string }>('runtime_discover_claude');
+      selectedStrategy = discovery.selectedStrategy ?? discovery.selectedCandidate ?? null;
+      useRuntimeStore.getState().patchSession(session.id, {
+        shellStrategy: selectedStrategy,
+        status: 'pty-starting',
+      });
+      useRuntimeTraceStore.getState().append({
+        traceId: session.traceId, source: "runtime-bridge", level: "info",
+        type: "discovery.ok", message: `Selected: ${selectedStrategy || 'default'}`,
+        uiSessionId: session.id, ptySessionId: session.ptySessionId,
+      });
+    } catch (discErr) {
+      useRuntimeTraceStore.getState().append({
+        traceId: session.traceId, source: "runtime-bridge", level: "warning",
+        type: "discovery.failed", message: `Discovery failed: ${String(discErr)}`,
+        uiSessionId: session.id, ptySessionId: session.ptySessionId,
+      });
+      useRuntimeStore.getState().patchSession(session.id, { status: 'pty-starting' });
+    }
+
+    // Phase 2: PTY start
     useRuntimeTraceStore.getState().append({
       traceId: session.traceId, source: "runtime-bridge", level: "info",
       type: "pty.start.request", message: "Requesting PTY start",

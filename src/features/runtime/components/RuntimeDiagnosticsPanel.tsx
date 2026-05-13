@@ -148,6 +148,44 @@ export function RuntimeDiagnosticsPanel() {
         </div>
       </Section>
 
+      {/* Raw Log Paths */}
+      <Section title="Raw Log Paths">
+        <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div>Rust debug: <code style={{ color: 'var(--cc-blue)' }}>%TEMP%/ctrl-cc-runtime-debug.log</code></div>
+          <div>Rust trace: <code style={{ color: 'var(--cc-blue)' }}>%TEMP%/ctrl-cc-runtime-trace.log</code></div>
+          <div>React error: <code style={{ color: 'var(--cc-blue)' }}>localStorage['ctrlcc:last-react-error']</code></div>
+          <div>Render loop: <code style={{ color: 'var(--cc-blue)' }}>localStorage['ctrlcc:render-loop']</code></div>
+        </div>
+      </Section>
+
+      {/* Orphan Processes */}
+      <Section title="Orphan Processes">
+        <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
+          Orphan detection via backend watchdog. Run diagnostics to check for dangling PTY child processes.
+        </div>
+      </Section>
+
+      {/* Copy Diagnostic Bundle */}
+      <Section title="Diagnostic Bundle">
+        <button style={btnStyle} onClick={() => {
+          const bundle = {
+            generatedAt: new Date().toISOString(),
+            frontendSessionCount: Object.keys(rtSessions).length,
+            backendPtyCount: probe?.backendPtySessions?.length ?? 0,
+            mismatchCount: probe?.mismatches?.length ?? 0,
+            traceCount: traceEvents.length,
+            sessions: Object.values(rtSessions).map(s => ({ id: s.id, ptySessionId: s.ptySessionId, status: s.status, cwd: s.cwd, error: s.error })),
+            backendPtySessions: probe?.backendPtySessions ?? [],
+            mismatches: probe?.mismatches ?? [],
+            recentTraces: traceEvents.slice(-50),
+          };
+          const json = JSON.stringify(bundle, null, 2);
+          navigator.clipboard.writeText(json).then(() => alert('Diagnostic bundle copied to clipboard')).catch(() => alert('Failed to copy: ' + json.slice(0, 200)));
+        }}>
+          Copy Diagnostic Bundle
+        </button>
+      </Section>
+
       {/* Frontend Runtime Store */}
       <Section title={`Frontend RuntimeStore (${Object.keys(rtSessions).length} sessions)`}>
         {Object.values(rtSessions).map((s) => (

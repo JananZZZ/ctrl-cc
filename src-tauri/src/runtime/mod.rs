@@ -6,3 +6,4 @@ pub mod event_payloads;
 pub mod claude_discovery;
 pub mod pty_session;
 pub mod structured_runtime;
+pub mod runtime_types;

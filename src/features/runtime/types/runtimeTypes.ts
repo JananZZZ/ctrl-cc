@@ -6,6 +6,7 @@ export type RuntimeMode = 'interactive-pty' | 'structured-print';
 export type UiSessionId = string;   // ses-xxx
 export type PtySessionId = string;  // pty-{uuid}
 export type ClaudeSessionId = string;
+export type TraceId = string;       // trace-{uuid}
 
 export type RuntimeSessionStatus =
   | 'created'

@@ -9,9 +9,9 @@ pub fn pty_check_support() -> Result<crate::pty::pty_types::PtySupportInfo, AppE
     Ok(PtyManager::check_support())
 }
 
-/// Start a Claude Code interactive PTY session.
-/// v9.0: Accepts both old (session_id) and new (ui_session_id + pty_session_id) ID contracts.
-/// Backend registry key = pty_session_id (pty-uuid).
+/// Deprecated wrapper — no frontend surface may call this directly.
+/// Use runtime_start_interactive instead.
+/// Creates ui_session_id=session_id and pty_session_id for backward compatibility.
 #[tauri::command]
 pub fn pty_start_claude_session(
     app: tauri::AppHandle,
@@ -42,6 +42,7 @@ pub fn pty_start_claude_session(
         cwd,
         extra_args,
         resume_claude_session_id: None,
+        selected_strategy: None,
         session_id: Some(ui_sid.clone()),
     };
     let result = manager.create(options, app);
@@ -52,8 +53,8 @@ pub fn pty_start_claude_session(
     result
 }
 
-/// Write data to an active PTY session.
-/// v9.0: Uses pty_session_id for registry lookup. Falls back to session_id for backward compat.
+/// Deprecated wrapper — no frontend surface may call this directly.
+/// Use runtime_write instead. Uses pty_session_id for registry lookup.
 #[tauri::command]
 pub fn pty_v2_write(
     manager: State<'_, PtyManager>,

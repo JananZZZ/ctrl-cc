@@ -70,6 +70,8 @@ pub struct PtyStartOptions {
     pub extra_args: Vec<String>,
     #[serde(default)]
     pub resume_claude_session_id: Option<String>,
+    #[serde(default)]
+    pub selected_strategy: Option<String>, // v9.0: shell strategy ID selected by discovery
     // Deprecated: kept for backward compat, equals ui_session_id
     #[serde(default)]
     pub session_id: Option<String>,
