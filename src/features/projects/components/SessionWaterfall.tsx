@@ -109,7 +109,7 @@ export const SessionWaterfall: React.FC<SessionWaterfallProps> = ({
               <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
                 <button onClick={() => onOpenWorkspace(s.id)} style={{
                   padding: '4px 12px', borderRadius: 'var(--cc-radius-sm)',
-                  border: 'none', background: 'var(--cc-brand)', color: '#fff',
+                  border: 'none', background: 'var(--cc-brand)', color: 'var(--cc-text-on-accent)',
                   cursor: 'pointer', fontSize: '11px', fontFamily: 'var(--cc-font-sans)', fontWeight: 500,
                 }}>Open</button>
                 <button onClick={() => onFork(s.id)} style={{

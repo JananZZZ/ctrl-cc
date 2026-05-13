@@ -51,7 +51,7 @@ export const DockQuickPrompt: React.FC<DockQuickPromptProps> = ({
         style={{
           padding: '4px 10px', borderRadius: 'var(--cc-radius-sm)',
           border: 'none', background: 'var(--cc-brand)',
-          color: '#fff', fontSize: '11px', fontWeight: 600,
+          color: 'var(--cc-text-on-accent)', fontSize: '11px', fontWeight: 600,
           fontFamily: 'var(--cc-font-sans)', cursor: 'pointer',
           opacity: disabled || sending || !value.trim() ? 0.5 : 1,
           transition: 'opacity 120ms var(--cc-ease-standard)',
