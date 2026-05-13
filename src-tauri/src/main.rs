@@ -5,6 +5,7 @@ mod database;
 mod error;
 mod pty;
 mod runtime;
+mod runtime_v2;
 
 use pty::PtyManager;
 use runtime::commands::ClaudeManager;
@@ -121,6 +122,7 @@ fn main() {
         .manage(file_lock_manager)
         .manage(process_watchdog)
         .manage(pty_session_manager)
+        .manage(runtime_v2::runtime_manager::RuntimeManager::default())
         .invoke_handler(tauri::generate_handler![
             // Database persistence
             commands::db_commands::save_session_to_db,
@@ -201,6 +203,11 @@ fn main() {
             pty_stop,
             structured_run,
     runtime_smoke_test,
+            runtime_v2::runtime_commands::runtime_discover_claude_v2,
+            runtime_v2::runtime_commands::runtime_start_interactive_v2,
+            runtime_v2::runtime_commands::runtime_write_v2,
+            runtime_v2::runtime_commands::runtime_stop_v2,
+            runtime_v2::runtime_commands::runtime_list_sessions_v2,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

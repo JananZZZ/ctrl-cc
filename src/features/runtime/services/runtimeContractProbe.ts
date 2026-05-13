@@ -54,7 +54,7 @@ export async function probeRuntimeContract(): Promise<RuntimeContractProbeResult
 
   let backendPtySessions: RuntimeContractProbeResult["backendPtySessions"] = [];
   try {
-    backendPtySessions = await invoke<RuntimeContractProbeResult["backendPtySessions"]>("runtime_list_pty_sessions");
+    backendPtySessions = await invoke<RuntimeContractProbeResult["backendPtySessions"]>("runtime_list_sessions_v2");
   } catch {
     // backend may not have command yet — show empty
   }

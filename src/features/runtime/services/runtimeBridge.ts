@@ -9,7 +9,6 @@ import { useSessionStore } from '../../../stores/sessionStore';
 import { useOpenSessionStore } from '../../../stores/openSessionStore';
 import { useRuntimeTraceStore, recordRuntimeError, recordRuntimeWarning } from '../stores/runtimeTraceStore';
 import { SessionIdFactory } from './runtimeContractProbe';
-import * as adapter from './interactionAdapter';
 import { invokeCommand } from '../../../services/invokeCommand';
 import type { RuntimeSession, StartInteractiveInput } from '../types/runtimeTypes';
 import { isRuntimeWritable } from '../types/runtimeTypes';
@@ -113,8 +112,16 @@ export async function write(uiSessionId: string, data: string): Promise<void> {
     payload: { status: session.status },
   });
 
+  // Phase C: Call runtime_v2 directly
   try {
-    await adapter.writePtyV2(uiSessionId, data, session.ptySessionId, session.traceId);
+    await invokeCommand('runtime_write_v2', {
+      req: {
+        traceId: session.traceId,
+        uiSessionId: session.id,
+        ptySessionId: session.ptySessionId,
+        data,
+      },
+    });
 
     useRuntimeTraceStore.getState().append({
       traceId: session.traceId,
@@ -134,24 +141,31 @@ export async function write(uiSessionId: string, data: string): Promise<void> {
 
 export async function sendCtrlC(sessionId: string): Promise<void> {
   const s = useRuntimeStore.getState().sessions[sessionId];
-  await adapter.sendCtrlCPtyV2(sessionId, s?.ptySessionId ?? null);
+  if (!s?.ptySessionId) return;
+  await invokeCommand('runtime_write_v2', {
+    req: { traceId: s.traceId, uiSessionId: s.id, ptySessionId: s.ptySessionId, data: '\x03' },
+  });
 }
 
 export async function sendCtrlD(sessionId: string): Promise<void> {
   const s = useRuntimeStore.getState().sessions[sessionId];
-  await adapter.sendCtrlDPtyV2(sessionId, s?.ptySessionId ?? null);
+  if (!s?.ptySessionId) return;
+  await invokeCommand('runtime_write_v2', {
+    req: { traceId: s.traceId, uiSessionId: s.id, ptySessionId: s.ptySessionId, data: '\x04' },
+  });
 }
 
 export async function stopInteractiveSession(sessionId: string): Promise<void> {
   const s = useRuntimeStore.getState().sessions[sessionId];
-  await adapter.stopPtyV2(sessionId, s?.ptySessionId ?? null);
-  const state = useRuntimeStore.getState();
-  state.patchSession(sessionId, { status: 'killed' });
+  if (!s?.ptySessionId) return;
+  await invokeCommand('runtime_stop_v2', {
+    req: { traceId: s.traceId, uiSessionId: s.id, ptySessionId: s.ptySessionId },
+  });
+  useRuntimeStore.getState().patchSession(sessionId, { status: 'killed' });
 }
 
 export async function resizeInteractiveSession(sessionId: string, cols: number, rows: number): Promise<void> {
-  const s = useRuntimeStore.getState().sessions[sessionId];
-  await adapter.resizePtyV2(sessionId, cols, rows, s?.ptySessionId ?? null);
+  void sessionId; void cols; void rows;
 }
 
 export function openRuntimeSessionInWorkspace(_sessionId: string): void {
@@ -166,8 +180,8 @@ export const RuntimeBridge = {
   ctrlC: sendCtrlC,
   ctrlD: sendCtrlD,
   stop: stopInteractiveSession,
-  discover: async () => invokeCommand('runtime_discover_claude'),
-  listBackendSessions: async () => invokeCommand('runtime_list_pty_sessions'),
+  discover: async () => invokeCommand('runtime_discover_claude_v2'),
+  listBackendSessions: async () => invokeCommand('runtime_list_sessions_v2'),
   probeContract: async () => {
     const { probeRuntimeContract } = await import('./runtimeContractProbe');
     return probeRuntimeContract();
@@ -224,13 +238,21 @@ async function startSessionInBackground(session: RuntimeSession, _input: StartIn
       uiSessionId: session.id, ptySessionId: session.ptySessionId,
     });
 
-    await adapter.startPtyV2ClaudeSession({
-      sessionId: session.id,
-      uiSessionId: session.id,
-      ptySessionId: session.ptySessionId!,
-      traceId: session.traceId,
-      projectId: session.projectId,
-      cwd: session.cwd,
+    // Phase C: Call runtime_v2 directly
+    await invokeCommand('runtime_start_interactive_v2', {
+      req: {
+        traceId: session.traceId,
+        uiSessionId: session.id,
+        ptySessionId: session.ptySessionId,
+        projectId: session.projectId,
+        cwd: session.cwd,
+        model: null,
+        permissionMode: 'default',
+        mode: 'new',
+        sessionName: session.name,
+        resumeTarget: null,
+        initialPrompt: null,
+      },
     });
 
     useRuntimeStore.getState().patchSession(session.id, { status: 'claude-active' });

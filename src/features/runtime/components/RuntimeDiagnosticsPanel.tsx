@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { probeRuntimeContract } from '../services/runtimeContractProbe';
 import { useRuntimeTraceStore } from '../stores/runtimeTraceStore';
 import { useRuntimeStore } from '../stores/runtimeStore';
+import { RuntimeBridge } from '../services/runtimeBridge';
 import type { RuntimeContractProbeResult } from '../services/runtimeContractProbe';
 
 interface DiscoveryMatrix {
@@ -16,8 +17,46 @@ export function RuntimeDiagnosticsPanel() {
   const [discovery, setDiscovery] = useState<DiscoveryMatrix | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [contractTestRunning, setContractTestRunning] = useState(false);
+  const [contractTestResult, setContractTestResult] = useState<{ ok: boolean; error?: string } | null>(null);
   const traceEvents = useRuntimeTraceStore((s) => s.events);
   const rtSessions = useRuntimeStore((s) => s.sessions);
+
+  const runActiveContractTest = async () => {
+    setContractTestRunning(true);
+    setContractTestResult(null);
+    try {
+      const result = await RuntimeBridge.runContractTest({
+        projectId: 'diagnostic',
+        projectName: 'Runtime Diagnostic',
+        cwd: await invoke('get_current_dir').catch(() => '.'),
+      });
+      setContractTestResult({ ok: true });
+      void result;
+      await refreshProbe();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setContractTestResult({ ok: false, error: message });
+    } finally {
+      setContractTestRunning(false);
+    }
+  };
+
+  const refreshProbe = async () => {
+    setLoading(true);
+    try {
+      const [probeResult, discoveryResult] = await Promise.all([
+        probeRuntimeContract(),
+        invoke<DiscoveryMatrix>('runtime_discover_claude').catch(() => null),
+      ]);
+      setProbe(probeResult);
+      setDiscovery(discoveryResult);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const runProbe = async () => {
     setLoading(true);
@@ -43,7 +82,15 @@ export function RuntimeDiagnosticsPanel() {
         <button onClick={runProbe} disabled={loading} style={btnStyle}>
           {loading ? 'Probing...' : 'Run Runtime Contract Test'}
         </button>
-        {probe && <span style={{ color: probe.mismatches.length === 0 ? 'var(--cc-green)' : 'var(--cc-red)', fontWeight: 600, fontSize: 'var(--cc-font-sm)' }}>{probe.mismatches.length === 0 ? 'ALL CONTRACTS PASSED' : `${probe.mismatches.length} MISMATCHES`}</span>}
+        <button onClick={() => void runActiveContractTest()} disabled={contractTestRunning} style={btnStyle}>
+          {contractTestRunning ? 'Running Contract Test...' : 'Run Active Runtime Contract Test'}
+        </button>
+        {probe && <ContractStatusBadge probe={probe} />}
+        {contractTestResult && (
+          <span style={{ color: contractTestResult.ok ? 'var(--cc-green)' : 'var(--cc-red)', fontSize: 'var(--cc-font-xs)' }}>
+            {contractTestResult.ok ? 'Test passed' : `Test failed: ${contractTestResult.error}`}
+          </span>
+        )}
         {error && <span style={{ color: 'var(--cc-red)' }}>{error}</span>}
       </div>
 
@@ -213,6 +260,37 @@ function StatusBadge({ status }: { status: string }) {
     status === 'failed' || status === 'disconnected' ? 'var(--cc-red)' :
     status === 'pty-starting' || status === 'discovering' ? 'var(--cc-amber)' : 'var(--cc-text-muted)';
   return <span style={{ color, fontWeight: 600 }}>{status}</span>;
+}
+
+/** Phase A: Correct contract status — NOT TESTED when 0 sessions. */
+function getContractStatus(probe: RuntimeContractProbeResult | null) {
+  if (!probe) {
+    return { label: 'NOT RUN', tone: 'muted' as const, detail: 'Runtime contract probe has not been executed.' };
+  }
+  const frontendCount = probe.frontendSessions?.length ?? 0;
+  const backendCount = probe.backendPtySessions?.length ?? 0;
+  const mismatchCount = probe.mismatches?.length ?? 0;
+
+  if (frontendCount === 0 && backendCount === 0) {
+    return { label: 'NOT TESTED — NO SESSIONS', tone: 'warning' as const, detail: 'No frontend RuntimeSession and no backend PTY session exist. Run an active Runtime Contract Test.' };
+  }
+  if (mismatchCount > 0) {
+    return { label: `${mismatchCount} CONTRACT MISMATCHES`, tone: 'error' as const, detail: 'Frontend RuntimeStore and backend PTY registry are inconsistent.' };
+  }
+  return { label: 'CONTRACTS PASSED', tone: 'success' as const, detail: 'RuntimeSession mappings match backend PTY registry.' };
+}
+
+const toneColors: Record<string, string> = {
+  success: 'var(--cc-green)', warning: 'var(--cc-amber)', error: 'var(--cc-red)', muted: 'var(--cc-text-muted)',
+};
+
+function ContractStatusBadge({ probe }: { probe: RuntimeContractProbeResult | null }) {
+  const status = getContractStatus(probe);
+  return (
+    <span style={{ color: toneColors[status.tone], fontWeight: 600, fontSize: 'var(--cc-font-sm)' }} title={status.detail}>
+      {status.label}
+    </span>
+  );
 }
 
 const btnStyle: React.CSSProperties = {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface SessionCardItem {
+export interface SessionCardItem {
   id: string;
   name: string;
   status: string;

@@ -1,0 +1,45 @@
+use tauri::State;
+
+use super::claude_discovery::discover_claude;
+use super::runtime_manager::RuntimeManager;
+use super::runtime_types::{
+    RuntimeDiscoveryResult, RuntimePtySessionDebugInfo, RuntimeStartInteractiveRequest,
+    RuntimeStartInteractiveResponse, RuntimeStopRequest, RuntimeWriteRequest,
+};
+
+#[tauri::command]
+pub fn runtime_discover_claude_v2() -> RuntimeDiscoveryResult {
+    discover_claude()
+}
+
+#[tauri::command]
+pub fn runtime_start_interactive_v2(
+    app: tauri::AppHandle,
+    manager: State<'_, RuntimeManager>,
+    req: RuntimeStartInteractiveRequest,
+) -> Result<RuntimeStartInteractiveResponse, String> {
+    manager.start_interactive(app, req)
+}
+
+#[tauri::command]
+pub fn runtime_write_v2(
+    manager: State<'_, RuntimeManager>,
+    req: RuntimeWriteRequest,
+) -> Result<(), String> {
+    manager.write(req)
+}
+
+#[tauri::command]
+pub fn runtime_stop_v2(
+    manager: State<'_, RuntimeManager>,
+    req: RuntimeStopRequest,
+) -> Result<(), String> {
+    manager.stop(req)
+}
+
+#[tauri::command]
+pub fn runtime_list_sessions_v2(
+    manager: State<'_, RuntimeManager>,
+) -> Result<Vec<RuntimePtySessionDebugInfo>, String> {
+    manager.list_sessions()
+}
