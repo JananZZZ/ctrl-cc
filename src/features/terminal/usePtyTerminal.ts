@@ -7,6 +7,8 @@ import { WebLinksAddon } from '@xterm/addon-web-links';
 import { SerializeAddon } from '@xterm/addon-serialize';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { RuntimeBridge } from '../runtime/services/runtimeBridge';
+import { useRuntimeStore } from '../runtime/stores/runtimeStore';
+import { isRuntimeWritable } from '../runtime/types/runtimeTypes';
 import { warnLog } from '../../services/invokeCommand';
 import '@xterm/xterm/css/xterm.css';
 
@@ -95,6 +97,7 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
   const searchRef = useRef<SearchAddon | null>(null);
   const serializeRef = useRef<SerializeAddon | null>(null);
   const deadRef = useRef(false);
+  const blockedInputReportedRef = useRef(false);
   const [status, setStatus] = useState<PtyStatus>('idle');
   const [ready, setReady] = useState(false);
 
@@ -103,6 +106,7 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     if (termRef.current) return;
 
     deadRef.current = false;
+    blockedInputReportedRef.current = false;
 
     const fit = new FitAddon();
     const search = new SearchAddon();
@@ -168,22 +172,35 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     }).then((fn) => unlisteners.push(fn));
 
     term.onData((data) => {
-      if (deadRef.current) {
-        term.writeln('\x1b[33m[Ctrl-CC] This PTY session has exited. Start or resume a session before typing.\x1b[0m');
+      const rt = useRuntimeStore.getState().sessions[sessionId];
+      const rtStatus = rt?.status ?? 'missing';
+
+      if (deadRef.current || !rt || !isRuntimeWritable(rtStatus as any)) {
+        if (!blockedInputReportedRef.current) {
+          blockedInputReportedRef.current = true;
+          const reason = rt?.error ? `${rtStatus}: ${rt.error}` : rtStatus;
+          term.writeln(`\x1b[33m[Ctrl-CC] Runtime is not writable (${reason}). Fix Runtime diagnostics, then start a new session.\x1b[0m`);
+        }
+        if (rtStatus === 'failed' || rtStatus === 'discovery-failed' || rtStatus === 'exited' || rtStatus === 'killed' || rtStatus === 'disconnected') {
+          deadRef.current = true;
+          setStatus(rtStatus === 'failed' || rtStatus === 'discovery-failed' ? 'failed' : 'exited');
+        }
         return;
       }
 
       RuntimeBridge.write(sessionId, data).catch((e: unknown) => {
         const msg = String(e);
         warnLog('pty', 'PTY write failed', msg);
-        if (msg.includes('not writable') || msg.includes('exited') || msg.includes('os error 232') || msg.includes('管道')) {
+        if (msg.includes('not writable') || msg.includes('exited') || msg.includes('os error 232') || msg.includes('管道') || msg.includes('Runtime not ready')) {
           deadRef.current = true;
           setStatus('exited');
         }
-        term.writeln(`\x1b[31m[Ctrl-CC] Write failed: ${msg}\x1b[0m`);
+        if (!blockedInputReportedRef.current) {
+          blockedInputReportedRef.current = true;
+          term.writeln(`\x1b[31m[Ctrl-CC] Write failed: ${msg}\x1b[0m`);
+        }
       });
     });
-
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const resizeObserver = new ResizeObserver(() => {
       if (resizeTimer != null) clearTimeout(resizeTimer);
@@ -209,7 +226,12 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     };
   }, [sessionId, container]);
 
-  const write = useCallback((data: string) => { RuntimeBridge.write(sessionId!, data).catch((e: unknown) => warnLog('pty', 'PTY write failed', String(e))); }, [sessionId]);
+  const write = useCallback((data: string) => {
+    if (!sessionId) return;
+    const rt = useRuntimeStore.getState().sessions[sessionId];
+    if (!rt || !isRuntimeWritable(rt.status)) return;
+    RuntimeBridge.write(sessionId, data).catch((e: unknown) => warnLog('pty', 'PTY write failed', String(e)));
+  }, [sessionId]);
   const sendCtrlC = useCallback(() => { RuntimeBridge.ctrlC(sessionId!).catch((e: unknown) => warnLog('pty', 'Ctrl+C failed', String(e))); }, [sessionId]);
   const sendCtrlD = useCallback(() => { RuntimeBridge.ctrlD(sessionId!).catch((e: unknown) => warnLog('pty', 'Ctrl+D failed', String(e))); }, [sessionId]);
   const clear = useCallback(() => { termRef.current?.clear(); }, []);

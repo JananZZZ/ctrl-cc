@@ -5,6 +5,7 @@ import { useRuntimeTraceStore } from '../stores/runtimeTraceStore';
 import { useRuntimeStore } from '../stores/runtimeStore';
 import { RuntimeBridge } from '../services/runtimeBridge';
 import type { RuntimeContractProbeResult } from '../services/runtimeContractProbe';
+import { formatTraceTime } from '../utils/traceTime';
 
 interface DiscoveryMatrix {
   shellStrategies: Array<{name:string;path:string;available:boolean;note:string}>;
@@ -111,6 +112,7 @@ export function RuntimeDiagnosticsPanel() {
                   <td style={tdStyle}>{p.id}</td>
                   <td style={tdStyle}>{p.program}</td>
                   <td style={tdStyle}>{(p.argsPrefix ?? p.args_prefix ?? []).join(' ')}</td>
+                  <td style={tdStyle}>{p.id?.includes?.("powershell") || p.id?.includes?.("pwsh") || p.id?.includes?.("cmd") ? "blocked (shell wrapper)" : "allowed"}</td>
                   <td style={tdStyle}>{p.canaryOk ? 'PASS' : (p.canaryOk === false ? 'FAIL' : 'NOT RUN')}</td>
                   <td style={tdStyle}>{p.versionOk ? (p.versionText ?? 'OK') : 'FAIL'}</td>
                   <td style={tdStyle}>{p.selected ? 'SELECTED' : '-'}</td>
@@ -193,7 +195,7 @@ export function RuntimeDiagnosticsPanel() {
         <div style={{ maxHeight: 300, overflow: 'auto' }}>
           {traceEvents.slice(0, 50).map((e) => (
             <div key={e.id} style={{ padding: '2px 8px', borderLeft: `3px solid ${e.level === 'error' ? 'var(--cc-red)' : e.level === 'warning' ? 'var(--cc-amber)' : 'var(--cc-border)'}`, marginBottom: 2, fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-mono)' }}>
-              <span style={{ color: 'var(--cc-text-soft)' }}>{e.ts.slice(11,19)}</span>
+              <span style={{ color: 'var(--cc-text-soft)' }}>{formatTraceTime(e.ts)}</span>
               <span style={{ marginLeft: 6, color: 'var(--cc-text-muted)' }}>[{e.source}]</span>
               <span style={{ marginLeft: 6, fontWeight: 600 }}>{e.type}</span>
               <span style={{ marginLeft: 6, color: 'var(--cc-text-soft)' }}>{e.message}</span>

@@ -10,6 +10,18 @@ import { useOpenSessionStore } from '../../../stores/openSessionStore';
 import { useRuntimeTraceStore, recordRuntimeError, recordRuntimeWarning } from '../stores/runtimeTraceStore';
 import { SessionIdFactory } from './runtimeContractProbe';
 import { invokeCommand } from '../../../services/invokeCommand';
+// v14.0: Rate-limit blocked write traces to 1 per 5 seconds per session+status
+const blockedWriteTraceAt = new Map<string, number>();
+
+function shouldTraceBlockedWrite(uiSessionId: string, status: string): boolean {
+  const key = `${uiSessionId}:${status}`;
+  const now = Date.now();
+  const last = blockedWriteTraceAt.get(key) ?? 0;
+  if (now - last < 5000) return false;
+  blockedWriteTraceAt.set(key, now);
+  return true;
+}
+
 import type { RuntimeSession, StartInteractiveInput } from '../types/runtimeTypes';
 import { isRuntimeWritable } from '../types/runtimeTypes';
 
@@ -97,6 +109,8 @@ export async function write(uiSessionId: string, data: string): Promise<void> {
   }
 
   if (!isRuntimeWritable(session.status)) {
+    if (shouldTraceBlockedWrite(uiSessionId, session.status)) {
+    }
     recordRuntimeWarning("runtime.write.not_ready", uiSessionId, session.ptySessionId, `Runtime not ready: ${session.status}`, session.traceId);
     throw new Error(`Runtime not ready: ${session.status}`);
   }
@@ -141,7 +155,7 @@ export async function write(uiSessionId: string, data: string): Promise<void> {
 
 export async function sendCtrlC(sessionId: string): Promise<void> {
   const s = useRuntimeStore.getState().sessions[sessionId];
-  if (!s?.ptySessionId) return;
+  if (!s?.ptySessionId || !isRuntimeWritable(s.status)) return;
   await invokeCommand('runtime_write_v2', {
     req: { traceId: s.traceId, uiSessionId: s.id, ptySessionId: s.ptySessionId, data: '\x03' },
   });
@@ -149,7 +163,7 @@ export async function sendCtrlC(sessionId: string): Promise<void> {
 
 export async function sendCtrlD(sessionId: string): Promise<void> {
   const s = useRuntimeStore.getState().sessions[sessionId];
-  if (!s?.ptySessionId) return;
+  if (!s?.ptySessionId || !isRuntimeWritable(s.status)) return;
   await invokeCommand('runtime_write_v2', {
     req: { traceId: s.traceId, uiSessionId: s.id, ptySessionId: s.ptySessionId, data: '\x04' },
   });
@@ -157,7 +171,7 @@ export async function sendCtrlD(sessionId: string): Promise<void> {
 
 export async function stopInteractiveSession(sessionId: string): Promise<void> {
   const s = useRuntimeStore.getState().sessions[sessionId];
-  if (!s?.ptySessionId) return;
+  if (!s?.ptySessionId || !isRuntimeWritable(s.status)) return;
   await invokeCommand('runtime_stop_v2', {
     req: { traceId: s.traceId, uiSessionId: s.id, ptySessionId: s.ptySessionId },
   });
@@ -284,6 +298,7 @@ async function startSessionInBackground(session: RuntimeSession, _input: StartIn
       });
       useRuntimeStore.getState().patchSession(session.id, { status: 'discovery-failed', error: msg });
       useSessionStore.getState().updateSession(session.id, { status: 'failed' as const });
+      useOpenSessionStore.getState().patchTab?.(session.id, { status: 'failed', ptyStatus: 'failed' });
       return;
     }
 
@@ -323,5 +338,6 @@ async function startSessionInBackground(session: RuntimeSession, _input: StartIn
     recordRuntimeError("pty.start.failed", session.id, session.ptySessionId, msg, session.traceId);
     useRuntimeStore.getState().patchSession(session.id, { status: 'failed', error: msg });
     useSessionStore.getState().updateSession(session.id, { status: 'failed' as const });
+      useOpenSessionStore.getState().patchTab?.(session.id, { status: 'failed', ptyStatus: 'failed' });
   }
 }

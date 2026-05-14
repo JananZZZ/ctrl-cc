@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePtyTerminal } from '../../features/terminal/usePtyTerminal';
+import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
 interface Props { sessionId: string | null; }
 
@@ -9,12 +10,13 @@ export function TerminalView({ sessionId }: Props) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const containerCb = useCallback((node: HTMLDivElement | null) => setContainer(node), []);
   const handle = usePtyTerminal(sessionId, container);
+  const runtimeSession = useRuntimeStore((s) => (sessionId ? s.sessions[sessionId] : null));
+  const runtimeFailed = runtimeSession?.status === 'failed' || runtimeSession?.status === 'discovery-failed';
   const fitFnRef = useRef<(() => void) | null>(null);
   fitFnRef.current = handle?.fit ?? null;
 
   useEffect(() => {
     if (container) {
-      // Delay fit to next frame so xterm has time to measure container
       const id = requestAnimationFrame(() => fitFnRef.current?.());
       return () => cancelAnimationFrame(id);
     }
@@ -36,10 +38,34 @@ export function TerminalView({ sessionId }: Props) {
         <ToolBtn onClick={() => handle?.clear()} title={t('common.clear')}>⌧</ToolBtn>
         <div style={{ flex: 1 }} />
         <span style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-muted)' }}>
-          {handle?.status === 'running' ? '●' : handle?.status === 'starting' ? '◐' : '○'} {handle?.status ?? 'idle'}
+          {runtimeSession?.status === 'claude-active' || runtimeSession?.status === 'pty-ready' ? '●' : runtimeFailed ? '×' : '○'} {runtimeSession?.status ?? handle?.status ?? 'idle'}
         </span>
       </div>
-      <div ref={containerCb} data-testid="terminal-xterm-root" style={{ flex: 1, overflow: 'hidden', padding: 2 }} />
+      {runtimeFailed && (
+        <div style={{
+          padding: '10px 12px', borderBottom: '1px solid var(--cc-border)',
+          background: 'var(--cc-red-soft)', color: 'var(--cc-text)',
+          fontSize: 'var(--cc-font-xs)', lineHeight: 1.55,
+        }}>
+          <div style={{ fontWeight: 700, color: 'var(--cc-red)', marginBottom: 4 }}>
+            Claude Runtime Startup Failed
+          </div>
+          <div style={{ color: 'var(--cc-text-muted)', wordBreak: 'break-word' }}>
+            {runtimeSession?.error || 'Runtime failed before PTY became writable.'}
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button onClick={() => navigator.clipboard.writeText(runtimeSession?.error || '')} style={{
+              padding: '4px 10px', border: '1px solid var(--cc-border)',
+              borderRadius: 'var(--cc-radius-sm)', background: 'transparent',
+              color: 'var(--cc-text-muted)', cursor: 'pointer',
+              fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-sans)',
+            }}>
+              Copy Error
+            </button>
+          </div>
+        </div>
+      )}
+      <div ref={containerCb} data-testid="terminal-xterm-root" style={{ flex: 1, overflow: 'hidden', padding: 2, opacity: runtimeFailed ? 0.55 : 1 }} />
     </div>
   );
 }

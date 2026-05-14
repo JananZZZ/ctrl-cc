@@ -9,6 +9,7 @@ interface OpenSessionState {
   closeTab: (sessionId: string) => void;
   setActiveTab: (sessionId: string | null) => void;
   pinTab: (sessionId: string) => void;
+  patchTab: (sessionId: string, patch: Partial<OpenSessionTab>) => void;
 }
 
 export const useOpenSessionStore = create<OpenSessionState>((set) => ({
@@ -48,5 +49,9 @@ export const useOpenSessionStore = create<OpenSessionState>((set) => ({
   pinTab: (sessionId) =>
     set((s) => ({
       tabs: s.tabs.map((t) => (t.sessionId === sessionId ? { ...t, isPinned: !t.isPinned } : t)),
+    })),
+  patchTab: (sessionId, patch) =>
+    set((state) => ({
+      tabs: state.tabs.map((t) => (t.sessionId === sessionId ? { ...t, ...patch } : t)),
     })),
 }));

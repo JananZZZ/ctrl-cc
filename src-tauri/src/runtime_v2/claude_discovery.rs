@@ -1,9 +1,28 @@
+use std::collections::HashSet;
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use super::claude_launch_plan::ClaudeLaunchPlan;
 use super::process_canary::canary_program_owned;
 use super::runtime_types::{ClaudeLaunchPlanDebug, RuntimeDiscoveryResult};
+
+const CLI_RELATIVE_CANDIDATES: &[&str] = &[
+    r"node_modules\@anthropic-ai\claude-code\cli.js",
+    r"node_modules\@anthropic-ai\claude-code\bin\claude.js",
+    r"node_modules\@anthropic-ai\claude-code\index.js",
+    r"node_modules/@anthropic-ai/claude-code/cli.js",
+    r"node_modules/@anthropic-ai/claude-code/bin/claude.js",
+    r"node_modules/@anthropic-ai/claude-code/index.js",
+];
+
+const CLI_PACKAGE_RELATIVE_CANDIDATES: &[&str] = &[
+    r"@anthropic-ai\claude-code\cli.js",
+    r"@anthropic-ai\claude-code\bin\claude.js",
+    r"@anthropic-ai\claude-code\index.js",
+    r"@anthropic-ai/claude-code/cli.js",
+    r"@anthropic-ai/claude-code/bin/claude.js",
+    r"@anthropic-ai/claude-code/index.js",
+];
 
 pub fn discover_claude() -> RuntimeDiscoveryResult {
     let mut debug = Vec::new();
@@ -11,9 +30,19 @@ pub fn discover_claude() -> RuntimeDiscoveryResult {
     let mut errors = Vec::new();
 
     for plan in collect_launch_plans() {
-        let (canary_ok, version_ok, version_text, error) = match canary_launch_plan(&plan) {
-            Ok(version) => (true, true, Some(version), None),
-            Err(err) => (false, false, None, Some(err)),
+        let policy_allowed = is_launch_plan_allowed_by_policy(&plan);
+        let (canary_ok, version_ok, version_text, error) = if policy_allowed {
+            match canary_launch_plan(&plan) {
+                Ok(version) => (true, true, Some(version), None),
+                Err(err) => (false, false, None, Some(err)),
+            }
+        } else {
+            (
+                false,
+                false,
+                None,
+                Some("Blocked by Ctrl-CC policy: shell wrappers are disabled unless CTRL_CC_ALLOW_SHELL_WRAPPER=1".to_string()),
+            )
         };
 
         let mut item = ClaudeLaunchPlanDebug {
@@ -40,37 +69,83 @@ pub fn discover_claude() -> RuntimeDiscoveryResult {
         debug.push(item);
     }
 
+    if selected.is_none() {
+        errors.push(
+            "No policy-allowed runnable Claude launch plan was found. Set CTRL_CC_CLAUDE_JS to Claude CLI JS path, or set CTRL_CC_ALLOW_SHELL_WRAPPER=1 only as a temporary fallback.".to_string(),
+        );
+    }
+
     RuntimeDiscoveryResult { selected, plans: debug, errors }
 }
 
 pub fn select_launch_plan() -> Result<ClaudeLaunchPlan, String> {
-    for plan in collect_launch_plans() {
-        let is_shell_wrapper =
-            plan.id.contains("powershell")
-            || plan.id.contains("pwsh")
-            || plan.id.contains("cmd");
+    let mut errors = Vec::new();
 
-        if is_shell_wrapper && std::env::var("CTRL_CC_ALLOW_SHELL_WRAPPER").is_err() {
+    for plan in collect_launch_plans() {
+        if !is_launch_plan_allowed_by_policy(&plan) {
+            errors.push(format!(
+                "{} blocked by policy. Set CTRL_CC_ALLOW_SHELL_WRAPPER=1 to allow shell wrappers temporarily.",
+                plan.id
+            ));
             continue;
         }
 
-        if canary_launch_plan(&plan).is_ok() {
-            return Ok(plan);
+        match canary_launch_plan(&plan) {
+            Ok(_) => return Ok(plan),
+            Err(err) => errors.push(format!("{} failed canary: {}", plan.id, err)),
         }
     }
 
-    Err("No runnable Claude launch plan found. Install Node.js and Claude Code CLI, or set CTRL_CC_CLAUDE_COMMAND.".to_string())
+    Err(format!(
+        "No runnable Claude launch plan found.\n{}\n\nRecommended fixes:\n1. Find Claude CLI JS path and set CTRL_CC_CLAUDE_JS.\n2. Or reinstall Claude Code CLI globally.\n3. Temporary fallback only: set CTRL_CC_ALLOW_SHELL_WRAPPER=1.",
+        errors.join("\n")
+    ))
+}
+
+fn is_launch_plan_allowed_by_policy(plan: &ClaudeLaunchPlan) -> bool {
+    if plan.id == "user-override-program" || plan.id == "user-override-js" {
+        return true;
+    }
+
+    let is_shell_wrapper = plan.id.contains("powershell")
+        || plan.id.contains("pwsh")
+        || plan.id.contains("cmd")
+        || plan.id.contains("ps1")
+        || plan.id.contains("claude-cmd");
+
+    if is_shell_wrapper && env::var("CTRL_CC_ALLOW_SHELL_WRAPPER").is_err() {
+        return false;
+    }
+
+    true
 }
 
 fn collect_launch_plans() -> Vec<ClaudeLaunchPlan> {
     let mut plans = Vec::new();
 
+    // Highest priority: explicit JS path.
+    if let Some(node) = find_node_exe() {
+        if let Ok(js) = env::var("CTRL_CC_CLAUDE_JS") {
+            let trimmed = js.trim();
+            if !trimmed.is_empty() && Path::new(trimmed).exists() {
+                plans.push(ClaudeLaunchPlan {
+                    id: "user-override-js".to_string(),
+                    label: "User override Claude CLI JS".to_string(),
+                    program: node.to_string_lossy().to_string(),
+                    args_prefix: vec![trimmed.to_string()],
+                    reason: "CTRL_CC_CLAUDE_JS".to_string(),
+                });
+            }
+        }
+    }
+
+    // Program-only override. Use for native exe only.
     if let Ok(command) = env::var("CTRL_CC_CLAUDE_COMMAND") {
         let trimmed = command.trim();
         if !trimmed.is_empty() {
             plans.push(ClaudeLaunchPlan {
-                id: "user-override".to_string(),
-                label: "User override".to_string(),
+                id: "user-override-program".to_string(),
+                label: "User override program".to_string(),
                 program: trimmed.to_string(),
                 args_prefix: vec![],
                 reason: "CTRL_CC_CLAUDE_COMMAND".to_string(),
@@ -102,6 +177,7 @@ fn collect_launch_plans() -> Vec<ClaudeLaunchPlan> {
         });
     }
 
+    // Shell wrappers are listed for diagnostics, but blocked by default policy.
     if let Some(pwsh) = find_on_path("pwsh.exe") {
         if let Some(ps1) = find_claude_ps1() {
             plans.push(ClaudeLaunchPlan {
@@ -116,7 +192,7 @@ fn collect_launch_plans() -> Vec<ClaudeLaunchPlan> {
                     "-File".into(),
                     ps1.to_string_lossy().to_string(),
                 ],
-                reason: "pwsh + npm PowerShell shim".to_string(),
+                reason: "Shell wrapper fallback only".to_string(),
             });
         }
     }
@@ -136,7 +212,7 @@ fn collect_launch_plans() -> Vec<ClaudeLaunchPlan> {
                     "-File".into(),
                     ps1.to_string_lossy().to_string(),
                 ],
-                reason: "Windows PowerShell + npm PowerShell shim".to_string(),
+                reason: "Shell wrapper fallback only; can trigger 0xc0000142 on this machine".to_string(),
             });
         }
     }
@@ -147,18 +223,25 @@ fn collect_launch_plans() -> Vec<ClaudeLaunchPlan> {
                 id: "cmd-claude-cmd".to_string(),
                 label: "cmd.exe + claude.cmd".to_string(),
                 program: cmd.to_string_lossy().to_string(),
-                args_prefix: vec![
-                    "/d".into(),
-                    "/s".into(),
-                    "/c".into(),
-                    cmd_shim.to_string_lossy().to_string(),
-                ],
-                reason: "Last resort. Avoid if cmd.exe fails 0xc0000142.".to_string(),
+                args_prefix: vec!["/d".into(), "/s".into(), "/c".into(), cmd_shim.to_string_lossy().to_string()],
+                reason: "Shell wrapper fallback only; avoid if cmd.exe/powershell.exe fails".to_string(),
             });
         }
     }
 
-    plans
+    dedupe_plans(plans)
+}
+
+fn dedupe_plans(plans: Vec<ClaudeLaunchPlan>) -> Vec<ClaudeLaunchPlan> {
+    let mut out = Vec::new();
+    let mut seen = HashSet::new();
+    for p in plans {
+        let key = format!("{}::{:?}", p.program, p.args_prefix);
+        if seen.insert(key) {
+            out.push(p);
+        }
+    }
+    out
 }
 
 fn canary_launch_plan(plan: &ClaudeLaunchPlan) -> Result<String, String> {
@@ -185,16 +268,47 @@ fn find_cmd_exe() -> Option<PathBuf> {
 }
 
 fn find_claude_cli_js() -> Option<PathBuf> {
-    let appdata = env::var("APPDATA").ok().map(PathBuf::from);
-    let mut candidates = Vec::new();
+    let mut bases: Vec<PathBuf> = Vec::new();
 
-    if let Some(appdata) = appdata {
-        candidates.push(appdata.join(r"npm\node_modules\@anthropic-ai\claude-code\cli.js"));
-        candidates.push(appdata.join(r"npm\node_modules\@anthropic-ai\claude-code\bin\claude.js"));
-        candidates.push(appdata.join(r"npm\node_modules\@anthropic-ai\claude-code\index.js"));
+    for key in ["NPM_CONFIG_PREFIX", "npm_config_prefix", "PREFIX"] {
+        if let Ok(v) = env::var(key) {
+            let p = PathBuf::from(v);
+            bases.push(p.clone());
+            bases.push(p.join("node_modules"));
+        }
     }
 
-    candidates.into_iter().find(|p| p.exists())
+    if let Ok(appdata) = env::var("APPDATA") {
+        bases.push(PathBuf::from(&appdata).join("npm"));
+        bases.push(PathBuf::from(&appdata).join("npm").join("node_modules"));
+    }
+
+    if let Ok(local) = env::var("LOCALAPPDATA") {
+        bases.push(PathBuf::from(&local).join("npm"));
+        bases.push(PathBuf::from(&local).join("npm").join("node_modules"));
+    }
+
+    if let Ok(user) = env::var("USERPROFILE") {
+        bases.push(PathBuf::from(&user).join("AppData").join("Roaming").join("npm"));
+        bases.push(PathBuf::from(&user).join("AppData").join("Roaming").join("npm").join("node_modules"));
+        bases.push(PathBuf::from(&user).join(".npm-global"));
+        bases.push(PathBuf::from(&user).join(".npm-global").join("lib").join("node_modules"));
+    }
+
+    if let Ok(program_files) = env::var("ProgramFiles") {
+        bases.push(PathBuf::from(program_files).join("nodejs").join("node_modules"));
+    }
+
+    for base in bases {
+        for rel in CLI_RELATIVE_CANDIDATES.iter().chain(CLI_PACKAGE_RELATIVE_CANDIDATES.iter()) {
+            let p = base.join(rel);
+            if p.exists() {
+                return Some(p);
+            }
+        }
+    }
+
+    None
 }
 
 fn find_claude_ps1() -> Option<PathBuf> {
@@ -218,54 +332,69 @@ fn find_claude_cmd() -> Option<PathBuf> {
 fn resolve_node_plan_from_claude_shim() -> Option<ClaudeLaunchPlan> {
     let shim = find_on_path("claude.cmd")
         .or_else(|| find_on_path("claude.ps1"))
-        .or_else(|| find_on_path("claude"));
-
-    let shim = shim?;
-    let content = std::fs::read_to_string(&shim).ok()?;
+        .or_else(|| find_on_path("claude"))?;
 
     let node = find_node_exe()?;
+    let shim_dir = shim.parent()?.to_path_buf();
+    let content = std::fs::read_to_string(&shim).unwrap_or_default();
 
-    let candidates = [
-        r"node_modules\@anthropic-ai\claude-code\cli.js",
-        r"node_modules\@anthropic-ai\claude-code\bin\claude.js",
-        r"node_modules\@anthropic-ai\claude-code\index.js",
-        r"node_modules/@anthropic-ai/claude-code/cli.js",
-        r"node_modules/@anthropic-ai/claude-code/bin/claude.js",
-        r"node_modules/@anthropic-ai/claude-code/index.js",
+    if let Some(js) = extract_cli_js_from_shim_content(&content, &shim_dir) {
+        if js.exists() {
+            return Some(ClaudeLaunchPlan {
+                id: "direct-node-from-shim".to_string(),
+                label: "Direct Node.js resolved from Claude npm shim".to_string(),
+                program: node.to_string_lossy().to_string(),
+                args_prefix: vec![js.to_string_lossy().to_string()],
+                reason: format!("Resolved from shim {}", shim.to_string_lossy()),
+            });
+        }
+    }
+
+    let common_roots = [
+        shim_dir.join("node_modules").join("@anthropic-ai").join("claude-code"),
+        shim_dir.join("..").join("node_modules").join("@anthropic-ai").join("claude-code"),
     ];
 
-    let shim_dir = shim.parent()?.to_path_buf();
-
-    for rel in candidates {
-        if content.contains(rel) {
-            let p = shim_dir.join(rel);
+    for root in common_roots {
+        for file in ["cli.js", "bin/claude.js", "index.js"] {
+            let p = root.join(file);
             if p.exists() {
                 return Some(ClaudeLaunchPlan {
-                    id: "direct-node-from-shim".to_string(),
-                    label: "Direct Node.js resolved from Claude npm shim".to_string(),
+                    id: "direct-node-from-shim-dir".to_string(),
+                    label: "Direct Node.js resolved from shim directory".to_string(),
                     program: node.to_string_lossy().to_string(),
                     args_prefix: vec![p.to_string_lossy().to_string()],
-                    reason: format!("Resolved from shim {}", shim.to_string_lossy()),
+                    reason: format!("Resolved from shim dir {}", shim_dir.to_string_lossy()),
                 });
             }
         }
     }
 
-    let common = shim_dir
-        .join("node_modules")
-        .join("@anthropic-ai")
-        .join("claude-code");
+    None
+}
 
-    for file in ["cli.js", "bin/claude.js", "index.js"] {
-        let p = common.join(file);
-        if p.exists() {
-            return Some(ClaudeLaunchPlan {
-                id: "direct-node-from-shim-dir".to_string(),
-                label: "Direct Node.js resolved from shim directory".to_string(),
-                program: node.to_string_lossy().to_string(),
-                args_prefix: vec![p.to_string_lossy().to_string()],
-                reason: format!("Resolved from shim dir {}", shim_dir.to_string_lossy()),
-            });
+fn extract_cli_js_from_shim_content(content: &str, shim_dir: &Path) -> Option<PathBuf> {
+    for line in content.lines() {
+        if !line.contains("@anthropic-ai") || !line.contains("claude-code") {
+            continue;
+        }
+
+        let cleaned = line
+            .replace("%dp0%", &shim_dir.to_string_lossy())
+            .replace("%~dp0", &shim_dir.to_string_lossy())
+            .replace("$basedir", &shim_dir.to_string_lossy())
+            .replace("$PSScriptRoot", &shim_dir.to_string_lossy())
+            .replace('"', " ")
+            .replace('\'', " ");
+
+        for token in cleaned.split_whitespace() {
+            if token.contains("@anthropic-ai") && token.contains("claude-code") && token.ends_with(".js") {
+                let p = PathBuf::from(token);
+                if p.is_absolute() {
+                    return Some(p);
+                }
+                return Some(shim_dir.join(p));
+            }
         }
     }
 
