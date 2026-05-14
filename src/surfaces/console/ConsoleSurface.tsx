@@ -57,7 +57,7 @@ export function ConsoleSurface() {
   const openWorkspace = (sid: string) => { const s = sessions.find((x) => x.id === sid); if (s) { openSession({ sessionId: s.id, projectId: s.projectId, projectName: s.title, title: s.title, status: s.status, viewMode: 'chat', pendingConfirms: 0, riskCount: s.riskCount, isPinned: false }); navigateTo('workspace'); } };
 
   return (
-    <div data-testid="surface-console" style={{ padding: '28px 36px', maxWidth: 960, overflow: 'auto', height: '100%' }}>
+    <div data-testid="surface-console" style={{ padding: 'clamp(20px, 2vw, 32px)', overflow: 'auto', height: '100%', width: '100%', maxWidth: 1480, margin: '0 auto', boxSizing: 'border-box' }}>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 'var(--cc-font-3xl)', fontWeight: 700, color: 'var(--cc-text)', marginBottom: 4 }}>{t(greetKey)}, {t('greeting.developer')}</h1>
         <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-soft)' }}>{t('console.subtitle')}</p>

@@ -61,36 +61,33 @@ export async function probeRuntimeContract(): Promise<RuntimeContractProbeResult
 
   const backendIds = new Set(backendPtySessions.map((s) => s.ptySessionId));
 
+  const preBackendStatuses = new Set(['created','workspace-opened','discovering','discovery-failed','pty-starting','failed']);
+  const requiresBackend = new Set(['pty-ready','claude-launching','claude-active','idle','waiting-permission']);
+
   const mismatches: Array<{ uiSessionId: string; ptySessionId: string | null; reason: string }> = [];
   for (const s of frontendSessions) {
     if (!s.ptySessionId) {
-      mismatches.push({ uiSessionId: s.uiSessionId, ptySessionId: null, reason: "frontend session has no ptySessionId" });
-    } else if (!backendIds.has(s.ptySessionId)) {
+      if (requiresBackend.has(s.status)) {
+        mismatches.push({ uiSessionId: s.uiSessionId, ptySessionId: null, reason: `frontend status=${s.status} requires PTY but ptySessionId is missing` });
+      }
+      continue;
+    }
+    if (preBackendStatuses.has(s.status) && !backendIds.has(s.ptySessionId)) continue;
+    if (requiresBackend.has(s.status) && !backendIds.has(s.ptySessionId)) {
       mismatches.push({ uiSessionId: s.uiSessionId, ptySessionId: s.ptySessionId, reason: "backend registry missing ptySessionId" });
-    } else {
-      const backend = backendPtySessions.find((b) => b.ptySessionId === s.ptySessionId);
-      if (backend) {
-        if (backend.status === 'exited' || backend.status === 'failed' || backend.status === 'killed') {
-          mismatches.push({
-            uiSessionId: s.uiSessionId,
-            ptySessionId: s.ptySessionId,
-            reason: `backend PTY is not alive: status=${backend.status}`,
-          });
-        }
-        if (backend.readerAlive === false) {
-          mismatches.push({
-            uiSessionId: s.uiSessionId,
-            ptySessionId: s.ptySessionId,
-            reason: "backend readerAlive=false",
-          });
-        }
-        if (!backend.hasWriter) {
-          mismatches.push({
-            uiSessionId: s.uiSessionId,
-            ptySessionId: s.ptySessionId,
-            reason: "backend hasWriter=false",
-          });
-        }
+      continue;
+    }
+    const backend = backendPtySessions.find((b) => b.ptySessionId === s.ptySessionId);
+    if (!backend) continue;
+    if (requiresBackend.has(s.status)) {
+      if (backend.status === 'exited' || backend.status === 'failed' || backend.status === 'killed') {
+        mismatches.push({ uiSessionId: s.uiSessionId, ptySessionId: s.ptySessionId, reason: `backend PTY is not alive: status=${backend.status}` });
+      }
+      if (backend.readerAlive === false) {
+        mismatches.push({ uiSessionId: s.uiSessionId, ptySessionId: s.ptySessionId, reason: "backend readerAlive=false" });
+      }
+      if (!backend.hasWriter) {
+        mismatches.push({ uiSessionId: s.uiSessionId, ptySessionId: s.ptySessionId, reason: "backend hasWriter=false" });
       }
     }
   }

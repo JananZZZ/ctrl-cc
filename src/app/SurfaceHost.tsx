@@ -24,7 +24,7 @@ export function SurfaceHost() {
   const Component = surfaces[activeSurface] ?? ConsoleSurface;
 
   return (
-    <div style={{ flex: 1, overflow: 'hidden' }}>
+    <div style={{ flex: 1, minWidth: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
       <ErrorBoundary key={activeSurface}>
         <Component />
       </ErrorBoundary>

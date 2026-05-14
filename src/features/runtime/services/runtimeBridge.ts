@@ -17,7 +17,7 @@ function shouldTraceBlockedWrite(uiSessionId: string, status: string): boolean {
   const key = `${uiSessionId}:${status}`;
   const now = Date.now();
   const last = blockedWriteTraceAt.get(key) ?? 0;
-  if (now - last < 5000) return false;
+  if (now - last < 3000) return false;
   blockedWriteTraceAt.set(key, now);
   return true;
 }

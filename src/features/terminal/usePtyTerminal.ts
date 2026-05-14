@@ -97,6 +97,9 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
   const searchRef = useRef<SearchAddon | null>(null);
   const serializeRef = useRef<SerializeAddon | null>(null);
   const deadRef = useRef(false);
+  const runtimeStatus = useRuntimeStore((s) =>
+    sessionId ? s.sessions[sessionId]?.status : undefined
+  );
   const blockedInputReportedRef = useRef(false);
   const [status, setStatus] = useState<PtyStatus>('idle');
   const [ready, setReady] = useState(false);
@@ -106,6 +109,13 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     if (termRef.current) return;
 
     deadRef.current = false;
+    blockedInputReportedRef.current = false;
+
+    // v15: Sync RuntimeStore failed status to deadRef via effect
+    if (runtimeStatus === 'failed' || runtimeStatus === 'discovery-failed' || runtimeStatus === 'exited' || runtimeStatus === 'killed' || runtimeStatus === 'disconnected') {
+      deadRef.current = true;
+      setStatus(runtimeStatus === 'failed' || runtimeStatus === 'discovery-failed' ? 'failed' : 'exited');
+    }
     blockedInputReportedRef.current = false;
 
     const fit = new FitAddon();

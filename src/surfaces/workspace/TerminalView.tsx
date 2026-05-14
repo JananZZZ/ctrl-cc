@@ -5,6 +5,7 @@ import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
 interface Props { sessionId: string | null; }
 
+
 export function TerminalView({ sessionId }: Props) {
   const { t } = useTranslation();
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
@@ -51,7 +52,7 @@ export function TerminalView({ sessionId }: Props) {
             Claude Runtime Startup Failed
           </div>
           <div style={{ color: 'var(--cc-text-muted)', wordBreak: 'break-word' }}>
-            {runtimeSession?.error || 'Runtime failed before PTY became writable.'}
+            {runtimeSession?.error || "Runtime failed before PTY became writable."}
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             <button onClick={() => navigator.clipboard.writeText(runtimeSession?.error || '')} style={{
