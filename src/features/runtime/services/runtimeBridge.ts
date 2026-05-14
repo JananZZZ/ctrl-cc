@@ -10,6 +10,9 @@ import { useOpenSessionStore } from '../../../stores/openSessionStore';
 import { useRuntimeTraceStore, recordRuntimeError, recordRuntimeWarning } from '../stores/runtimeTraceStore';
 import { SessionIdFactory } from './runtimeContractProbe';
 import { invokeCommand } from '../../../services/invokeCommand';
+import type { RuntimeSession, StartInteractiveInput } from '../types/runtimeTypes';
+import { isRuntimeWritable } from '../types/runtimeTypes';
+
 const notReadyWarnLastAt = new Map<string, number>();
 
 function shouldRecordNotReady(uiSessionId: string, status: string): boolean {
@@ -20,9 +23,6 @@ function shouldRecordNotReady(uiSessionId: string, status: string): boolean {
   notReadyWarnLastAt.set(key, now);
   return true;
 }
-
-import type { RuntimeSession, StartInteractiveInput } from '../types/runtimeTypes';
-import { isRuntimeWritable } from '../types/runtimeTypes';
 
 function createPendingSession(input: StartInteractiveInput): RuntimeSession {
   const now = new Date().toISOString();

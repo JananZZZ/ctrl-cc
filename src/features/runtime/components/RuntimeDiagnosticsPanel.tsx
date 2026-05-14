@@ -109,7 +109,7 @@ export function RuntimeDiagnosticsPanel() {
           <table style={{ ...tableStyle, minWidth: 980 }}>
             <thead>
               <tr>
-                {['Plan', 'Program', 'Args Prefix', 'Canary', 'Version', 'Selected', 'Error'].map((h) => (
+                {['Plan', 'Program', 'Args Prefix', 'Policy', 'Canary', 'Selected', 'Error'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
               </tr>
@@ -308,7 +308,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function StatusBadge({ status }: { status: string }) {
   const color = status === 'claude-active' || status === 'pty-ready' ? 'var(--cc-green)' :
-    status === 'failed' || status === 'disconnected' ? 'var(--cc-red)' :
+    status === 'failed' || status === 'discovery-failed' || status === 'disconnected' ? 'var(--cc-red)' :
     status === 'pty-starting' || status === 'discovering' ? 'var(--cc-amber)' : 'var(--cc-text-muted)';
   return <span style={{ color, fontWeight: 600 }}>{status}</span>;
 }
