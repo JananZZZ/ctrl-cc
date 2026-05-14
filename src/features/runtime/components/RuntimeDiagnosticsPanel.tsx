@@ -21,6 +21,7 @@ export function RuntimeDiagnosticsPanel() {
   const [contractTestRunning, setContractTestRunning] = useState(false);
   const [contractTestResult, setContractTestResult] = useState<{ ok: boolean; error?: string } | null>(null);
   const [jsCandidates, setJsCandidates] = useState<Array<{ path: string; exists: boolean; source: string }>>([]);
+  const [nativeClaude, setNativeClaude] = useState<Array<{ path: string; source: string; exists: boolean; executable: boolean; versionOk: boolean; versionText: string | null; printOk: boolean; interactiveAllowed: boolean; error: string | null }>>([]);
   const traceEvents = useRuntimeTraceStore((s) => s.events);
   const rtSessions = useRuntimeStore((s) => s.sessions);
 
@@ -56,6 +57,9 @@ export function RuntimeDiagnosticsPanel() {
       invoke<Array<{ path: string; exists: boolean; source: string }>>('runtime_find_claude_js_candidates')
         .then(setJsCandidates)
         .catch(() => setJsCandidates([]));
+      invoke<Array<{ path: string; source: string; exists: boolean; executable: boolean; versionOk: boolean; versionText: string | null; printOk: boolean; interactiveAllowed: boolean; error: string | null }>>('runtime_discover_native_claude')
+        .then(setNativeClaude)
+        .catch(() => setNativeClaude([]));
     } catch (e) {
       setError(String(e));
     } finally {
@@ -76,6 +80,9 @@ export function RuntimeDiagnosticsPanel() {
       invoke<Array<{ path: string; exists: boolean; source: string }>>('runtime_find_claude_js_candidates')
         .then(setJsCandidates)
         .catch(() => setJsCandidates([]));
+      invoke<Array<{ path: string; source: string; exists: boolean; executable: boolean; versionOk: boolean; versionText: string | null; printOk: boolean; interactiveAllowed: boolean; error: string | null }>>('runtime_discover_native_claude')
+        .then(setNativeClaude)
+        .catch(() => setNativeClaude([]));
     } catch (e) {
       setError(String(e));
     } finally {
@@ -102,9 +109,9 @@ export function RuntimeDiagnosticsPanel() {
         {error && <span style={{ color: 'var(--cc-red)' }}>{error}</span>}
       </div>
 
-      {/* v13.0: Launch Plan Matrix (v2 discovery) */}
+      {/* Legacy Launch Plan Matrix (v2 discovery) */}
       {discovery && Array.isArray((discovery as any).plans) && (
-        <Section title="Launch Plan Matrix">
+        <Section title="Legacy Launch Plan Matrix">
           <div style={{ overflowX: 'auto', width: '100%', borderRadius: 'var(--cc-radius-sm)' }}>
           <table style={{ ...tableStyle, minWidth: 980 }}>
             <thead>
@@ -158,6 +165,48 @@ export function RuntimeDiagnosticsPanel() {
             </table>
           </div>
         )}
+      </Section>
+
+      {/* Native Claude Executable Candidates */}
+      <Section title="Native Claude Executable Candidates">
+        {nativeClaude.length === 0 ? (
+          <p style={{ color: 'var(--cc-text-muted)' }}>No native Claude candidates found. Run diagnostics to scan for claude.exe.</p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ ...tableStyle, minWidth: 980 }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Path</th>
+                  <th style={thStyle}>Source</th>
+                  <th style={thStyle}>Exists</th>
+                  <th style={thStyle}>Version</th>
+                  <th style={thStyle}>Interactive</th>
+                  <th style={thStyle}>Error</th>
+                </tr>
+              </thead>
+              <tbody>
+                {nativeClaude.map((c) => (
+                  <tr key={c.path}>
+                    <td style={tdStyle}><code>{c.path}</code></td>
+                    <td style={tdStyle}>{c.source}</td>
+                    <td style={tdStyle}>{c.exists ? '✅' : '❌'}</td>
+                    <td style={tdStyle}>{c.versionOk ? (c.versionText ?? 'OK') : 'FAIL'}</td>
+                    <td style={tdStyle}>{c.interactiveAllowed ? '✅ Allowed' : '❌ Blocked'}</td>
+                    <td style={tdStyle}>{c.error ?? '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Section>
+
+      {/* Runtime Fabric Ledger (v19.0) */}
+      <Section title="Runtime Fabric Ledger">
+        <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
+          Runtime Fabric Store tracks Chat / Terminal / Background channels via Event Ledger.
+          New sessions default to Chat (stream-json). Terminal starts native claude.exe on demand.
+        </div>
       </Section>
 
       {/* Legacy discovery: only show if old format */}

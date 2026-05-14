@@ -6,7 +6,7 @@ use chrono::Utc;
 use portable_pty::{CommandBuilder, NativePtySystem, PtySize, PtySystem};
 use tauri::{AppHandle, Emitter};
 
-use super::claude_discovery::select_launch_plan;
+use super::native_claude_discovery::select_native_claude_for_interactive;
 use super::runtime_types::{
     RuntimePtySessionDebugInfo, RuntimeStartInteractiveRequest, RuntimeStartInteractiveResponse,
     RuntimeStopRequest, RuntimeWriteRequest,
@@ -58,15 +58,14 @@ impl RuntimeManager {
             return Err(format!("cwd is not a directory: {}", req.cwd));
         }
 
-        let plan = select_launch_plan()?;
-        let mut claude_args = build_claude_args(&req);
+        let claude_bin = select_native_claude_for_interactive()?;
+        let program = claude_bin.to_string_lossy().to_string();
+        let mut args = build_interactive_args(&req);
         if let Some(initial) = &req.initial_prompt {
             if !initial.trim().is_empty() {
-                claude_args.push(initial.clone());
+                args.push(initial.clone());
             }
         }
-
-        let (program, args) = plan.command_parts(&claude_args);
 
         let pty_system = NativePtySystem::default();
         let pair = pty_system
@@ -208,7 +207,7 @@ impl RuntimeManager {
             pid,
             cwd: req.cwd,
             status: "pty-ready".into(),
-            launch_plan_id: plan.id,
+            launch_plan_id: "native-claude-exe".into(),
             program,
             args,
         })
@@ -292,33 +291,38 @@ impl RuntimeManager {
     }
 }
 
-fn build_claude_args(req: &RuntimeStartInteractiveRequest) -> Vec<String> {
+fn build_interactive_args(req: &RuntimeStartInteractiveRequest) -> Vec<String> {
     let mut args = Vec::new();
 
     if let Some(permission) = &req.permission_mode {
-        args.push("--permission-mode".into());
-        args.push(permission.clone());
-    }
-
-    // Do not force --model during PTY bootstrap.
-    // Some Claude Code CLI versions reject short model aliases and exit immediately.
-    if let Some(model) = &req.model {
-        let m = model.trim();
-        if !m.is_empty() && m != "default" && m != "sonnet" && m != "opus" && m != "haiku" {
-            args.push("--model".into());
-            args.push(m.to_string());
+        if !permission.trim().is_empty() && permission != "default" {
+            args.push("--permission-mode".into());
+            args.push(permission.clone());
         }
     }
 
-    match req.mode.as_str() {
-        "continue" => args.push("--continue".into()),
-        "resume" => {
-            args.push("--resume".into());
-            if let Some(target) = &req.resume_target {
-                args.push(target.clone());
-            }
+    if let Some(name) = &req.session_name {
+        if !name.trim().is_empty() {
+            args.push("--name".into());
+            args.push(name.clone());
         }
-        _ => {}
+    }
+
+    if req.mode == "resume" {
+        args.push("--resume".into());
+        if let Some(target) = &req.resume_target {
+            args.push(target.clone());
+        }
+    }
+
+    if req.mode == "continue" {
+        args.push("--continue".into());
+    }
+
+    if let Some(initial) = &req.initial_prompt {
+        if !initial.trim().is_empty() {
+            args.push(initial.clone());
+        }
     }
 
     args

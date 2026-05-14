@@ -9,6 +9,7 @@ import { invokeCommand, warnLog } from '../services/invokeCommand';
 import { useErrorStore } from '../stores/errorStore';
 import { listen } from '@tauri-apps/api/event';
 import { installRuntimeLifecycleBridge } from '../features/runtime/services/runtimeLifecycleBridge';
+import { installRuntimeFabricEventBridge } from '../features/runtime-fabric/services/runtimeFabricEventBridge';
 import i18n from '../i18n';
 
 export function App() {
@@ -26,6 +27,15 @@ export function App() {
     }).catch((error) => {
       console.error('[Ctrl-CC] installRuntimeLifecycleBridge failed', error);
     });
+    return () => cleanup?.();
+  }, []);
+
+  // v19.0: Install Runtime Fabric Event Bridge (runtime://chat-stream, chat-stderr, chat-exit)
+  useEffect(() => {
+    let cleanup: undefined | (() => void);
+    installRuntimeFabricEventBridge()
+      .then((fn) => { cleanup = fn; })
+      .catch((err) => console.error('[Ctrl-CC] RuntimeFabricEventBridge failed', err));
     return () => cleanup?.();
   }, []);
 

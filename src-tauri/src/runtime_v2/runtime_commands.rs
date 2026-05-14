@@ -1,6 +1,9 @@
 use tauri::State;
 
 use super::claude_discovery::{discover_claude, list_claude_js_candidates};
+use super::chat_stream::start_chat_stream;
+use super::native_claude_discovery::{discover_native_claude_candidates, ClaudeNativeCandidate};
+use super::runtime_types::{ChatStreamRequest, ChatStreamStarted};
 use super::runtime_manager::RuntimeManager;
 use super::runtime_types::{
     ClaudeJsCandidate, RuntimeDiscoveryResult, RuntimePtySessionDebugInfo,
@@ -48,4 +51,17 @@ pub fn runtime_list_sessions_v2(
 #[tauri::command]
 pub fn runtime_find_claude_js_candidates() -> Vec<ClaudeJsCandidate> {
     list_claude_js_candidates()
+}
+
+#[tauri::command]
+pub fn runtime_discover_native_claude() -> Vec<ClaudeNativeCandidate> {
+    discover_native_claude_candidates()
+}
+
+#[tauri::command]
+pub fn runtime_start_chat_stream(
+    app: tauri::AppHandle,
+    req: ChatStreamRequest,
+) -> Result<ChatStreamStarted, String> {
+    start_chat_stream(app, req)
 }
