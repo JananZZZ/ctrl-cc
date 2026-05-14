@@ -319,11 +319,5 @@ fn build_interactive_args(req: &RuntimeStartInteractiveRequest) -> Vec<String> {
         args.push("--continue".into());
     }
 
-    if let Some(initial) = &req.initial_prompt {
-        if !initial.trim().is_empty() {
-            args.push(initial.clone());
-        }
-    }
-
     args
 }
