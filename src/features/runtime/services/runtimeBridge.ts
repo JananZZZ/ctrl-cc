@@ -89,8 +89,12 @@ export async function startInteractiveClaudeSession(input: StartInteractiveInput
 
   useSurfaceStore.getState().navigateTo('workspace');
 
-  // Background PTY start — non-blocking
-  void startSessionInBackground(session, input);
+  // v20: legacy RuntimeBridge no longer auto-starts PTY when opening a chat tab.
+  // PTY must be started explicitly by TerminalView / RuntimeFabricBridge.startTerminalChannel.
+  const shouldAutoStartPty = (input as StartInteractiveInput & { autoStartPty?: boolean }).autoStartPty === true;
+  if (shouldAutoStartPty) {
+    void startSessionInBackground(session, input);
+  }
   return session;
 }
 

@@ -6,7 +6,7 @@ use chrono::Utc;
 use portable_pty::{CommandBuilder, NativePtySystem, PtySize, PtySystem};
 use tauri::{AppHandle, Emitter};
 
-use super::native_claude_discovery::select_native_claude_for_interactive;
+use super::claude_command_resolver::{select_for_terminal, ClaudeCommandSpec};
 use super::runtime_types::{
     RuntimePtySessionDebugInfo, RuntimeStartInteractiveRequest, RuntimeStartInteractiveResponse,
     RuntimeStopRequest, RuntimeWriteRequest,
@@ -58,14 +58,8 @@ impl RuntimeManager {
             return Err(format!("cwd is not a directory: {}", req.cwd));
         }
 
-        let claude_bin = select_native_claude_for_interactive()?;
-        let program = claude_bin.to_string_lossy().to_string();
-        let mut args = build_interactive_args(&req);
-        if let Some(initial) = &req.initial_prompt {
-            if !initial.trim().is_empty() {
-                args.push(initial.clone());
-            }
-        }
+        let spec = select_for_terminal()?;
+        let (program, args) = build_command_for_spec(&spec, &req);
 
         let pty_system = NativePtySystem::default();
         let pair = pty_system
@@ -289,6 +283,36 @@ impl RuntimeManager {
             })
             .collect())
     }
+}
+
+fn build_command_for_spec(spec: &ClaudeCommandSpec, req: &RuntimeStartInteractiveRequest) -> (String, Vec<String>) {
+    let cli_args = build_interactive_args(req);
+
+    if spec.kind == "gitBash" {
+        let command = if cli_args.is_empty() {
+            "claude".to_string()
+        } else {
+            format!("claude {}", shell_quote_args(&cli_args))
+        };
+        return (spec.program.clone(), vec!["-lc".to_string(), command]);
+    }
+
+    let mut args = spec.args_prefix.clone();
+    args.extend(cli_args);
+    (spec.program.clone(), args)
+}
+
+fn shell_quote_args(args: &[String]) -> String {
+    args.iter()
+        .map(|a| {
+            if a.chars().all(|c| c.is_ascii_alphanumeric() || "-_./:".contains(c)) {
+                a.clone()
+            } else {
+                format!("'{}'", a.replace('\'', "'\\''"))
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn build_interactive_args(req: &RuntimeStartInteractiveRequest) -> Vec<String> {

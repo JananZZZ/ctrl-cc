@@ -1,0 +1,75 @@
+.console-page {
+  display: grid;
+  gap: 16px;
+}
+
+.console-hero {
+  max-width: 720px;
+}
+
+.console-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.console-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.95fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.console-card {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.console-env-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1fr);
+  row-gap: 8px;
+  column-gap: 12px;
+  align-items: baseline;
+}
+
+.console-env-grid .value {
+  min-width: 0;
+  text-align: right;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.console-health-strip {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-surface-solid);
+  border: 1px solid var(--cc-border);
+}
+
+@media (max-width: 1200px) {
+  .console-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .console-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .console-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .console-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}

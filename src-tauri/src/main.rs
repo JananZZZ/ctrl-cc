@@ -210,6 +210,7 @@ fn main() {
             runtime_v2::runtime_commands::runtime_list_sessions_v2,
             runtime_v2::runtime_commands::runtime_find_claude_js_candidates,
             runtime_v2::runtime_commands::runtime_discover_native_claude,
+            runtime_v2::runtime_commands::runtime_discover_claude_commands,
             runtime_v2::runtime_commands::runtime_start_chat_stream,
         ])
         .run(tauri::generate_context!())

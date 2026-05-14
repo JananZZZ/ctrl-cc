@@ -109,9 +109,11 @@ export function RuntimeDiagnosticsPanel() {
         {error && <span style={{ color: 'var(--cc-red)' }}>{error}</span>}
       </div>
 
-      {/* Legacy Launch Plan Matrix (v2 discovery) */}
+      {/* Legacy Launch Plan Matrix (v2 discovery) — default collapsed */}
       {discovery && Array.isArray((discovery as any).plans) && (
-        <Section title="Legacy Launch Plan Matrix">
+        <details>
+        <summary style={{ cursor: 'pointer', fontSize: 'var(--cc-font-md)', fontWeight: 600, color: 'var(--cc-text)', marginBottom: 8 }}>Legacy Launch Plan Matrix</summary>
+        <Section title="">
           <div style={{ overflowX: 'auto', width: '100%', borderRadius: 'var(--cc-radius-sm)' }}>
           <table style={{ ...tableStyle, minWidth: 980 }}>
             <thead>
@@ -138,9 +140,14 @@ export function RuntimeDiagnosticsPanel() {
           </table>
           </div>
         </Section>
+        </details>
       )}
-      {/* Claude JS Candidates */}
-      <Section title="Claude JS Candidates">
+      {/* Claude JS Candidates — default collapsed */}
+      <details>
+        <summary style={{ cursor: 'pointer', fontSize: 'var(--cc-font-md)', fontWeight: 600, color: 'var(--cc-text)', marginBottom: 8 }}>
+          Claude JS Candidates ({jsCandidates.filter(c => c.exists).length} found / {jsCandidates.length} scanned)
+        </summary>
+        <Section title="">
         {jsCandidates.length === 0 ? (
           <p style={{ color: 'var(--cc-text-muted)' }}>No JS candidates found. Set CTRL_CC_CLAUDE_JS manually.</p>
         ) : (
@@ -165,7 +172,8 @@ export function RuntimeDiagnosticsPanel() {
             </table>
           </div>
         )}
-      </Section>
+        </Section>
+        </details>
 
       {/* Native Claude Executable Candidates */}
       <Section title="Native Claude Executable Candidates">

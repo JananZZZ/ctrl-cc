@@ -12,8 +12,8 @@ import { CcStatusDot } from '../../components/ui/CcStatusDot';
 import { CcCard } from '../../components/ui/CcCard';
 import { CcBadge } from '../../components/ui/CcBadge';
 import { SurfacePage } from '../../components/layout/SurfacePage';
-import { ResponsiveGrid } from '../../components/layout/ResponsiveGrid';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
+import './console-surface.css';
 
 export function ConsoleSurface() {
   useRenderLoopGuard('ConsoleSurface');
@@ -55,6 +55,7 @@ export function ConsoleSurface() {
 
   return (
     <SurfacePage variant="dashboard" testId="surface-console">
+      <div className="console-page">
       <div className="cc-hero">
         <div>
           <h1 style={{ fontSize: 'var(--cc-font-3xl)', fontWeight: 700, color: 'var(--cc-text)', marginBottom: 4 }}>{t(greetKey)}, {t('greeting.developer')}</h1>
@@ -63,13 +64,13 @@ export function ConsoleSurface() {
         </div>
       </div>
 
-      <ResponsiveGrid min={175} gap={14}>
+      <div className="console-stat-grid">
         <Stat title={t('console.running')} value={running} color="var(--cc-green)" sub={`${sessions.length} ${t('console.totalSessions')}`} />
         <Stat title={t('console.projects')} value={projects.filter((p) => p.activeSessionCount > 0).length} color="var(--cc-blue)" sub={`${projects.length} ${t('console.total')}`} />
         <Stat title={t('console.costToday')} value={'$' + costToday.toFixed(3)} color="var(--cc-amber)" sub={`${today.length} ${t('console.sessionsToday')}`} />
         <Stat title={t('console.claudeCli')} value={envLoading ? '...' : cap?.exists ? cap?.version || 'OK' : 'N/A'} color={cap?.exists ? 'var(--cc-green)' : 'var(--cc-red)'} sub={cap?.authStatus || t('common.unknown')} />
         <Stat title={t('console.totalTokens')} value={totalTokens >= 1000 ? (totalTokens / 1000).toFixed(1) + 'k' : String(totalTokens)} color="var(--cc-text)" sub={t('console.tokensDesc')} />
-      </ResponsiveGrid>
+      </div>
 
       {/* Runtime Health Strip — v10 Mission Control */}
       <div style={{
@@ -87,8 +88,8 @@ export function ConsoleSurface() {
         <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-muted)' }}>RuntimeBridge v9.0</span>
       </div>
 
-      <ResponsiveGrid min={460} gap={18}>
-        <CcCard className="cc-section-card"><h3 style={st}>{t('console.architecture')}</h3>
+      <div className="console-two-col">
+        <CcCard className="cc-section-card console-card"><h3 style={st}>{t('console.architecture')}</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 'var(--cc-font-xs)' }}>
             <Plane label={t('console.planeInteraction')} pct={90} color="var(--cc-green)" desc={t('console.planeInteractionDesc')} />
             <Plane label={t('console.planeControl')} pct={80} color="var(--cc-blue)" desc={t('console.planeControlDesc')} />
@@ -96,7 +97,7 @@ export function ConsoleSurface() {
             <Plane label={t('console.planeGovernance')} pct={5} color="var(--cc-red)" desc={t('console.planeGovernanceDesc')} />
           </div>
         </CcCard>
-        <CcCard className="cc-section-card">
+        <CcCard className="cc-section-card console-card">
           <div className="cc-card-header">
             <h3 style={st}>{t('console.environment')}</h3>
             <CcButton size="sm" variant="ghost" onClick={() => void refreshEnv()} disabled={envLoading}>
@@ -109,7 +110,7 @@ export function ConsoleSurface() {
               尚未检测环境配置。点击右上角按钮检查 Claude CLI、LaunchPlan、Node.js 与认证状态。
             </div>
           ) : (
-            <div className="cc-kv-stack">
+            <div className="console-env-grid">
               <E label={t('console.claudeCli')} value={cap?.exists ? cap?.version || String(t('common.installed')) : String(t('common.notDetected'))} c={cap?.exists ? 'var(--cc-green)' : 'var(--cc-red)'} />
               <E label={t('console.authStatus')} value={cap?.authStatus || String(t('common.unknown'))} c={cap?.authStatus === 'authenticated' ? 'var(--cc-green)' : 'var(--cc-amber)'} />
               <E label="LaunchPlan" value={selectedLaunchPlan?.id ?? 'not selected'} c={selectedLaunchPlan ? 'var(--cc-green)' : 'var(--cc-red)'} />
@@ -122,7 +123,7 @@ export function ConsoleSurface() {
             </div>
           )}
         </CcCard>
-      </ResponsiveGrid>
+      </div>
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 22 }}>
         <CcButton variant="primary" onClick={() => navigateTo('workspace')}>{t('nav.workspace')}</CcButton>
@@ -153,12 +154,20 @@ export function ConsoleSurface() {
       <div style={{ borderTop: '1px solid var(--cc-border)', paddingTop: 12, fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
         {t('console.footer')}
       </div>
+      </div>
     </SurfacePage>
   );
 }
 function Stat({ title, value, color, sub }: { title: string; value: string | number; color: string; sub: string }) { return <div style={{ padding: '12px 14px', borderRadius: 'var(--cc-radius-lg)', background: 'var(--cc-surface-solid)', border: '1px solid var(--cc-border)' }}><div style={{ fontSize: 'var(--cc-font-2xl)', fontWeight: 700, color }}>{value}</div><div style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)', marginTop: 2 }}>{title}</div><div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', marginTop: 2 }}>{sub}</div></div>; }
 function Plane({ label, pct, color, desc }: { label: string; pct: number; color: string; desc: string }) { return <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ color: 'var(--cc-text-soft)', width: 80, fontSize: 'var(--cc-font-2xs)' }}>{label}</span><div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--cc-bg-muted)', overflow: 'hidden' }}><div style={{ width: pct + '%', height: '100%', borderRadius: 3, background: color }} /></div><span style={{ color, fontWeight: 600, fontSize: 'var(--cc-font-2xs)', width: 30 }}>{pct}%</span><span style={{ color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-3xs)', flex: 1 }}>{desc}</span></div>; }
-function E({ label, value, c }: { label: string; value: string; c?: string }) { return <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--cc-text-soft)' }}>{label}</span><span style={{ color: c || 'var(--cc-text)', fontWeight: 500 }}>{value}</span></div>; }
+function E({ label, value, c }: { label: string; value: string; c?: string }) {
+  return (
+    <>
+      <span style={{ color: 'var(--cc-text-soft)' }}>{label}</span>
+      <span className="value" style={{ color: c || 'var(--cc-text)', fontWeight: 500 }}>{value}</span>
+    </>
+  );
+}
 const st: React.CSSProperties = { fontSize: 'var(--cc-font-sm)', fontWeight: 600, color: 'var(--cc-text)', marginBottom: 8 };
 function fmtDate(iso: string) { try { return new Date(iso).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return iso; } }
 function HealthDot({ label, ok, detail, color }: { label: string; ok: boolean; detail: string; color?: string }) {

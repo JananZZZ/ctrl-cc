@@ -2,6 +2,7 @@ use tauri::State;
 
 use super::claude_discovery::{discover_claude, list_claude_js_candidates};
 use super::chat_stream::start_chat_stream;
+use super::claude_command_resolver::{discover_claude_commands, ClaudeCommandSpec};
 use super::native_claude_discovery::{discover_native_claude_candidates, ClaudeNativeCandidate};
 use super::runtime_types::{ChatStreamRequest, ChatStreamStarted};
 use super::runtime_manager::RuntimeManager;
@@ -56,6 +57,11 @@ pub fn runtime_find_claude_js_candidates() -> Vec<ClaudeJsCandidate> {
 #[tauri::command]
 pub fn runtime_discover_native_claude() -> Vec<ClaudeNativeCandidate> {
     discover_native_claude_candidates()
+}
+
+#[tauri::command]
+pub fn runtime_discover_claude_commands() -> Vec<ClaudeCommandSpec> {
+    discover_claude_commands()
 }
 
 #[tauri::command]

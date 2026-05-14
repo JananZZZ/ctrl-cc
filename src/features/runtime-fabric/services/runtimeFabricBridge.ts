@@ -87,7 +87,17 @@ export function createCtrlCcSession(input: CreateSessionInput): CtrlCcSession {
   return session;
 }
 
-export async function sendChatMessage(sessionId: string, prompt: string) {
+export async function sendChatMessage(
+  sessionId: string,
+  prompt: string,
+  options?: {
+    model?: string;
+    permissionMode?: string;
+    effort?: string;
+    cwd?: string;
+    projectId?: string;
+  }
+) {
   const state = useRuntimeFabricStore.getState();
   const session = state.sessions[sessionId];
   if (!session) throw new Error(`session not found: ${sessionId}`);
@@ -118,24 +128,41 @@ export async function sendChatMessage(sessionId: string, prompt: string) {
     message: prompt,
   });
 
-  const started = await invokeCommand<{ pid?: number }>('runtime_start_chat_stream', {
-    req: {
-      traceId: uid('trace'),
+  try {
+    const started = await invokeCommand<{ pid?: number }>('runtime_start_chat_stream', {
+      req: {
+        traceId: uid('trace'),
+        sessionId,
+        channelId: channel.id,
+        cwd: options?.cwd ?? session.cwd,
+        prompt,
+        claudeSessionId: session.claudeSessionId,
+        model: options?.model ?? 'sonnet',
+        permissionMode: options?.permissionMode ?? 'default',
+        maxTurns: null,
+      },
+    });
+
+    useRuntimeFabricStore.getState().patchChannel(channel.id, {
+      status: 'running',
+      pid: started.pid ?? null,
+    });
+  } catch (error) {
+    const msg = String(error);
+    useRuntimeFabricStore.getState().patchChannel(channel.id, {
+      status: 'failed',
+      error: msg,
+      exitedAt: new Date().toISOString(),
+    });
+    useRuntimeFabricStore.getState().appendEvent({
       sessionId,
       channelId: channel.id,
-      cwd: session.cwd,
-      prompt,
-      claudeSessionId: session.claudeSessionId,
-      model: 'sonnet',
-      permissionMode: 'default',
-      maxTurns: null,
-    },
-  });
-
-  useRuntimeFabricStore.getState().patchChannel(channel.id, {
-    status: 'running',
-    pid: started.pid ?? null,
-  });
+      level: 'error',
+      type: 'chat.failed',
+      message: msg,
+    });
+    throw error;
+  }
 }
 
 export async function startTerminalChannel(sessionId: string) {
@@ -164,23 +191,40 @@ export async function startTerminalChannel(sessionId: string) {
     activeView: 'terminal',
   });
 
-  await invokeCommand('runtime_start_interactive_v2', {
-    req: {
-      traceId: uid('trace'),
-      uiSessionId: sessionId,
-      ptySessionId: channel.id,
-      projectId: session.projectId,
-      cwd: session.cwd,
-      model: null,
-      permissionMode: 'default',
-      mode: 'new',
-      sessionName: session.title,
-      resumeTarget: null,
-      initialPrompt: null,
-    },
-  });
+  try {
+    await invokeCommand('runtime_start_interactive_v2', {
+      req: {
+        traceId: uid('trace'),
+        uiSessionId: sessionId,
+        ptySessionId: channel.id,
+        projectId: session.projectId,
+        cwd: session.cwd,
+        model: null,
+        permissionMode: 'default',
+        mode: 'new',
+        sessionName: session.title,
+        resumeTarget: null,
+        initialPrompt: null,
+      },
+    });
 
-  useRuntimeFabricStore.getState().patchChannel(channel.id, { status: 'ready' });
+    useRuntimeFabricStore.getState().patchChannel(channel.id, { status: 'ready' });
+  } catch (error) {
+    const msg = String(error);
+    useRuntimeFabricStore.getState().patchChannel(channel.id, {
+      status: 'failed',
+      error: msg,
+      exitedAt: new Date().toISOString(),
+    });
+    useRuntimeFabricStore.getState().appendEvent({
+      sessionId,
+      channelId: channel.id,
+      level: 'error',
+      type: 'terminal.failed',
+      message: msg,
+    });
+    throw error;
+  }
 }
 
 export const RuntimeFabricBridge = {

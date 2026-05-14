@@ -3,10 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useOpenSessionStore } from '../../stores/openSessionStore';
-import { invokeCommand } from '../../services/invokeCommand';
-import { RuntimeBridge, write as runtimeWrite } from '../../features/runtime/services/runtimeBridge';
-import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
-import { isRuntimeWritable } from '../../features/runtime/types/runtimeTypes';
+import { RuntimeFabricBridge } from '../../features/runtime-fabric/services/runtimeFabricBridge';
+import { useRuntimeFabricStore } from '../../features/runtime-fabric/stores/runtimeFabricStore';
 import { StreamCoalescer } from '../../features/chat/StreamCoalescer';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
@@ -49,8 +47,9 @@ export function WorkspaceSurface() {
 
   const isComposerEnabled = useCallback((sessionId: string | null): boolean => {
     if (!sessionId) return false;
-    const rt = useRuntimeStore.getState().sessions[sessionId];
-    return Boolean(rt?.ptySessionId) && isRuntimeWritable(rt.status);
+    const fabric = useRuntimeFabricStore.getState().sessions[sessionId];
+    if (!fabric) return true;
+    return fabric.status !== 'failed';
   }, []);
 
   const events = useMemo(() => {
@@ -90,59 +89,58 @@ export function WorkspaceSurface() {
     return () => { unlistenRef.current?.(); };
   }, [activeTabId]);
 
-  const handleSend = useCallback(async (text: string, config: { model: string; effort: string; permissionMode: string; runtimeMode: string }): Promise<SendResult> => {
+  const handleSend = useCallback(async (
+    text: string,
+    config: { model: string; effort: string; permissionMode: string; runtimeMode: string }
+  ): Promise<SendResult> => {
     if (!activeTabId) return { ok: false, error: 'No active session' };
 
-    const rtSession = useRuntimeStore.getState().sessions[activeTabId];
-    const canSend = rtSession?.ptySessionId && isRuntimeWritable(rtSession.status);
+    const userEvent: RuntimeEvent = {
+      id: `usr-${Date.now()}`,
+      sessionId: activeTabId,
+      projectId: activeSession?.projectId ?? '',
+      type: 'user_message',
+      content: text,
+      severity: 'low',
+      createdAt: new Date().toISOString(),
+    };
+    setRawEvents((prev) => [...prev, userEvent]);
 
-    if (!canSend) {
-      const status = rtSession?.status ?? 'missing';
-      const errMsg = `Claude Runtime 尚未连接：${status}。请先在设置 → 诊断中修复环境配置，然后重新新建会话。`;
-      setError(errMsg);
-      return { ok: false, error: errMsg };
-    }
-
-    if (config.runtimeMode === 'pty-interactive') {
+    try {
+      await RuntimeFabricBridge.sendChatMessage(activeTabId, text, {
+        model: config.model,
+        permissionMode: config.permissionMode,
+        effort: config.effort,
+        cwd: activeSession?.cwd,
+        projectId: activeSession?.projectId,
+      } as any);
+      return { ok: true };
+    } catch (err) {
+      const msg = String(err);
+      setError(`${t('workspace.sendFailed')}: ${msg}`);
+      setRawEvents((prev) => [...prev, {
+        id: `sys-${Date.now()}`,
+        sessionId: activeTabId,
+        projectId: activeSession?.projectId ?? '',
+        type: 'system',
+        content: `Chat Runtime failed: ${msg}`,
+        severity: 'medium',
+        createdAt: new Date().toISOString(),
+      } as unknown as RuntimeEvent]);
       try {
-        await runtimeWrite(activeTabId, text + '\r');
-        setRawEvents((prev) => [...prev, {
-          id: `usr-${Date.now()}`, sessionId: activeTabId,
-          projectId: activeSession?.projectId ?? '',
-          type: 'user_message', content: text, severity: 'low',
-          createdAt: new Date().toISOString(),
-        }]);
-        return { ok: true };
-      } catch (err) {
-        const msg = String(err);
-        setError(`${t('workspace.sendFailed')}: ${msg}`);
-        try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: 'Send failed', detail: msg }); } catch {}
-        return { ok: false, error: msg };
-      }
-    } else {
-      try {
-        await invokeCommand('create_claude_chat', { options: {
-          sessionId: activeTabId, projectId: activeSession?.projectId ?? 'default',
-          cwd: activeSession?.cwd ?? '.', model: config.model, effort: config.effort, permissionMode: config.permissionMode, prompt: text,
-        } });
-        setRawEvents((prev) => [...prev, {
-          id: `usr-${Date.now()}`, sessionId: activeTabId,
-          projectId: activeSession?.projectId ?? '',
-          type: 'user_message', content: text, severity: 'low',
-          createdAt: new Date().toISOString(),
-        }]);
-        return { ok: true };
-      } catch (err) {
-        const msg = String(err);
-        setError(`${t('workspace.sendFailed')}: ${msg}`);
-        try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: 'Send failed', detail: msg }); } catch {}
-        return { ok: false, error: msg };
-      }
+        useErrorStore.getState().addError({
+          severity: 'error',
+          source: 'session',
+          title: 'Chat failed',
+          detail: msg,
+        });
+      } catch {}
+      return { ok: false, error: msg };
     }
   }, [activeTabId, activeSession, t]);
 
-  // v9.0: All session creation goes through RuntimeBridge — the single entry point.
-  const startSessionWithProject = useCallback(async (projectId: string, projectPath?: string) => {
+  // v20.0: Session creation via RuntimeFabricBridge — does NOT auto-start PTY.
+  const startSessionWithProject = useCallback((projectId: string, projectPath?: string) => {
     setError(null);
     let cwd = projectPath || '.';
     if (cwd === '.') {
@@ -157,11 +155,11 @@ export function WorkspaceSurface() {
     setStarting(true);
 
     try {
-      const session = await RuntimeBridge.startInteractiveSession({
+      const session = RuntimeFabricBridge.createCtrlCcSession({
         projectId, projectName: projName, cwd,
-        mode: 'new', sessionName: cwd.split(/[/\\]/).pop() || undefined,
+        title: cwd.split(/[/\\]/).pop() || undefined,
       });
-      try { useErrorStore.getState().addError({ severity: 'info', source: 'session', title: `${t('error.ptySessionCreated')}: ${session.id.slice(0, 8)}...`, detail: `CWD: ${cwd}` }); } catch {}
+      try { useErrorStore.getState().addError({ severity: 'info', source: 'session', title: `Session created: ${session.id.slice(0, 8)}...`, detail: `CWD: ${cwd}` }); } catch {}
     } catch (err) {
       setError(`${t('workspace.startFailed')}: ${String(err)}`);
       try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: t('error.ptySessionFailed'), detail: `CWD: ${cwd}, Error: ${String(err)}` }); } catch {}
@@ -171,7 +169,6 @@ export function WorkspaceSurface() {
   }, [projects, t]);
 
   const handleCloseTab = useCallback((sessionId: string) => {
-    RuntimeBridge.stop(sessionId).catch(() => {});
     closeTab(sessionId);
   }, [closeTab]);
 
@@ -220,7 +217,29 @@ export function WorkspaceSurface() {
           <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px', borderBottom: '1px solid var(--cc-border)', background: 'var(--cc-bg-muted)', flexShrink: 0, gap: 0 }}>
             {(['chat', 'terminal', 'split'] as ViewMode[]).map((mode) => {
               const a = viewMode === mode;
-              return <button key={mode} onClick={() => setViewMode(mode)} style={{ padding: '4px 14px', fontSize: 'var(--cc-font-xs)', fontWeight: a ? 600 : 400, border: 'none', borderBottom: a ? '2px solid var(--cc-navy)' : '2px solid transparent', background: a ? 'var(--cc-surface-solid)' : 'transparent', color: a ? 'var(--cc-text)' : 'var(--cc-text-muted)', cursor: 'pointer' }}>{viewModeLabels[mode]}</button>;
+              return <button
+                key={mode}
+                onClick={() => {
+                  setViewMode(mode);
+                  if ((mode === 'terminal' || mode === 'split') && activeTabId) {
+                    const fabric = useRuntimeFabricStore.getState().sessions[activeTabId];
+                    if (fabric && !fabric.terminalChannelId) {
+                      RuntimeFabricBridge.startTerminalChannel(activeTabId).catch((e) => {
+                        const msg = String(e);
+                        setError(`Terminal start failed: ${msg}`);
+                        try {
+                          useErrorStore.getState().addError({
+                            severity: 'error',
+                            source: 'pty',
+                            title: 'Terminal start failed',
+                            detail: msg,
+                          });
+                        } catch {}
+                      });
+                    }
+                  }
+                }}
+                style={{ padding: '4px 14px', fontSize: 'var(--cc-font-xs)', fontWeight: a ? 600 : 400, border: 'none', borderBottom: a ? '2px solid var(--cc-navy)' : '2px solid transparent', background: a ? 'var(--cc-surface-solid)' : 'transparent', color: a ? 'var(--cc-text)' : 'var(--cc-text-muted)', cursor: 'pointer' }}>{viewModeLabels[mode]}</button>;
             })}
             <CcButton variant="ghost" size="sm" onClick={handleStartPtySession} disabled={starting}>{starting ? t('workspace.starting') : `+ ${t('workspace.newSession')}`}</CcButton>
             {error && <span style={{ marginLeft: 12, fontSize: 'var(--cc-font-xs)', color: 'var(--cc-red)' }}>{error}</span>}

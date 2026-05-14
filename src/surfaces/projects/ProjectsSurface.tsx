@@ -6,7 +6,7 @@ import { useOpenSessionStore } from '../../stores/openSessionStore';
 import { useSurfaceStore } from '../../stores/surfaceStore';
 import { useErrorStore } from '../../stores/errorStore';
 import { invokeCommand } from '../../services/invokeCommand';
-import { RuntimeBridge } from '../../features/runtime/services/runtimeBridge';
+import { RuntimeFabricBridge } from '../../features/runtime-fabric/services/runtimeFabricBridge';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 import { ProjectsTopBar } from './ProjectsTopBar';
 import { ProjectManagementRail } from './ProjectManagementRail';
@@ -92,25 +92,33 @@ export function ProjectsSurface() {
     const proj = useProjectStore.getState().projects.find((p) => p.id === projectId);
     const cwd = proj?.path || '.';
 
-    // v9.0: All session creation through RuntimeBridge — single entry point
-    RuntimeBridge.startInteractiveSession({
-      projectId, projectName: proj?.name || t('workspace.project'), cwd,
-      mode: 'new', sessionName: cwd.split(/[/\\]/).pop() || undefined,
-    }).catch((e: unknown) => {
+    try {
+      RuntimeFabricBridge.createCtrlCcSession({
+        projectId,
+        projectName: proj?.name || t('workspace.project'),
+        cwd,
+        title: cwd.split(/[/\\]/).pop() || undefined,
+      });
+    } catch (e) {
       try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: t('error.createSessionFailed'), detail: String(e) }); } catch {}
-    }).finally(() => setCreatingSession(false));
+    } finally {
+      setCreatingSession(false);
+    }
   };
 
   const handleResumeSession = (sessionId: string) => {
     const ses = sessions.find((s) => s.id === sessionId);
     if (!ses) return;
-    RuntimeBridge.startInteractiveSession({
-      projectId: ses.projectId, projectName: ses.title, cwd: ses.cwd,
-      mode: 'resume', resumeTarget: ses.claudeSessionId,
-      sessionName: ses.title + ' (Resume)',
-    }).catch((e: unknown) => {
+    try {
+      RuntimeFabricBridge.createCtrlCcSession({
+        projectId: ses.projectId,
+        projectName: ses.title,
+        cwd: ses.cwd,
+        title: `${ses.title} (Resume)`,
+      });
+    } catch (e) {
       try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: t('error.createSessionFailed'), detail: String(e) }); } catch {}
-    });
+    }
   };
 
   return (

@@ -3,7 +3,7 @@ use std::process::{Command, Stdio};
 
 use tauri::{AppHandle, Emitter};
 
-use super::native_claude_discovery::select_claude_for_print_mode;
+use super::claude_command_resolver::select_for_chat;
 use super::runtime_types::{ChatStreamRequest, ChatStreamStarted};
 
 pub fn start_chat_stream(app: AppHandle, req: ChatStreamRequest) -> Result<ChatStreamStarted, String> {
@@ -11,16 +11,16 @@ pub fn start_chat_stream(app: AppHandle, req: ChatStreamRequest) -> Result<ChatS
         return Err("prompt is empty".to_string());
     }
 
-    let claude = select_claude_for_print_mode()?;
-
-    let mut args = vec![
+    let spec = select_for_chat()?;
+    let mut args = spec.args_prefix.clone();
+    args.extend(vec![
         "-p".to_string(),
         req.prompt.clone(),
         "--output-format".to_string(),
         "stream-json".to_string(),
         "--include-partial-messages".to_string(),
         "--verbose".to_string(),
-    ];
+    ]);
 
     if let Some(id) = &req.claude_session_id {
         if !id.trim().is_empty() {
@@ -48,7 +48,7 @@ pub fn start_chat_stream(app: AppHandle, req: ChatStreamRequest) -> Result<ChatS
         args.push(max_turns.to_string());
     }
 
-    let mut child = Command::new(&claude)
+    let mut child = Command::new(&spec.program)
         .args(&args)
         .current_dir(&req.cwd)
         .stdin(Stdio::null())
