@@ -35,7 +35,7 @@ export function ProjectManagementRail({ collapsed, onToggleCollapse, selectedPro
   }
 
   return (
-    <div data-testid="project-management-rail" style={{ width: 240, flexShrink: 0, borderRight: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="project-management-rail" data-testid="project-management-rail" style={{ width: 240, flexShrink: 0, borderRight: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <RailHeader title={t('projects.title')} onCollapse={onToggleCollapse} count={filtered.length} />
       <div style={{ flex: 1, overflow: 'auto', padding: '4px 0' }}>
         {roots.length > 0 && (

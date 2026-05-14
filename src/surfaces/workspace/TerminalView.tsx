@@ -5,6 +5,27 @@ import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
 interface Props { sessionId: string | null; }
 
+function parseRuntimeStartupHint(error?: string | null) {
+  if (!error) return null;
+
+  if (error.includes('CTRL_CC_CLAUDE_JS') || error.includes('No policy-allowed runnable')) {
+    return {
+      title: 'Claude Runtime Startup Failed',
+      summary: 'Ctrl-CC did not find a direct Node.js Claude CLI entry. Shell wrappers are blocked to avoid cmd/powershell startup crashes.',
+      actions: [
+        'Open Settings → Diagnostics → Claude JS Candidates.',
+        'If no existing JS candidate is found, set CTRL_CC_CLAUDE_JS to the real Claude CLI JS entry.',
+        'Temporary fallback only: set CTRL_CC_ALLOW_SHELL_WRAPPER=1.',
+      ],
+    };
+  }
+
+  return {
+    title: 'Claude Runtime Startup Failed',
+    summary: error,
+    actions: ['Open diagnostics.', 'Copy diagnostic bundle.', 'Start a new session after fixing Runtime.'],
+  };
+}
 
 export function TerminalView({ sessionId }: Props) {
   const { t } = useTranslation();
@@ -42,30 +63,39 @@ export function TerminalView({ sessionId }: Props) {
           {runtimeSession?.status === 'claude-active' || runtimeSession?.status === 'pty-ready' ? '●' : runtimeFailed ? '×' : '○'} {runtimeSession?.status ?? handle?.status ?? 'idle'}
         </span>
       </div>
-      {runtimeFailed && (
-        <div style={{
-          padding: '10px 12px', borderBottom: '1px solid var(--cc-border)',
-          background: 'var(--cc-red-soft)', color: 'var(--cc-text)',
-          fontSize: 'var(--cc-font-xs)', lineHeight: 1.55,
-        }}>
-          <div style={{ fontWeight: 700, color: 'var(--cc-red)', marginBottom: 4 }}>
-            Claude Runtime Startup Failed
+      {runtimeFailed && (() => {
+        const hint = parseRuntimeStartupHint(runtimeSession?.error);
+        if (!hint) return null;
+        return (
+          <div style={{
+            padding: '10px 12px', borderBottom: '1px solid var(--cc-border)',
+            background: 'var(--cc-red-soft)', color: 'var(--cc-text)',
+            fontSize: 'var(--cc-font-xs)', lineHeight: 1.55,
+          }}>
+            <div style={{ fontWeight: 700, color: 'var(--cc-red)', marginBottom: 4 }}>
+              {hint.title}
+            </div>
+            <div style={{ color: 'var(--cc-text-muted)', wordBreak: 'break-word', marginBottom: 4 }}>
+              {hint.summary}
+            </div>
+            {hint.actions.length > 0 && (
+              <ul style={{ margin: '4px 0 8px 16px', padding: 0, color: 'var(--cc-text-soft)' }}>
+                {hint.actions.map((a, i) => <li key={i} style={{ marginBottom: 2 }}>{a}</li>)}
+              </ul>
+            )}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => navigator.clipboard.writeText(runtimeSession?.error || '')} style={{
+                padding: '4px 10px', border: '1px solid var(--cc-border)',
+                borderRadius: 'var(--cc-radius-sm)', background: 'transparent',
+                color: 'var(--cc-text-muted)', cursor: 'pointer',
+                fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-sans)',
+              }}>
+                Copy Error
+              </button>
+            </div>
           </div>
-          <div style={{ color: 'var(--cc-text-muted)', wordBreak: 'break-word' }}>
-            {runtimeSession?.error || "Runtime failed before PTY became writable."}
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <button onClick={() => navigator.clipboard.writeText(runtimeSession?.error || '')} style={{
-              padding: '4px 10px', border: '1px solid var(--cc-border)',
-              borderRadius: 'var(--cc-radius-sm)', background: 'transparent',
-              color: 'var(--cc-text-muted)', cursor: 'pointer',
-              fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-sans)',
-            }}>
-              Copy Error
-            </button>
-          </div>
-        </div>
-      )}
+        );
+      })()}
       <div ref={containerCb} data-testid="terminal-xterm-root" style={{ flex: 1, overflow: 'hidden', padding: 2, opacity: runtimeFailed ? 0.55 : 1 }} />
     </div>
   );

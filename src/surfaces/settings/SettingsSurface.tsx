@@ -8,6 +8,7 @@ import { CcButton } from '../../components/ui/CcButton';
 import { CTRL_CC_THEMES } from '../../design/theme-registry';
 import type { CtrlCcTheme } from '../../design/theme-types';
 import { RuntimeDiagnosticsPanel } from '../../features/runtime/components/RuntimeDiagnosticsPanel';
+import { SurfacePage } from '../../components/layout/SurfacePage';
 
 interface Capability { version: string | null; exists: boolean; authStatus: string | null; supportsStreamJson: boolean; supportsMCP: boolean; supportsAgents: boolean; checkedAt: string; errors: string[]; }
 
@@ -110,7 +111,7 @@ export function SettingsSurface() {
   ];
 
   return (
-    <div data-testid="surface-settings" style={{ padding: 'clamp(20px, 2vw, 32px)', overflow: 'auto', height: '100%', width: '100%', maxWidth: 1480, margin: '0 auto', boxSizing: 'border-box' }}>
+    <SurfacePage variant="diagnostics" testId="surface-settings">
       <h1 style={{ fontSize: 'var(--cc-font-2xl)', fontWeight: 600, color: 'var(--cc-text)', marginBottom: 4 }}>{t('settings.title')}</h1>
       <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-muted)', marginBottom: 24 }}>
         {t('settings.environment')} / {t('settings.runtime')} / {t('settings.appearance')} / {t('settings.security')} / {t('settings.language')} / {t('settings.diagnostics')}
@@ -278,7 +279,7 @@ export function SettingsSurface() {
         {/* Runtime Deep Diagnostics */}
         <RuntimeDiagnosticsPanel />
       </CcCard>
-    </div>
+    </SurfacePage>
   );
 }
 

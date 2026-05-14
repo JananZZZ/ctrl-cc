@@ -10,15 +10,14 @@ import { useOpenSessionStore } from '../../../stores/openSessionStore';
 import { useRuntimeTraceStore, recordRuntimeError, recordRuntimeWarning } from '../stores/runtimeTraceStore';
 import { SessionIdFactory } from './runtimeContractProbe';
 import { invokeCommand } from '../../../services/invokeCommand';
-// v14.0: Rate-limit blocked write traces to 1 per 5 seconds per session+status
-const blockedWriteTraceAt = new Map<string, number>();
+const notReadyWarnLastAt = new Map<string, number>();
 
-function shouldTraceBlockedWrite(uiSessionId: string, status: string): boolean {
+function shouldRecordNotReady(uiSessionId: string, status: string): boolean {
   const key = `${uiSessionId}:${status}`;
   const now = Date.now();
-  const last = blockedWriteTraceAt.get(key) ?? 0;
+  const last = notReadyWarnLastAt.get(key) ?? 0;
   if (now - last < 3000) return false;
-  blockedWriteTraceAt.set(key, now);
+  notReadyWarnLastAt.set(key, now);
   return true;
 }
 
@@ -109,9 +108,15 @@ export async function write(uiSessionId: string, data: string): Promise<void> {
   }
 
   if (!isRuntimeWritable(session.status)) {
-    if (shouldTraceBlockedWrite(uiSessionId, session.status)) {
+    if (shouldRecordNotReady(uiSessionId, session.status)) {
+      recordRuntimeWarning(
+        'runtime.write.not_ready',
+        uiSessionId,
+        session.ptySessionId,
+        `Runtime not ready: ${session.status}`,
+        session.traceId
+      );
     }
-    recordRuntimeWarning("runtime.write.not_ready", uiSessionId, session.ptySessionId, `Runtime not ready: ${session.status}`, session.traceId);
     throw new Error(`Runtime not ready: ${session.status}`);
   }
 

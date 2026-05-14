@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use super::claude_launch_plan::ClaudeLaunchPlan;
 use super::process_canary::canary_program_owned;
-use super::runtime_types::{ClaudeLaunchPlanDebug, RuntimeDiscoveryResult};
+use super::runtime_types::{ClaudeJsCandidate, ClaudeLaunchPlanDebug, RuntimeDiscoveryResult};
 
 pub fn discover_claude() -> RuntimeDiscoveryResult {
     let mut debug = Vec::new();
@@ -128,11 +128,70 @@ fn find_cmd_exe() -> Option<PathBuf> {
     let p = PathBuf::from(r"C:\Windows\System32\cmd.exe"); p.exists().then_some(p)
 }
 
+pub fn list_claude_js_candidates() -> Vec<ClaudeJsCandidate> {
+    let mut out = Vec::new();
+
+    if let Ok(v) = env::var("CTRL_CC_CLAUDE_JS") {
+        let p = PathBuf::from(v.trim());
+        out.push(ClaudeJsCandidate {
+            path: p.to_string_lossy().to_string(),
+            exists: p.exists(),
+            source: "CTRL_CC_CLAUDE_JS".to_string(),
+        });
+    }
+
+    if let Ok(appdata) = env::var("APPDATA") {
+        let npm = PathBuf::from(appdata).join("npm");
+        for p in known_js_candidates_under_npm_root(&npm) {
+            out.push(ClaudeJsCandidate {
+                exists: p.exists(),
+                path: p.to_string_lossy().to_string(),
+                source: "APPDATA npm known candidates".to_string(),
+            });
+        }
+
+        let node_modules = npm.join("node_modules");
+        let mut scanned = Vec::new();
+        collect_js(&node_modules, 0, &mut scanned);
+        for p in scanned.into_iter().take(80) {
+            out.push(ClaudeJsCandidate {
+                exists: p.exists(),
+                path: p.to_string_lossy().to_string(),
+                source: "APPDATA npm recursive scan".to_string(),
+            });
+        }
+    }
+
+    if let Some(shim) = find_claude_cmd().or_else(find_claude_ps1) {
+        if let Some(dir) = shim.parent() {
+            for p in search_js_entries(dir) {
+                out.push(ClaudeJsCandidate {
+                    exists: p.exists(),
+                    path: p.to_string_lossy().to_string(),
+                    source: format!("shim dir scan: {}", shim.to_string_lossy()),
+                });
+            }
+        }
+    }
+
+    let mut seen = std::collections::HashSet::new();
+    out.into_iter()
+        .filter(|c| seen.insert(c.path.clone()))
+        .collect()
+}
+
+fn known_js_candidates_under_npm_root(npm_root: &Path) -> Vec<PathBuf> {
+    let mut candidates = Vec::new();
+    push_js_cands(&mut candidates, npm_root);
+    candidates
+}
+
 fn find_claude_cli_js() -> Option<PathBuf> {
-    let mut cs: Vec<PathBuf> = Vec::new();
-    if let Ok(a) = env::var("APPDATA") { push_js_cands(&mut cs, &PathBuf::from(a).join("npm")); }
-    if let Ok(p) = env::var("NPM_CONFIG_PREFIX") { push_js_cands(&mut cs, &PathBuf::from(p)); }
-    cs.into_iter().find(|p| p.exists())
+    list_claude_js_candidates()
+        .into_iter()
+        .filter(|c| c.exists)
+        .map(|c| PathBuf::from(c.path))
+        .find(|p| p.exists())
 }
 
 fn push_js_cands(cs: &mut Vec<PathBuf>, base: &Path) {

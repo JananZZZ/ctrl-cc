@@ -11,6 +11,8 @@ import { CcButton } from '../../components/ui/CcButton';
 import { CcStatusDot } from '../../components/ui/CcStatusDot';
 import { CcCard } from '../../components/ui/CcCard';
 import { CcBadge } from '../../components/ui/CcBadge';
+import { SurfacePage } from '../../components/layout/SurfacePage';
+import { ResponsiveGrid } from '../../components/layout/ResponsiveGrid';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 
 interface Capability { version: string | null; exists: boolean; authStatus: string | null; supportsStreamJson: boolean; checkedAt: string; errors: string[]; }
@@ -57,20 +59,20 @@ export function ConsoleSurface() {
   const openWorkspace = (sid: string) => { const s = sessions.find((x) => x.id === sid); if (s) { openSession({ sessionId: s.id, projectId: s.projectId, projectName: s.title, title: s.title, status: s.status, viewMode: 'chat', pendingConfirms: 0, riskCount: s.riskCount, isPinned: false }); navigateTo('workspace'); } };
 
   return (
-    <div data-testid="surface-console" style={{ padding: 'clamp(20px, 2vw, 32px)', overflow: 'auto', height: '100%', width: '100%', maxWidth: 1480, margin: '0 auto', boxSizing: 'border-box' }}>
+    <SurfacePage variant="dashboard" testId="surface-console">
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 'var(--cc-font-3xl)', fontWeight: 700, color: 'var(--cc-text)', marginBottom: 4 }}>{t(greetKey)}, {t('greeting.developer')}</h1>
         <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-soft)' }}>{t('console.subtitle')}</p>
         <p style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>{t('console.footer')}</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10, marginBottom: 22 }}>
+      <ResponsiveGrid min={160} gap={12}>
         <Stat title={t('console.running')} value={running} color="var(--cc-green)" sub={`${sessions.length} ${t('console.totalSessions')}`} />
         <Stat title={t('console.projects')} value={projects.filter((p) => p.activeSessionCount > 0).length} color="var(--cc-blue)" sub={`${projects.length} ${t('console.total')}`} />
         <Stat title={t('console.costToday')} value={'$' + costToday.toFixed(3)} color="var(--cc-amber)" sub={`${today.length} ${t('console.sessionsToday')}`} />
         <Stat title={t('console.claudeCli')} value={capLoading ? '...' : cap?.exists ? cap?.version || 'OK' : 'N/A'} color={cap?.exists ? 'var(--cc-green)' : 'var(--cc-red)'} sub={cap?.authStatus || t('common.unknown')} />
         <Stat title={t('console.totalTokens')} value={totalTokens >= 1000 ? (totalTokens / 1000).toFixed(1) + 'k' : String(totalTokens)} color="var(--cc-text)" sub={t('console.tokensDesc')} />
-      </div>
+      </ResponsiveGrid>
 
       {/* Runtime Health Strip — v10 Mission Control */}
       <div style={{
@@ -88,7 +90,7 @@ export function ConsoleSurface() {
         <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-muted)' }}>RuntimeBridge v9.0</span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+      <ResponsiveGrid min={420} gap={16}>
         <CcCard style={{ padding: 14 }}><h3 style={st}>{t('console.architecture')}</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 'var(--cc-font-xs)' }}>
             <Plane label={t('console.planeInteraction')} pct={90} color="var(--cc-green)" desc={t('console.planeInteractionDesc')} />
@@ -109,7 +111,7 @@ export function ConsoleSurface() {
               <E label={t('console.db')} value={t('console.techDb')} />
             </div>}
         </CcCard>
-      </div>
+      </ResponsiveGrid>
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 22 }}>
         <CcButton variant="primary" onClick={() => navigateTo('workspace')}>{t('nav.workspace')}</CcButton>
@@ -140,7 +142,7 @@ export function ConsoleSurface() {
       <div style={{ borderTop: '1px solid var(--cc-border)', paddingTop: 12, fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
         {t('console.footer')}
       </div>
-    </div>
+    </SurfacePage>
   );
 }
 function Stat({ title, value, color, sub }: { title: string; value: string | number; color: string; sub: string }) { return <div style={{ padding: '12px 14px', borderRadius: 'var(--cc-radius-lg)', background: 'var(--cc-surface-solid)', border: '1px solid var(--cc-border)' }}><div style={{ fontSize: 'var(--cc-font-2xl)', fontWeight: 700, color }}>{value}</div><div style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)', marginTop: 2 }}>{title}</div><div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', marginTop: 2 }}>{sub}</div></div>; }

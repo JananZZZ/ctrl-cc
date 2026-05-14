@@ -114,7 +114,7 @@ export function ProjectsSurface() {
   };
 
   return (
-    <div data-testid="surface-projects" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div data-testid="surface-projects" style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', minWidth: 0 }}>
       <ProjectsTopBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -130,7 +130,7 @@ export function ProjectsSurface() {
         filterMode={filterMode}
         onFilterChange={setFilterMode}
       />
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minWidth: 0 }}>
         <ProjectManagementRail
           collapsed={projectRailCollapsed}
           onToggleCollapse={() => setProjectRailCollapsed((v) => !v)}

@@ -208,6 +208,7 @@ fn main() {
             runtime_v2::runtime_commands::runtime_write_v2,
             runtime_v2::runtime_commands::runtime_stop_v2,
             runtime_v2::runtime_commands::runtime_list_sessions_v2,
+            runtime_v2::runtime_commands::runtime_find_claude_js_candidates,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

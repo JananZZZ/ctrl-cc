@@ -20,6 +20,7 @@ export function RuntimeDiagnosticsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [contractTestRunning, setContractTestRunning] = useState(false);
   const [contractTestResult, setContractTestResult] = useState<{ ok: boolean; error?: string } | null>(null);
+  const [jsCandidates, setJsCandidates] = useState<Array<{ path: string; exists: boolean; source: string }>>([]);
   const traceEvents = useRuntimeTraceStore((s) => s.events);
   const rtSessions = useRuntimeStore((s) => s.sessions);
 
@@ -52,6 +53,9 @@ export function RuntimeDiagnosticsPanel() {
       ]);
       setProbe(probeResult);
       setDiscovery(discoveryResult);
+      invoke<Array<{ path: string; exists: boolean; source: string }>>('runtime_find_claude_js_candidates')
+        .then(setJsCandidates)
+        .catch(() => setJsCandidates([]));
     } catch (e) {
       setError(String(e));
     } finally {
@@ -69,6 +73,9 @@ export function RuntimeDiagnosticsPanel() {
       ]);
       setProbe(probeResult);
       setDiscovery(discoveryResult);
+      invoke<Array<{ path: string; exists: boolean; source: string }>>('runtime_find_claude_js_candidates')
+        .then(setJsCandidates)
+        .catch(() => setJsCandidates([]));
     } catch (e) {
       setError(String(e));
     } finally {
@@ -98,7 +105,8 @@ export function RuntimeDiagnosticsPanel() {
       {/* v13.0: Launch Plan Matrix (v2 discovery) */}
       {discovery && Array.isArray((discovery as any).plans) && (
         <Section title="Launch Plan Matrix">
-          <table style={tableStyle}>
+          <div style={{ overflowX: 'auto', width: '100%', borderRadius: 'var(--cc-radius-sm)' }}>
+          <table style={{ ...tableStyle, minWidth: 980 }}>
             <thead>
               <tr>
                 {['Plan', 'Program', 'Args Prefix', 'Canary', 'Version', 'Selected', 'Error'].map((h) => (
@@ -121,8 +129,37 @@ export function RuntimeDiagnosticsPanel() {
               ))}
             </tbody>
           </table>
+          </div>
         </Section>
       )}
+      {/* Claude JS Candidates */}
+      <Section title="Claude JS Candidates">
+        {jsCandidates.length === 0 ? (
+          <p style={{ color: 'var(--cc-text-muted)' }}>No JS candidates found. Set CTRL_CC_CLAUDE_JS manually.</p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ ...tableStyle, minWidth: 900 }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Exists</th>
+                  <th style={thStyle}>Path</th>
+                  <th style={thStyle}>Source</th>
+                </tr>
+              </thead>
+              <tbody>
+                {jsCandidates.map((c) => (
+                  <tr key={c.path}>
+                    <td style={tdStyle}>{c.exists ? '✅' : '❌'}</td>
+                    <td style={tdStyle}><code>{c.path}</code></td>
+                    <td style={tdStyle}>{c.source}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Section>
+
       {/* Legacy discovery: only show if old format */}
       {discovery && (discovery as any).shellStrategies && (
         <Section title={`Legacy Discovery — ${(discovery as any).overallStatus}`}>
@@ -134,7 +171,8 @@ export function RuntimeDiagnosticsPanel() {
         <>
           {/* Session Mapping */}
           <Section title="Session Mapping">
-            <table style={tableStyle}>
+            <div style={{ overflowX: 'auto', width: '100%', borderRadius: 'var(--cc-radius-sm)' }}>
+            <table style={{ ...tableStyle, minWidth: 980 }}>
               <thead><tr>{['UI Session ID','PTY Session ID','Claude Sess ID','Frontend Status','Backend Exists','CWD','Error'].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr></thead>
               <tbody>
                 {probe.frontendSessions.map((fs) => {
@@ -154,6 +192,7 @@ export function RuntimeDiagnosticsPanel() {
                 {probe.frontendSessions.length === 0 && <tr><td colSpan={7} style={tdStyle}>No frontend sessions</td></tr>}
               </tbody>
             </table>
+            </div>
           </Section>
 
           {/* Mismatches */}
@@ -169,7 +208,8 @@ export function RuntimeDiagnosticsPanel() {
 
           {/* Backend PTY Registry */}
           <Section title={`PTY Registry (${probe.backendPtySessions.length})`}>
-            <table style={tableStyle}>
+            <div style={{ overflowX: 'auto', width: '100%', borderRadius: 'var(--cc-radius-sm)' }}>
+            <table style={{ ...tableStyle, minWidth: 980 }}>
               <thead><tr>{['PTY Session ID','UI Session ID','CWD','PID','Status','Has Writer','Created'].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr></thead>
               <tbody>
                 {probe.backendPtySessions.map((b) => (
@@ -186,6 +226,7 @@ export function RuntimeDiagnosticsPanel() {
                 {probe.backendPtySessions.length === 0 && <tr><td colSpan={7} style={tdStyle}>Empty — no PTY sessions in backend registry</td></tr>}
               </tbody>
             </table>
+            </div>
           </Section>
         </>
       )}
@@ -194,7 +235,7 @@ export function RuntimeDiagnosticsPanel() {
       <Section title={`Trace Timeline (${traceEvents.length})`}>
         <div style={{ maxHeight: 300, overflow: 'auto' }}>
           {traceEvents.slice(0, 50).map((e) => (
-            <div key={e.id} style={{ padding: '2px 8px', borderLeft: `3px solid ${e.level === 'error' ? 'var(--cc-red)' : e.level === 'warning' ? 'var(--cc-amber)' : 'var(--cc-border)'}`, marginBottom: 2, fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-mono)' }}>
+            <div key={e.id} style={{ padding: '2px 8px', borderLeft: `3px solid ${e.level === 'error' ? 'var(--cc-red)' : e.level === 'warning' ? 'var(--cc-amber)' : 'var(--cc-border)'}`, marginBottom: 2, fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-mono)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
               <span style={{ color: 'var(--cc-text-soft)' }}>{formatTraceTime(e.ts)}</span>
               <span style={{ marginLeft: 6, color: 'var(--cc-text-muted)' }}>[{e.source}]</span>
               <span style={{ marginLeft: 6, fontWeight: 600 }}>{e.type}</span>

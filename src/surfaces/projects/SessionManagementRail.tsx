@@ -41,7 +41,7 @@ export function SessionManagementRail({ collapsed, onToggleCollapse, projectId, 
 
   if (!projectId) {
     return (
-      <div data-testid="session-management-rail" style={{ width: 280, flexShrink: 0, borderRight: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column' }}>
+      <div className="session-management-rail" data-testid="session-management-rail" style={{ width: 280, flexShrink: 0, borderRight: '1px solid var(--cc-border)', display: 'flex', flexDirection: 'column' }}>
         <RailHeader title={t('sessionInspector.session')} onCollapse={onToggleCollapse} count={0} />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
           <span style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-soft)' }}>{t('common.selectProject')}</span>

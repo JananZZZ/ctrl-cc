@@ -97,10 +97,13 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
   const searchRef = useRef<SearchAddon | null>(null);
   const serializeRef = useRef<SerializeAddon | null>(null);
   const deadRef = useRef(false);
+  const lastBlockedInputAtRef = useRef(0);
   const runtimeStatus = useRuntimeStore((s) =>
     sessionId ? s.sessions[sessionId]?.status : undefined
   );
-  const blockedInputReportedRef = useRef(false);
+  const runtimeError = useRuntimeStore((s) =>
+    sessionId ? s.sessions[sessionId]?.error : undefined
+  );
   const [status, setStatus] = useState<PtyStatus>('idle');
   const [ready, setReady] = useState(false);
 
@@ -109,14 +112,12 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     if (termRef.current) return;
 
     deadRef.current = false;
-    blockedInputReportedRef.current = false;
+    lastBlockedInputAtRef.current = 0;
 
-    // v15: Sync RuntimeStore failed status to deadRef via effect
     if (runtimeStatus === 'failed' || runtimeStatus === 'discovery-failed' || runtimeStatus === 'exited' || runtimeStatus === 'killed' || runtimeStatus === 'disconnected') {
       deadRef.current = true;
       setStatus(runtimeStatus === 'failed' || runtimeStatus === 'discovery-failed' ? 'failed' : 'exited');
     }
-    blockedInputReportedRef.current = false;
 
     const fit = new FitAddon();
     const search = new SearchAddon();
@@ -182,18 +183,19 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     }).then((fn) => unlisteners.push(fn));
 
     term.onData((data) => {
-      const rt = useRuntimeStore.getState().sessions[sessionId];
-      const rtStatus = rt?.status ?? 'missing';
+      const current = useRuntimeStore.getState().sessions[sessionId];
 
-      if (deadRef.current || !rt || !isRuntimeWritable(rtStatus as any)) {
-        if (!blockedInputReportedRef.current) {
-          blockedInputReportedRef.current = true;
-          const reason = rt?.error ? `${rtStatus}: ${rt.error}` : rtStatus;
-          term.writeln(`\x1b[33m[Ctrl-CC] Runtime is not writable (${reason}). Fix Runtime diagnostics, then start a new session.\x1b[0m`);
-        }
-        if (rtStatus === 'failed' || rtStatus === 'discovery-failed' || rtStatus === 'exited' || rtStatus === 'killed' || rtStatus === 'disconnected') {
-          deadRef.current = true;
-          setStatus(rtStatus === 'failed' || rtStatus === 'discovery-failed' ? 'failed' : 'exited');
+      if (
+        deadRef.current ||
+        !current ||
+        ['failed', 'discovery-failed', 'exited', 'killed', 'disconnected'].includes(current.status)
+      ) {
+        const now = Date.now();
+        if (now - lastBlockedInputAtRef.current > 3000) {
+          lastBlockedInputAtRef.current = now;
+          term.writeln(
+            `\x1b[33m[Ctrl-CC] Claude Runtime is not writable (${current?.status ?? 'missing'}). Fix Runtime Diagnostics, then start a new session.\x1b[0m`
+          );
         }
         return;
       }
@@ -201,14 +203,11 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
       RuntimeBridge.write(sessionId, data).catch((e: unknown) => {
         const msg = String(e);
         warnLog('pty', 'PTY write failed', msg);
-        if (msg.includes('not writable') || msg.includes('exited') || msg.includes('os error 232') || msg.includes('管道') || msg.includes('Runtime not ready')) {
+        if (msg.includes('not writable') || msg.includes('not ready') || msg.includes('exited') || msg.includes('os error 232') || msg.includes('管道')) {
           deadRef.current = true;
-          setStatus('exited');
+          setStatus('failed');
         }
-        if (!blockedInputReportedRef.current) {
-          blockedInputReportedRef.current = true;
-          term.writeln(`\x1b[31m[Ctrl-CC] Write failed: ${msg}\x1b[0m`);
-        }
+        term.writeln(`\x1b[31m[Ctrl-CC] Write failed: ${msg}\x1b[0m`);
       });
     });
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -235,6 +234,26 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
       setReady(false);
     };
   }, [sessionId, container]);
+
+  useEffect(() => {
+    if (!runtimeStatus) return;
+
+    if (['failed', 'discovery-failed', 'exited', 'killed', 'disconnected'].includes(runtimeStatus)) {
+      deadRef.current = true;
+      setStatus('failed');
+
+      const term = termRef.current;
+      if (term) {
+        const now = Date.now();
+        if (now - lastBlockedInputAtRef.current > 3000) {
+          lastBlockedInputAtRef.current = now;
+          term.writeln(
+            `\x1b[33m[Ctrl-CC] Claude Runtime is not writable (${runtimeStatus}). ${runtimeError ?? 'Open diagnostics and start a new session.'}\x1b[0m`
+          );
+        }
+      }
+    }
+  }, [runtimeStatus, runtimeError]);
 
   const write = useCallback((data: string) => {
     if (!sessionId) return;

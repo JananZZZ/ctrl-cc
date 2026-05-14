@@ -134,6 +134,23 @@ html, body, .cc-card, .cc-button, .cc-badge, .cc-tabs, .cc-tab,
   outline-offset: 2px;
 }
 
+/* ═══════════════ Projects Surface Responsive ═══════════════ */
+@media (max-width: 1100px) {
+  [data-testid="surface-projects"] .project-management-rail {
+    display: none;
+  }
+
+  [data-testid="surface-projects"] .session-management-rail {
+    width: 260px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  [data-testid="surface-projects"] .session-management-rail {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

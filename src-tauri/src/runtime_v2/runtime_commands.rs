@@ -1,10 +1,11 @@
 use tauri::State;
 
-use super::claude_discovery::discover_claude;
+use super::claude_discovery::{discover_claude, list_claude_js_candidates};
 use super::runtime_manager::RuntimeManager;
 use super::runtime_types::{
-    RuntimeDiscoveryResult, RuntimePtySessionDebugInfo, RuntimeStartInteractiveRequest,
-    RuntimeStartInteractiveResponse, RuntimeStopRequest, RuntimeWriteRequest,
+    ClaudeJsCandidate, RuntimeDiscoveryResult, RuntimePtySessionDebugInfo,
+    RuntimeStartInteractiveRequest, RuntimeStartInteractiveResponse, RuntimeStopRequest,
+    RuntimeWriteRequest,
 };
 
 #[tauri::command]
@@ -42,4 +43,9 @@ pub fn runtime_list_sessions_v2(
     manager: State<'_, RuntimeManager>,
 ) -> Result<Vec<RuntimePtySessionDebugInfo>, String> {
     manager.list_sessions()
+}
+
+#[tauri::command]
+pub fn runtime_find_claude_js_candidates() -> Vec<ClaudeJsCandidate> {
+    list_claude_js_candidates()
 }

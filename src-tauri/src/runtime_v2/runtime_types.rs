@@ -72,6 +72,14 @@ pub struct RuntimeDiscoveryResult {
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct ClaudeJsCandidate {
+    pub path: String,
+    pub exists: bool,
+    pub source: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ClaudeLaunchPlanDebug {
     pub id: String,
     pub label: String,
