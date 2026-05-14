@@ -67,9 +67,8 @@ export function TerminalView({ sessionId }: Props) {
         const hint = parseRuntimeStartupHint(runtimeSession?.error);
         if (!hint) return null;
         return (
-          <div style={{
-            padding: '10px 12px', borderBottom: '1px solid var(--cc-border)',
-            background: 'var(--cc-red-soft)', color: 'var(--cc-text)',
+          <div className="runtime-startup-failure" style={{
+            borderBottom: '1px solid var(--cc-border)',
             fontSize: 'var(--cc-font-xs)', lineHeight: 1.55,
           }}>
             <div style={{ fontWeight: 700, color: 'var(--cc-red)', marginBottom: 4 }}>

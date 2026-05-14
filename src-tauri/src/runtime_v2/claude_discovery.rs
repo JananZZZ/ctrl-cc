@@ -42,7 +42,15 @@ pub fn select_launch_plan() -> Result<ClaudeLaunchPlan, String> {
             Err(e) => blocked_or_failed.push(format!("{}: {}", plan.id, e)),
         }
     }
-    Err(format!("{}\nNo policy-allowed runnable launch plan. Set CTRL_CC_CLAUDE_JS to Claude CLI JS path.", blocked_or_failed.join("\n")))
+    Err(format!(
+        "{}\nNo policy-allowed runnable Claude launch plan was found.\n\
+         Ctrl-CC tried direct JS entries and direct node+npx fallbacks, but none passed canary.\n\
+         Open Settings → Diagnostics → Claude JS Candidates.\n\
+         If no JS candidate exists, run `where claude` and inspect `%APPDATA%\\npm\\claude.cmd`.\n\
+         Recommended fix: set CTRL_CC_CLAUDE_JS to the real Claude CLI JS entry.\n\
+         Temporary fallback: set CTRL_CC_ALLOW_SHELL_WRAPPER=1.",
+        blocked_or_failed.join("\n")
+    ))
 }
 
 fn is_policy_allowed(plan: &ClaudeLaunchPlan) -> bool {
@@ -63,6 +71,30 @@ fn collect_launch_plans() -> Vec<ClaudeLaunchPlan> {
     }
     if let Some(p) = resolve_node_plan_from_claude_shim() { plans.push(p); }
     for p in scan_node_modules_for_claude_js() { plans.push(p); }
+    if let (Some(node), Some(npx_cli)) = (find_node_exe(), find_npx_cli_js()) {
+        plans.push(ClaudeLaunchPlan {
+            id: "direct-node-npx-anthropic-claude-code".to_string(),
+            label: "Direct Node.js + npx @anthropic-ai/claude-code".to_string(),
+            program: node.to_string_lossy().to_string(),
+            args_prefix: vec![
+                npx_cli.to_string_lossy().to_string(),
+                "--yes".to_string(),
+                "@anthropic-ai/claude-code".to_string(),
+            ],
+            reason: "Runs npx through node.exe directly; avoids cmd.exe/powershell.exe wrappers".to_string(),
+        });
+        plans.push(ClaudeLaunchPlan {
+            id: "direct-node-npx-claude-code".to_string(),
+            label: "Direct Node.js + npx claude-code".to_string(),
+            program: node.to_string_lossy().to_string(),
+            args_prefix: vec![
+                npx_cli.to_string_lossy().to_string(),
+                "--yes".to_string(),
+                "claude-code".to_string(),
+            ],
+            reason: "Fallback package name through direct npx".to_string(),
+        });
+    }
     if let Some(exe) = find_on_path("claude.exe") {
         plans.push(ClaudeLaunchPlan {
             id: "native-claude-exe".into(), label: "Native claude.exe".into(),
@@ -267,6 +299,22 @@ fn scan_node_modules_for_claude_js() -> Vec<ClaudeLaunchPlan> {
             label: "Scanned npm modules".into(), program: node.to_string_lossy().to_string(),
             args_prefix: vec![js.to_string_lossy().to_string()], reason: format!("Scanned {}", r.to_string_lossy()) }); } }
     plans
+}
+
+fn find_npx_cli_js() -> Option<PathBuf> {
+    let mut candidates = Vec::new();
+
+    if let Ok(program_files) = env::var("ProgramFiles") {
+        candidates.push(PathBuf::from(program_files).join(r"nodejs\node_modules\npm\bin\npx-cli.js"));
+    }
+
+    candidates.push(PathBuf::from(r"C:\Program Files\nodejs\node_modules\npm\bin\npx-cli.js"));
+
+    if let Ok(appdata) = env::var("APPDATA") {
+        candidates.push(PathBuf::from(appdata).join(r"npm\node_modules\npm\bin\npx-cli.js"));
+    }
+
+    candidates.into_iter().find(|p| p.exists())
 }
 
 fn find_on_path(exe: &str) -> Option<PathBuf> {

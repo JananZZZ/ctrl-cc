@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
-import { invokeCommand } from '../../services/invokeCommand';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 import { CcCard } from '../../components/ui/CcCard';
 import { CcButton } from '../../components/ui/CcButton';
@@ -9,8 +8,8 @@ import { CTRL_CC_THEMES } from '../../design/theme-registry';
 import type { CtrlCcTheme } from '../../design/theme-types';
 import { RuntimeDiagnosticsPanel } from '../../features/runtime/components/RuntimeDiagnosticsPanel';
 import { SurfacePage } from '../../components/layout/SurfacePage';
-
-interface Capability { version: string | null; exists: boolean; authStatus: string | null; supportsStreamJson: boolean; supportsMCP: boolean; supportsAgents: boolean; checkedAt: string; errors: string[]; }
+import { useEnvironmentStore } from '../../features/environment/stores/environmentStore';
+import { PermissionCenterCard } from './PermissionCenterCard';
 
 const THEME_I18N_KEYS: Record<CtrlCcTheme, string> = {
   'warm-sand': 'theme.warmSand',
@@ -28,12 +27,9 @@ const THEME_DESC_KEYS: Record<CtrlCcTheme, string> = {
 export function SettingsSurface() {
   useRenderLoopGuard('SettingsSurface');
   const { t } = useTranslation();
-  const [cap, setCap] = useState<Capability | null>(null);
-  const [capLoading, setCapLoading] = useState(true);
   const [model, setModel] = useState(() => localStorage.getItem('ctrl-cc-model') || 'sonnet');
   const [effort, setEffort] = useState(() => localStorage.getItem('ctrl-cc-effort') || 'medium');
   const [permMode, setPermMode] = useState(() => localStorage.getItem('ctrl-cc-permMode') || 'default');
-  const [autoTrust, setAutoTrust] = useState(() => Number(localStorage.getItem('ctrl-cc-autoTrust')) || 0);
   const [fontSize, setFontSize] = useState(() => {
     const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cc-font-scale').trim()) || 1;
     return Math.round(14 * scale);
@@ -48,37 +44,22 @@ export function SettingsSurface() {
     return 'warm-sand';
   });
 
-  const checkCap = () => {
-    setCapLoading(true);
-    invokeCommand<Capability>('claude_check_capability')
-      .then((c) => {
-        setCap(c);
-        localStorage.setItem('ctrl-cc-capability', JSON.stringify({ data: c, checkedAt: new Date().toISOString() }));
-        setStatusMsg(t('settings.envCheckComplete'));
-      })
-      .catch(() => setCap({ version: null, exists: false, authStatus: null, supportsStreamJson: false, supportsMCP: false, supportsAgents: false, checkedAt: new Date().toISOString(), errors: ['Detection failed'] }))
-      .finally(() => setCapLoading(false));
-  };
+  const envSnapshot = useEnvironmentStore((s) => s.snapshot);
+  const envLoading = useEnvironmentStore((s) => s.loading);
+  const envError = useEnvironmentStore((s) => s.error);
+  const refreshEnv = useEnvironmentStore((s) => s.refresh);
+  const loadCachedEnv = useEnvironmentStore((s) => s.loadCached);
+  const clearEnv = useEnvironmentStore((s) => s.clear);
 
   useEffect(() => {
-    // Try cached capability first
-    const cached = localStorage.getItem('ctrl-cc-capability');
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (parsed.data && parsed.checkedAt) {
-          const age = Date.now() - new Date(parsed.checkedAt).getTime();
-          if (age < 5 * 60 * 1000) { setCap(parsed.data); setCapLoading(false); return; }
-        }
-      } catch {}
-    }
-    checkCap();
-  }, []);
+    loadCachedEnv();
+  }, [loadCachedEnv]);
+
+  const cap = envSnapshot?.capability ?? null;
 
   useEffect(() => { localStorage.setItem('ctrl-cc-model', model); }, [model]);
   useEffect(() => { localStorage.setItem('ctrl-cc-effort', effort); }, [effort]);
   useEffect(() => { localStorage.setItem('ctrl-cc-permMode', permMode); }, [permMode]);
-  useEffect(() => { localStorage.setItem('ctrl-cc-autoTrust', String(autoTrust)); }, [autoTrust]);
 
   const switchTheme = (themeId: CtrlCcTheme) => {
     setCurrentTheme(themeId);
@@ -92,7 +73,7 @@ export function SettingsSurface() {
   };
 
   const exportDiag = () => {
-    const diag = { cap, model, effort, permMode, autoTrust, fontSize, theme: currentTheme, lang: i18n.language, time: new Date().toISOString() };
+    const diag = { cap, model, effort, permMode, fontSize, theme: currentTheme, lang: i18n.language, time: new Date().toISOString(), env: envSnapshot };
     const blob = new Blob([JSON.stringify(diag, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'ctrl-cc-diagnostics.json'; a.click();
@@ -104,11 +85,6 @@ export function SettingsSurface() {
     try { localStorage.clear(); setStatusMsg(t('settings.cacheCleared')); }
     catch { setStatusMsg(t('settings.cacheClearFailed')); }
   };
-
-  const AUTO_TRUST_DESCS = [
-    t('settings.autoTrustLevels.0'), t('settings.autoTrustLevels.1'), t('settings.autoTrustLevels.2'),
-    t('settings.autoTrustLevels.3'), t('settings.autoTrustLevels.4'), t('settings.autoTrustLevels.5'),
-  ];
 
   return (
     <SurfacePage variant="diagnostics" testId="surface-settings">
@@ -123,7 +99,7 @@ export function SettingsSurface() {
       )}
 
       {/* Language Toggle */}
-      <CcCard style={{ padding: 16, marginBottom: 16 }}>
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
         <h3 style={sectH3}>{t('settings.language')}</h3>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
@@ -152,7 +128,7 @@ export function SettingsSurface() {
       </CcCard>
 
       {/* Appearance — 4 Theme Cards */}
-      <CcCard style={{ padding: 16, marginBottom: 16 }}>
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
         <h3 style={sectH3}>
           {t('settings.appearance')}
           <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', marginLeft: 8, fontWeight: 400 }}>
@@ -214,27 +190,41 @@ export function SettingsSurface() {
       </CcCard>
 
       {/* Environment */}
-      <CcCard style={{ padding: 16, marginBottom: 16 }}>
-        <h3 style={sectH3}>{t('settings.environment')}</h3>
-        {capLoading ? (
-          <div style={{ color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-sm)' }}>{t('common.detecting')}</div>
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
+        <div className="cc-card-header">
+          <h3 style={sectH3}>{t('settings.environment')}</h3>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <CcButton size="sm" variant="ghost" onClick={() => void refreshEnv()} disabled={envLoading}>
+              {envLoading ? t('common.detecting') : envSnapshot ? '刷新环境配置' : '检测环境配置'}
+            </CcButton>
+            {envSnapshot && (
+              <CcButton size="sm" variant="ghost" onClick={clearEnv}>
+                清除环境缓存
+              </CcButton>
+            )}
+          </div>
+        </div>
+
+        {envError && <div className="cc-inline-error">{envError}</div>}
+
+        {!envSnapshot ? (
+          <div className="cc-empty-hint">
+            尚未检测环境。点击"检测环境配置"后，将统一检测 Claude CLI、认证状态、LaunchPlan、Claude JS 候选路径。
+          </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 24px', fontSize: 'var(--cc-font-sm)' }}>
+          <div className="cc-settings-grid">
             <F label={t('console.claudeCli')} value={cap?.exists ? String(t('common.installed')) : String(t('common.notDetected'))} color={cap?.exists ? 'var(--cc-green)' : 'var(--cc-red)'} />
             <F label={t('console.version')} value={cap?.version || 'N/A'} />
             <F label={t('console.authStatus')} value={cap?.authStatus || String(t('common.unknown'))} color={cap?.authStatus === 'authenticated' ? 'var(--cc-green)' : 'var(--cc-amber)'} />
-            <F label={t('console.mcp')} value={cap?.supportsMCP ? String(t('common.supported')) : String(t('common.unknown'))} />
-            <F label={t('console.agents')} value={cap?.supportsAgents ? String(t('common.supported')) : String(t('common.unknown'))} />
-            <F label={t('console.checkedAt')} value={cap?.checkedAt ? fmtTime(cap.checkedAt) : 'N/A'} />
+            <F label="LaunchPlan" value={envSnapshot.launchPlans.find((p) => p.selected)?.id ?? 'not selected'} />
+            <F label="Claude JS candidates" value={String(envSnapshot.jsCandidates.filter((c) => c.exists).length)} />
+            <F label={t('console.checkedAt')} value={fmtTime(envSnapshot.generatedAt)} />
           </div>
         )}
-        <div style={{ marginTop: 10 }}>
-          <CcButton size="sm" variant="ghost" onClick={checkCap}>{t('settings.redetect')}</CcButton>
-        </div>
       </CcCard>
 
       {/* Runtime */}
-      <CcCard style={{ padding: 16, marginBottom: 16 }}>
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
         <h3 style={sectH3}>{t('settings.runtime')}</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 'var(--cc-font-sm)' }}>
           <S label={t('settings.defaultModel')} value={model} onChange={setModel} opts={['sonnet', 'opus', 'haiku']} />
@@ -243,33 +233,11 @@ export function SettingsSurface() {
         </div>
       </CcCard>
 
-      {/* Permission Center */}
-      <CcCard style={{ padding: 16, marginBottom: 16 }}>
-        <h3 style={sectH3}>{t('settings.permissionCenter')}</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 'var(--cc-font-xs)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ color: 'var(--cc-text-soft)', minWidth: 100 }}>{t('settings.allowlist')}</span>
-            <span style={{ color: 'var(--cc-green)' }}>read, glob, grep, list</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ color: 'var(--cc-text-soft)', minWidth: 100 }}>{t('settings.denylist')}</span>
-            <span style={{ color: 'var(--cc-red)' }}>rm -rf, git push --force</span>
-          </div>
-          <CcButton size="sm" variant="ghost" onClick={() => setStatusMsg('Permission Center active')}>{t('settings.manageRules')}</CcButton>
-        </div>
-      </CcCard>
-
-      {/* AutoTrust Security */}
-      <CcCard style={{ padding: 16, marginBottom: 16 }}>
-        <h3 style={sectH3}>{t('settings.autoTrustSecurity')}</h3>
-        <S label={t('settings.autoTrust')} value={String(autoTrust)} onChange={(v) => setAutoTrust(parseInt(v))} opts={['0', '1', '2', '3', '4', '5']} />
-        <div style={{ marginTop: 6, fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
-          {t('settings.autoTrustDesc', { level: autoTrust, desc: AUTO_TRUST_DESCS[autoTrust] })}
-        </div>
-      </CcCard>
+      {/* Permission Center — real backend */}
+      <PermissionCenterCard />
 
       {/* Diagnostics */}
-      <CcCard style={{ padding: 16, marginBottom: 16 }}>
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
         <h3 style={sectH3}>{t('settings.diagnostics')}</h3>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
           <CcButton size="sm" variant="ghost" onClick={exportDiag}>{t('settings.exportDiag')}</CcButton>

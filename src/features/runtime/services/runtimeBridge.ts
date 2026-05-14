@@ -81,7 +81,9 @@ export async function startInteractiveClaudeSession(input: StartInteractiveInput
 
   useOpenSessionStore.getState().openSession({
     sessionId: session.id, projectId: session.projectId, projectName: input.projectName,
-    title: session.name, status: 'starting', viewMode: 'terminal',
+    title: session.name,
+      status: 'starting',
+      viewMode: 'chat',
     pendingConfirms: 0, riskCount: 0, isPinned: false,
   });
 

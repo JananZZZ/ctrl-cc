@@ -325,6 +325,16 @@ function getContractStatus(probe: RuntimeContractProbeResult | null) {
   if (frontendCount === 0 && backendCount === 0) {
     return { label: 'NOT TESTED — NO SESSIONS', tone: 'warning' as const, detail: 'No frontend RuntimeSession and no backend PTY session exist. Run an active Runtime Contract Test.' };
   }
+  const failedFrontendCount = probe.frontendSessions.filter((s) =>
+    ['failed', 'discovery-failed'].includes(s.status)
+  ).length;
+  if (failedFrontendCount > 0) {
+    return {
+      label: `${failedFrontendCount} STARTUP FAILED`,
+      tone: 'error' as const,
+      detail: 'One or more RuntimeSessions failed before backend PTY creation.',
+    };
+  }
   if (mismatchCount > 0) {
     return { label: `${mismatchCount} CONTRACT MISMATCHES`, tone: 'error' as const, detail: 'Frontend RuntimeStore and backend PTY registry are inconsistent.' };
   }

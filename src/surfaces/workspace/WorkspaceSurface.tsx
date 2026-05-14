@@ -6,7 +6,6 @@ import { useOpenSessionStore } from '../../stores/openSessionStore';
 import { invokeCommand } from '../../services/invokeCommand';
 import { RuntimeBridge, write as runtimeWrite } from '../../features/runtime/services/runtimeBridge';
 import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
-import { recordRuntimeTrace } from '../../features/runtime/stores/runtimeTraceStore';
 import { isRuntimeWritable } from '../../features/runtime/types/runtimeTypes';
 import { StreamCoalescer } from '../../features/chat/StreamCoalescer';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
@@ -98,14 +97,9 @@ export function WorkspaceSurface() {
     const canSend = rtSession?.ptySessionId && isRuntimeWritable(rtSession.status);
 
     if (!canSend) {
-      const status = rtSession?.status ?? 'unknown';
-      const ptyId = rtSession?.ptySessionId ?? 'null';
-      const errMsg = `${t('workspace.sendFailed')}: Runtime not ready (status=${status}, ptySessionId=${ptyId})`;
+      const status = rtSession?.status ?? 'missing';
+      const errMsg = `Claude Runtime 尚未连接：${status}。请先在设置 → 诊断中修复环境配置，然后重新新建会话。`;
       setError(errMsg);
-      recordRuntimeTrace(
-        "composer.blocked.not_ready", `Cannot send: runtime not ready. status=${status}`,
-        "warning", "composer", activeTabId, rtSession?.ptySessionId ?? null, rtSession?.traceId ?? null
-      );
       return { ok: false, error: errMsg };
     }
 
