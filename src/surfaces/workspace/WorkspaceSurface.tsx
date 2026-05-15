@@ -5,6 +5,7 @@ import { useSessionStore } from '../../stores/sessionStore';
 import { useOpenSessionStore } from '../../stores/openSessionStore';
 import { RuntimeFabricBridge } from '../../features/runtime-fabric/services/runtimeFabricBridge';
 import { useRuntimeFabricStore } from '../../features/runtime-fabric/stores/runtimeFabricStore';
+import { useSetupStore } from '../../features/setup/stores/setupStore';
 import { StreamCoalescer } from '../../features/chat/StreamCoalescer';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
@@ -47,6 +48,8 @@ export function WorkspaceSurface() {
 
   const isComposerEnabled = useCallback((sessionId: string | null): boolean => {
     if (!sessionId) return false;
+    const setup = useSetupStore.getState().snapshot;
+    if (setup && !setup.ready) return false;
     const fabric = useRuntimeFabricStore.getState().sessions[sessionId];
     if (!fabric) return true;
     return fabric.status !== 'failed';

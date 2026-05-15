@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSetupStore } from '../stores/setupStore';
 import { SetupCheckList } from './SetupCheckList';
 import { SetupRepairPanel } from './SetupRepairPanel';
@@ -19,6 +19,13 @@ const STEPS: { id: Step; label: string; icon: string }[] = [
 
 export function FirstRunSetupWizard() {
   const [step, setStep] = useState<Step>('welcome');
+
+  // Install setup://task-progress event listener
+  useEffect(() => {
+    let cleanup: undefined | (() => void);
+    useSetupStore.getState().installListeners().then((fn) => { cleanup = fn; });
+    return () => cleanup?.();
+  }, []);
   const snapshot = useSetupStore((s) => s.snapshot);
   const checking = useSetupStore((s) => s.checking);
   const detectAll = useSetupStore((s) => s.detectAll);

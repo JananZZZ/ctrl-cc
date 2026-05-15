@@ -168,6 +168,14 @@ export function App() {
     return () => { unlisten.then((fn) => fn()); };
   }, []);
 
+  // v23.0: Load cached setup snapshot and install task progress listeners
+  useEffect(() => {
+    useSetupStore.getState().loadCached();
+    let cleanup: undefined | (() => void);
+    useSetupStore.getState().installListeners().then((fn) => { cleanup = fn; });
+    return () => cleanup?.();
+  }, []);
+
   // v23.0: First-run onboarding gate
   const onboardingCompleted = useSetupStore((s) => s.onboardingCompleted);
 
