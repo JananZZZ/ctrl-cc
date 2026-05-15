@@ -1,6 +1,5 @@
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { useRuntimeFabricStore } from '../stores/runtimeFabricStore';
-import type { RuntimeEvent } from '../../../types';
 
 interface ChatStreamPayload {
   traceId: string;
@@ -32,18 +31,6 @@ function extractText(parsed: unknown): string {
   return '';
 }
 
-function makeRuntimeEvent(sessionId: string, type: string, content: string): RuntimeEvent {
-  return {
-    id: `fabric-${sessionId}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    sessionId,
-    projectId: '',
-    type: type as RuntimeEvent['type'],
-    content,
-    severity: 'low',
-    createdAt: new Date().toISOString(),
-  };
-}
-
 export async function installRuntimeFabricEventBridge(): Promise<() => void> {
   const unlisten: UnlistenFn[] = [];
 
@@ -68,10 +55,7 @@ export async function installRuntimeFabricEventBridge(): Promise<() => void> {
 
     const text = extractText(parsed);
     if (text) {
-      useRuntimeFabricStore.getState().appendChatEvent(
-        p.sessionId,
-        makeRuntimeEvent(p.sessionId, 'assistant_delta', text)
-      );
+      useRuntimeFabricStore.getState().upsertAssistantDelta(p.sessionId, p.channelId, text);
     }
   }));
 
@@ -84,10 +68,6 @@ export async function installRuntimeFabricEventBridge(): Promise<() => void> {
       type: 'chat.failed',
       message: p.line,
     });
-    useRuntimeFabricStore.getState().appendChatEvent(
-      p.sessionId,
-      makeRuntimeEvent(p.sessionId, 'system', p.line)
-    );
   }));
 
   unlisten.push(await listen<ChatExitPayload>('runtime://chat-exit', (event) => {
@@ -97,8 +77,8 @@ export async function installRuntimeFabricEventBridge(): Promise<() => void> {
       exitedAt: new Date().toISOString(),
     });
     useRuntimeFabricStore.getState().patchSession(p.sessionId, {
-      status: p.code === 0 ? 'idle' : 'failed',
-      error: p.code === 0 ? null : `chat exited with code ${p.code}`,
+      status: 'idle',
+      error: p.code === 0 ? null : `last chat turn exited with code ${p.code}`,
     });
     useRuntimeFabricStore.getState().appendEvent({
       sessionId: p.sessionId,

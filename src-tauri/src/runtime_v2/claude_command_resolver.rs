@@ -43,6 +43,12 @@ pub fn discover_claude_commands() -> Vec<ClaudeCommandSpec> {
         specs.push(native_spec(p, "npm optional native binary"));
     }
 
+    for p in find_claude_npm_wrapper_candidates() {
+        if let Some(spec) = node_wrapper_spec(p, "npm global @anthropic-ai/claude-code wrapper") {
+            specs.push(spec);
+        }
+    }
+
     if let Some(bash) = find_git_bash() {
         specs.push(shell_spec(
             "git-bash-claude",
@@ -87,18 +93,44 @@ pub fn discover_claude_commands() -> Vec<ClaudeCommandSpec> {
     dedupe_specs(specs).into_iter().map(inspect_spec).collect()
 }
 
+fn command_rank(spec: &ClaudeCommandSpec, for_terminal: bool) -> i32 {
+    if !spec.version_ok {
+        return 10_000;
+    }
+
+    match spec.kind.as_str() {
+        "nativeExe" => 0,
+        "nodeWrapper" => 10,
+        "cmdShim" => if for_terminal { 40 } else { 30 },
+        "gitBash" => 50,
+        _ => 1000,
+    }
+}
+
 pub fn select_for_chat() -> Result<ClaudeCommandSpec, String> {
-    discover_claude_commands()
+    let mut specs: Vec<_> = discover_claude_commands()
         .into_iter()
-        .find(|s| s.version_ok && s.selectable_for_chat)
-        .ok_or_else(|| "No Claude command available for Chat. Install Claude Code native or set CTRL_CC_CLAUDE_BIN.".to_string())
+        .filter(|s| s.version_ok && s.selectable_for_chat)
+        .collect();
+
+    specs.sort_by_key(|s| command_rank(s, false));
+
+    specs.into_iter().next().ok_or_else(|| {
+        "No Claude command available for Chat. Install Claude Code CLI or run Setup Center.".to_string()
+    })
 }
 
 pub fn select_for_terminal() -> Result<ClaudeCommandSpec, String> {
-    discover_claude_commands()
+    let mut specs: Vec<_> = discover_claude_commands()
         .into_iter()
-        .find(|s| s.version_ok && s.selectable_for_terminal && s.interactive_pty_ok)
-        .ok_or_else(|| "No Claude command available for Terminal PTY. Install native Claude Code or Git for Windows, then run diagnostics.".to_string())
+        .filter(|s| s.version_ok && s.selectable_for_terminal && s.interactive_pty_ok)
+        .collect();
+
+    specs.sort_by_key(|s| command_rank(s, true));
+
+    specs.into_iter().next().ok_or_else(|| {
+        "No Claude command available for Terminal PTY. Install native Claude Code or npm wrapper, then run diagnostics.".to_string()
+    })
 }
 
 fn native_spec(path: PathBuf, source: &str) -> ClaudeCommandSpec {
@@ -179,6 +211,11 @@ fn inspect_spec(mut spec: ClaudeCommandSpec) -> ClaudeCommandSpec {
             spec.selectable_for_terminal = true;
             spec.interactive_pty_ok = true;
         }
+        "nodeWrapper" => {
+            spec.selectable_for_chat = true;
+            spec.selectable_for_terminal = true;
+            spec.interactive_pty_ok = true;
+        }
         "npxDiagnostic" => {
             spec.selectable_for_chat = false;
             spec.selectable_for_terminal = false;
@@ -253,6 +290,59 @@ fn find_npx_cli_js() -> Option<PathBuf> {
     }
     candidates.push(PathBuf::from(r"C:\Program Files\nodejs\node_modules\npm\bin\npx-cli.js"));
     candidates.into_iter().find(|p| p.exists())
+}
+
+fn find_claude_npm_wrapper_candidates() -> Vec<PathBuf> {
+    let mut roots = Vec::new();
+
+    if let Ok(appdata) = env::var("APPDATA") {
+        roots.push(PathBuf::from(appdata).join("npm").join("node_modules"));
+    }
+
+    if let Some(root) = npm_root_g() {
+        roots.push(root);
+    }
+
+    let rels = [
+        r"@anthropic-ai\claude-code\cli-wrapper.cjs",
+        r"@anthropic-ai\claude-code\cli.js",
+        r"@anthropic-ai\claude-code\cli.cjs",
+        r"@anthropic-ai\claude-code\cli.mjs",
+        r"@anthropic-ai\claude-code\index.js",
+        r"@anthropic-ai\claude-code\index.mjs",
+        r"claude-code\cli-wrapper.cjs",
+        r"claude-code\cli.js",
+    ];
+
+    let mut out = Vec::new();
+    for root in roots {
+        for rel in rels {
+            let p = root.join(rel);
+            if p.exists() {
+                out.push(p);
+            }
+        }
+    }
+    out
+}
+
+fn node_wrapper_spec(path: PathBuf, source: &str) -> Option<ClaudeCommandSpec> {
+    let node = find_node_exe()?;
+    Some(ClaudeCommandSpec {
+        id: format!("node-wrapper-{}", sanitize(&path.to_string_lossy())),
+        label: "Node + Claude npm wrapper".to_string(),
+        program: node.to_string_lossy().to_string(),
+        args_prefix: vec![path.to_string_lossy().to_string()],
+        kind: "nodeWrapper".to_string(),
+        source: source.to_string(),
+        version_ok: false,
+        version_text: None,
+        print_ok: false,
+        interactive_pty_ok: false,
+        selectable_for_chat: false,
+        selectable_for_terminal: false,
+        error: None,
+    })
 }
 
 fn find_npm_optional_native_candidates() -> Vec<PathBuf> {
@@ -369,6 +459,14 @@ pub fn build_invocation(spec: &ClaudeCommandSpec, claude_args: &[String]) -> Res
             ResolvedInvocation {
                 program: spec.program.clone(),
                 args: vec!["-lc".to_string(), quoted],
+            }
+        }
+        "nodeWrapper" => {
+            let mut args = spec.args_prefix.clone();
+            args.extend(claude_args.iter().cloned());
+            ResolvedInvocation {
+                program: spec.program.clone(),
+                args,
             }
         }
         "npxDiagnostic" => {

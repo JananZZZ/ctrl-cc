@@ -3,7 +3,7 @@ use std::process::{Command, Stdio};
 
 use tauri::{AppHandle, Emitter};
 
-use super::claude_command_resolver::select_for_chat;
+use super::claude_command_resolver::{build_invocation, select_for_chat};
 use super::runtime_types::{ChatStreamRequest, ChatStreamStarted};
 
 pub fn start_chat_stream(app: AppHandle, req: ChatStreamRequest) -> Result<ChatStreamStarted, String> {
@@ -12,44 +12,45 @@ pub fn start_chat_stream(app: AppHandle, req: ChatStreamRequest) -> Result<ChatS
     }
 
     let spec = select_for_chat()?;
-    let mut args = spec.args_prefix.clone();
-    args.extend(vec![
+    let mut claude_args = vec![
         "-p".to_string(),
         req.prompt.clone(),
         "--output-format".to_string(),
         "stream-json".to_string(),
         "--include-partial-messages".to_string(),
         "--verbose".to_string(),
-    ]);
+    ];
 
     if let Some(id) = &req.claude_session_id {
         if !id.trim().is_empty() {
-            args.push("--session-id".to_string());
-            args.push(id.clone());
+            claude_args.push("--session-id".to_string());
+            claude_args.push(id.clone());
         }
     }
 
     if let Some(model) = &req.model {
         if !model.trim().is_empty() && model != "default" {
-            args.push("--model".to_string());
-            args.push(model.clone());
+            claude_args.push("--model".to_string());
+            claude_args.push(model.clone());
         }
     }
 
     if let Some(permission) = &req.permission_mode {
         if !permission.trim().is_empty() && permission != "default" {
-            args.push("--permission-mode".to_string());
-            args.push(permission.clone());
+            claude_args.push("--permission-mode".to_string());
+            claude_args.push(permission.clone());
         }
     }
 
     if let Some(max_turns) = req.max_turns {
-        args.push("--max-turns".to_string());
-        args.push(max_turns.to_string());
+        claude_args.push("--max-turns".to_string());
+        claude_args.push(max_turns.to_string());
     }
 
-    let mut child = Command::new(&spec.program)
-        .args(&args)
+    let invocation = build_invocation(&spec, &claude_args);
+
+    let mut child = Command::new(&invocation.program)
+        .args(&invocation.args)
         .current_dir(&req.cwd)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())

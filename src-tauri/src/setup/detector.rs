@@ -193,31 +193,37 @@ fn check_claude_config() -> SetupCheckResult {
 }
 
 fn check_windows_terminal() -> SetupCheckResult {
-    let candidates = [
-        r"C:\Users\*\AppData\Local\Microsoft\WindowsApps\wt.exe",
-        r"C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_*\wt.exe",
-    ];
-    let found = candidates.iter().any(|p| {
-        let path = Path::new(p);
-        if p.contains('*') {
-            let dir = path.parent().unwrap_or(Path::new("."));
-            if dir.exists() {
-                if let Ok(entries) = std::fs::read_dir(dir) {
-                    return entries
-                        .flatten()
-                        .any(|e| e.file_name().to_string_lossy() == "wt.exe");
-                }
-            }
-            false
-        } else {
-            path.exists()
-        }
-    });
+    let out = run_cmd_shell("where.exe wt");
 
-    let mut r = check("Windows Terminal", "windowsTerminal", found, false);
-    if !found {
-        r.fix_hint = Some("winget install Microsoft.WindowsTerminal".to_string());
+    if out.success && !out.stdout.trim().is_empty() {
+        let mut r = check("Windows Terminal", "windowsTerminal", true, false);
+        r.paths = out.stdout.lines().map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+        r.method = Some("where.exe wt".to_string());
+        return r;
     }
+
+    let mut candidates = Vec::new();
+
+    if let Ok(local_appdata) = std::env::var("LOCALAPPDATA") {
+        candidates.push(std::path::PathBuf::from(local_appdata).join(r"Microsoft\WindowsApps\wt.exe"));
+    }
+
+    if let Ok(userprofile) = std::env::var("USERPROFILE") {
+        candidates.push(std::path::PathBuf::from(userprofile).join(r"AppData\Local\Microsoft\WindowsApps\wt.exe"));
+    }
+
+    for p in candidates {
+        if p.exists() {
+            let mut r = check("Windows Terminal", "windowsTerminal", true, false);
+            r.paths = vec![p.to_string_lossy().to_string()];
+            r.method = Some("known path".to_string());
+            return r;
+        }
+    }
+
+    let mut r = check("Windows Terminal", "windowsTerminal", false, false);
+    r.status = "warning".to_string();
+    r.fix_hint = Some("winget install Microsoft.WindowsTerminal".to_string());
     r
 }
 
@@ -260,28 +266,40 @@ fn check_npm_registry() -> SetupCheckResult {
 }
 
 fn check_path_env() -> SetupCheckResult {
-    let path = std::env::var("PATH").unwrap_or_default();
-    let parts: Vec<&str> = path.split(';').collect();
+    let node = run_cmd_shell("where.exe node");
+    let npm = run_cmd_shell("where.exe npm");
+    let claude_cmd = run_cmd_shell("where.exe claude.cmd");
+    let claude = run_cmd_shell("where.exe claude");
+    let wt = run_cmd_shell("where.exe wt");
 
-    let has_npm_global = parts.iter().any(|p| p.contains("npm") && !p.contains("node_modules"));
-    let has_node = parts.iter().any(|p| p.contains("nodejs") || p.contains("node"));
-    let mut issues = Vec::new();
+    let node_ok = node.success && !node.stdout.trim().is_empty();
+    let npm_ok = npm.success && !npm.stdout.trim().is_empty();
+    let claude_ok = (claude_cmd.success && !claude_cmd.stdout.trim().is_empty())
+        || (claude.success && !claude.stdout.trim().is_empty());
 
-    if !has_npm_global {
-        issues.push("npm global bin 不在 PATH 中");
-    }
-    if !has_node {
-        issues.push("Node.js 不在 PATH 中");
-    }
+    let ok = node_ok && npm_ok;
 
-    let mut r = check("PATH 环境", "pathEnv", issues.is_empty(), true);
+    let mut r = check("PATH 环境", "pathEnv", ok, false);
+    r.required = false;
+    r.status = if ok { "ok".to_string() } else { "warning".to_string() };
+    r.installed = ok;
+    r.ok = ok;
+
     r.details = serde_json::json!({
-        "entryCount": parts.len(),
-        "issues": issues,
+        "node": node.stdout,
+        "npm": npm.stdout,
+        "claude": claude.stdout,
+        "claudeCmd": claude_cmd.stdout,
+        "wt": wt.stdout,
+        "nodeOk": node_ok,
+        "npmOk": npm_ok,
+        "claudeOk": claude_ok
     });
-    if !issues.is_empty() {
-        r.fix_hint = Some("检查系统环境变量 PATH 是否包含 npm 和 Node.js 路径".to_string());
+
+    if !ok {
+        r.fix_hint = Some("PATH 可疑：请检查 Node.js 和 npm 是否可通过 where.exe 找到。".to_string());
     }
+
     r
 }
 

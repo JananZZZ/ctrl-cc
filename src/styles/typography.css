@@ -1,5 +1,17 @@
-/* Ctrl-CC Typography Hierarchy — v23.0 */
+/* Ctrl-CC Typography Hierarchy — v24.0 */
 :root {
+  --cc-font-xs: calc(12px * var(--cc-font-scale, 1));
+  --cc-font-sm: calc(13px * var(--cc-font-scale, 1));
+  --cc-font-md: calc(14px * var(--cc-font-scale, 1));
+  --cc-font-lg: calc(16px * var(--cc-font-scale, 1));
+  --cc-font-xl: calc(20px * var(--cc-font-scale, 1));
+  --cc-font-2xl: calc(28px * var(--cc-font-scale, 1));
+  --cc-font-3xl: calc(34px * var(--cc-font-scale, 1));
+
+  --cc-line-tight: 1.15;
+  --cc-line-normal: 1.45;
+  --cc-line-relaxed: 1.65;
+
   --cc-type-display: clamp(28px, 3.2vw, 40px);
   --cc-type-title: clamp(22px, 2vw, 28px);
   --cc-type-section: 18px;
@@ -17,3 +29,15 @@
 .cc-caption { font-size: var(--cc-type-caption); color: var(--cc-text-muted); }
 .cc-micro { font-size: var(--cc-type-micro); color: var(--cc-text-soft); }
 .cc-mono { font-family: var(--cc-font-mono); font-size: var(--cc-type-caption); }
+
+.cc-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.cc-dashboard-card {
+  min-width: 0;
+  overflow: hidden;
+}

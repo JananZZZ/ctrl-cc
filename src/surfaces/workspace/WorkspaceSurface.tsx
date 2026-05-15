@@ -6,7 +6,6 @@ import { useOpenSessionStore } from '../../stores/openSessionStore';
 import { RuntimeFabricBridge } from '../../features/runtime-fabric/services/runtimeFabricBridge';
 import { useRuntimeFabricStore } from '../../features/runtime-fabric/stores/runtimeFabricStore';
 import { useSetupStore } from '../../features/setup/stores/setupStore';
-import { StreamCoalescer } from '../../features/chat/StreamCoalescer';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
 import { CcButton } from '../../components/ui/CcButton';
@@ -22,6 +21,8 @@ import { useErrorStore } from '../../stores/errorStore';
 import type { RuntimeEvent, Session } from '../../types';
 
 type ViewMode = 'chat' | 'terminal' | 'split';
+
+const EMPTY_RUNTIME_EVENTS: RuntimeEvent[] = [];
 
 export function WorkspaceSurface() {
   useRenderLoopGuard('WorkspaceSurface');
@@ -41,8 +42,6 @@ export function WorkspaceSurface() {
   const sessions = useSessionStore((s) => s.sessions);
   const addProject = useProjectStore((s) => s.addProject);
   const projects = useProjectStore((s) => s.projects);
-  const unlistenRef = useRef<UnlistenFn | null>(null);
-  const coalescerRef = useRef(new StreamCoalescer());
 
   const activeSession: Session | null = activeTabId ? sessions.find((s) => s.id === activeTabId) ?? null : null;
 
@@ -56,28 +55,26 @@ export function WorkspaceSurface() {
   }, []);
 
   const fabricChatEvents = useRuntimeFabricStore(
-    useCallback((s) => activeTabId ? (s.chatEvents[activeTabId] ?? []) : [], [activeTabId])
+    useCallback(
+      (s) => (activeTabId ? (s.chatEvents[activeTabId] ?? EMPTY_RUNTIME_EVENTS) : EMPTY_RUNTIME_EVENTS),
+      [activeTabId]
+    )
   );
 
   const events = useMemo(() => {
     const merged = [...rawEvents, ...fabricChatEvents];
-    const result: RuntimeEvent[] = [];
-    const seenIds = new Set<string>();
+    const byId = new Map<string, RuntimeEvent>();
+
     for (const evt of merged) {
-      const coalesced = coalescerRef.current.feed(evt);
-      if (coalesced) {
-        if (evt.type === 'assistant_delta') {
-          const filtered = result.filter(r => !(r.id === coalesced.id && r.type === 'assistant_message'));
-          result.length = 0;
-          result.push(...filtered);
-        }
-        if (!seenIds.has(coalesced.id)) {
-          seenIds.add(coalesced.id);
-          result.push(coalesced);
-        }
-      }
+      byId.set(evt.id, evt);
     }
-    return result;
+
+    return Array.from(byId.values()).sort((a, b) => {
+      const at = Date.parse(a.createdAt || '');
+      const bt = Date.parse(b.createdAt || '');
+      if (Number.isNaN(at) || Number.isNaN(bt)) return 0;
+      return at - bt;
+    });
   }, [rawEvents, fabricChatEvents]);
 
   useEffect(() => {
@@ -85,17 +82,35 @@ export function WorkspaceSurface() {
     if (tab?.viewMode) setViewMode(tab.viewMode);
   }, [activeTabId, tabs]);
 
+  const activeTabIdRef = useRef<string | null>(null);
+
   useEffect(() => {
+    activeTabIdRef.current = activeTabId;
+  }, [activeTabId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    let cleanup: UnlistenFn | null = null;
+
     listen<RuntimeEvent>('runtime:event', (e) => {
-      if (activeTabId && e.payload.sessionId === activeTabId) {
+      const current = activeTabIdRef.current;
+      if (current && e.payload.sessionId === current) {
         setRawEvents((prev) => {
+          if (prev.some((x) => x.id === e.payload.id)) return prev;
           const next = [...prev, e.payload];
-          return next.length > 500 ? next.slice(-200) : next; // cap at 200-500 to prevent memory leak
+          return next.length > 500 ? next.slice(-200) : next;
         });
       }
-    }).then((fn) => { unlistenRef.current = fn; });
-    return () => { unlistenRef.current?.(); };
-  }, [activeTabId]);
+    }).then((fn) => {
+      if (cancelled) fn();
+      else cleanup = fn;
+    });
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
+  }, []);
 
   const handleSend = useCallback(async (
     text: string,

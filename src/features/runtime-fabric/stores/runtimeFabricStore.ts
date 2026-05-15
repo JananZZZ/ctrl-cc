@@ -23,6 +23,7 @@ interface RuntimeFabricState {
   appendEvent: (event: Omit<LedgerEvent, 'id' | 'ts'> & { id?: string; ts?: string }) => void;
   getSessionEvents: (sessionId: CtrlCcSessionId) => LedgerEvent[];
   appendChatEvent: (sessionId: string, event: RuntimeEvent) => void;
+  upsertAssistantDelta: (sessionId: string, channelId: string, delta: string) => void;
 }
 
 export const useRuntimeFabricStore = create<RuntimeFabricState>((set, get) => ({
@@ -85,6 +86,50 @@ export const useRuntimeFabricStore = create<RuntimeFabricState>((set, get) => ({
         chatEvents: {
           ...state.chatEvents,
           [sessionId]: [...prev, event].slice(-500),
+        },
+      };
+    });
+  },
+
+  upsertAssistantDelta: (sessionId, channelId, delta) => {
+    set((state) => {
+      const prev = state.chatEvents[sessionId] ?? [];
+      const streamId = `assistant-stream-${channelId}`;
+      const existingIndex = prev.findIndex((e) => e.id === streamId);
+
+      const now = new Date().toISOString();
+
+      if (existingIndex >= 0) {
+        const next = [...prev];
+        const old = next[existingIndex];
+        next[existingIndex] = {
+          ...old,
+          content: `${old.content ?? ''}${delta}`,
+          createdAt: old.createdAt || now,
+        };
+        return {
+          chatEvents: {
+            ...state.chatEvents,
+            [sessionId]: next.slice(-500),
+          },
+        };
+      }
+
+      return {
+        chatEvents: {
+          ...state.chatEvents,
+          [sessionId]: [
+            ...prev,
+            {
+              id: streamId,
+              sessionId,
+              projectId: '',
+              type: 'assistant_message',
+              content: delta,
+              severity: 'low',
+              createdAt: now,
+            } as RuntimeEvent,
+          ].slice(-500),
         },
       };
     });
