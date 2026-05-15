@@ -359,7 +359,8 @@
     "termReady": "终端就绪",
     "termReadyDesc": "新建 PTY 会话后 Claude Code CLI 将在此显示",
     "title": "工作区",
-    "composerReadyGate": "Claude Runtime 尚未连接：请等待 PTY/Claude 启动成功，或打开诊断查看原因"
+    "composerReadyGate": "Claude Runtime 尚未连接：请等待 PTY/Claude 启动成功，或打开诊断查看原因",
+    "composerSetupGate": "Claude Code CLI 尚未配置完成，请先完成环境配置"
   },
   "errorLog": {
     "all": "全部",

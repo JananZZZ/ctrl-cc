@@ -2,6 +2,78 @@ use crate::setup::subprocess_runner::{run_cmd_shell, run_powershell};
 use crate::setup::task_manager::SetupTaskManager;
 use tauri::AppHandle;
 
+pub fn install_nodejs_lts(app: AppHandle, tasks: &SetupTaskManager) -> Result<String, String> {
+    let task_id = tasks.new_task("install-nodejs-lts");
+
+    tasks.emit(
+        &app, &task_id, "install-nodejs-lts", "running",
+        "安装 Node.js LTS", 0.1,
+        "推荐使用 winget 安装 Node.js LTS。请在终端中运行以下命令或手动下载安装。",
+        None,
+    );
+
+    tasks.emit(
+        &app, &task_id, "install-nodejs-lts", "running",
+        "Node.js LTS 安装指引", 0.5,
+        "运行: winget install OpenJS.NodeJS.LTS",
+        None,
+    );
+
+    let out = run_cmd_shell("winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements");
+    if out.success {
+        tasks.emit(
+            &app, &task_id, "install-nodejs-lts", "complete",
+            "完成", 1.0,
+            "Node.js LTS 安装成功。请重启终端后运行 node --version 验证。",
+            None,
+        );
+        return Ok("Node.js LTS 安装成功".to_string());
+    }
+
+    let err = format!(
+        "Node.js 自动安装失败: {}\n\n手动安装: 访问 https://nodejs.org 下载 LTS 版本，或运行 winget install OpenJS.NodeJS.LTS",
+        out.stderr
+    );
+    tasks.emit(&app, &task_id, "install-nodejs-lts", "error", "安装失败", 1.0, &err, Some(&err));
+    Err(err)
+}
+
+pub fn install_git_for_windows(app: AppHandle, tasks: &SetupTaskManager) -> Result<String, String> {
+    let task_id = tasks.new_task("install-git-for-windows");
+
+    tasks.emit(
+        &app, &task_id, "install-git-for-windows", "running",
+        "安装 Git for Windows", 0.1,
+        "推荐使用 winget 安装 Git for Windows（含 Git Bash）。",
+        None,
+    );
+
+    tasks.emit(
+        &app, &task_id, "install-git-for-windows", "running",
+        "Git for Windows 安装指引", 0.5,
+        "运行: winget install Git.Git",
+        None,
+    );
+
+    let out = run_cmd_shell("winget install Git.Git --accept-package-agreements --accept-source-agreements");
+    if out.success {
+        tasks.emit(
+            &app, &task_id, "install-git-for-windows", "complete",
+            "完成", 1.0,
+            "Git for Windows 安装成功。请重启终端后运行 git --version 验证。",
+            None,
+        );
+        return Ok("Git for Windows 安装成功".to_string());
+    }
+
+    let err = format!(
+        "Git 自动安装失败: {}\n\n手动安装: 访问 https://git-scm.com 下载，或运行 winget install Git.Git",
+        out.stderr
+    );
+    tasks.emit(&app, &task_id, "install-git-for-windows", "error", "安装失败", 1.0, &err, Some(&err));
+    Err(err)
+}
+
 pub fn fix_powershell_policy(
     app: AppHandle,
     tasks: &SetupTaskManager,

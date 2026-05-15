@@ -11,6 +11,8 @@ interface Props {
   viewMode: 'chat' | 'terminal' | 'split' | 'structured-task';
   sessionRuntimeMode?: 'pty-interactive' | 'structured-print';
   disabled?: boolean;
+  disabledReason?: 'runtime' | 'setup';
+  onDisabledClick?: () => void;
   onSend: (text: string, config: { model: string; effort: string; permissionMode: PermissionMode; runtimeMode: RuntimeMode }) => Promise<SendResult>;
 }
 
@@ -19,7 +21,7 @@ const EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
 const PERMISSION_MODES: PermissionMode[] = ['default', 'acceptEdits', 'plan', 'auto', 'dontAsk'];
 const PERM_KEYS: Record<string, string> = { default: 'composerBar.permDefault', acceptEdits: 'composerBar.permAcceptEdits', plan: 'composerBar.permPlan', auto: 'composerBar.permAuto', dontAsk: 'composerBar.permDontAsk' };
 
-export function ComposerBar({ viewMode, sessionRuntimeMode, disabled, onSend }: Props) {
+export function ComposerBar({ viewMode, sessionRuntimeMode, disabled, disabledReason, onDisabledClick, onSend }: Props) {
   const { t } = useTranslation();
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -97,7 +99,18 @@ export function ComposerBar({ viewMode, sessionRuntimeMode, disabled, onSend }: 
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
-        placeholder={disabled ? t('workspace.composerReadyGate') : viewMode === 'terminal' ? t('composerBar.terminalPlaceholder') : `${t('composerBar.placeholder')} (${t('composerBar.shortcutHint')})`}
+        placeholder={
+          disabled && disabledReason === 'setup'
+            ? t('workspace.composerSetupGate')
+            : disabled
+            ? t('workspace.composerReadyGate')
+            : viewMode === 'terminal'
+            ? t('composerBar.terminalPlaceholder')
+            : `${t('composerBar.placeholder')} (${t('composerBar.shortcutHint')})`
+        }
+        onClick={() => {
+          if (disabled && onDisabledClick) onDisabledClick();
+        }}
         rows={1}
         style={{
           flex: 1, resize: 'none', padding: '8px 12px',

@@ -11,6 +11,7 @@ interface ProviderPreset {
 }
 
 const PROVIDER_PRESETS: ProviderPreset[] = [
+  { id: 'anthropic', label: '官方 Anthropic', baseUrl: 'https://api.anthropic.com', haikuModel: 'claude-haiku-4-5', sonnetModel: 'claude-sonnet-4-6', opusModel: 'claude-opus-4-7' },
   { id: 'deepseek', label: 'DeepSeek', baseUrl: 'https://api.deepseek.com', haikuModel: 'deepseek-chat', sonnetModel: 'deepseek-reasoner', opusModel: 'deepseek-reasoner' },
   { id: 'zhipu', label: '智谱 GLM', baseUrl: 'https://open.bigmodel.cn/api/paas/v4', haikuModel: 'glm-4-flash', sonnetModel: 'glm-4-plus', opusModel: 'glm-4-plus' },
   { id: 'minimax', label: 'MiniMax', baseUrl: 'https://api.minimax.chat/v1', haikuModel: 'abab6.5s-chat', sonnetModel: 'abab7-chat', opusModel: 'abab7-chat' },

@@ -6,6 +6,7 @@ import { useOpenSessionStore } from '../../stores/openSessionStore';
 import { RuntimeFabricBridge } from '../../features/runtime-fabric/services/runtimeFabricBridge';
 import { useRuntimeFabricStore } from '../../features/runtime-fabric/stores/runtimeFabricStore';
 import { useSetupStore } from '../../features/setup/stores/setupStore';
+import { useSurfaceStore } from '../../stores/surfaceStore';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
 import { CcButton } from '../../components/ui/CcButton';
@@ -52,6 +53,11 @@ export function WorkspaceSurface() {
     const fabric = useRuntimeFabricStore.getState().sessions[sessionId];
     if (!fabric) return true;
     return fabric.status !== 'failed';
+  }, []);
+
+  const isSetupIncomplete = useCallback((): boolean => {
+    const setup = useSetupStore.getState().snapshot;
+    return Boolean(setup && !setup.ready);
   }, []);
 
   const fabricChatEvents = useRuntimeFabricStore(
@@ -269,9 +275,9 @@ export function WorkspaceSurface() {
           </div>
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              {viewMode === 'chat' && <><ChatView events={events} /><ComposerBar viewMode="chat" sessionRuntimeMode={activeSession?.runtimeMode} disabled={!isComposerEnabled(activeTabId)} onSend={handleSend} /></>}
+              {viewMode === 'chat' && <><ChatView events={events} /><ComposerBar viewMode="chat" sessionRuntimeMode={activeSession?.runtimeMode} disabled={!isComposerEnabled(activeTabId)} disabledReason={isSetupIncomplete() ? 'setup' : 'runtime'} onDisabledClick={isSetupIncomplete() ? () => { useSurfaceStore.getState().navigateTo('settings'); } : undefined} onSend={handleSend} /></>}
               {viewMode === 'terminal' && <TerminalView sessionId={activeTabId} />}
-              {viewMode === 'split' && (<div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}><div style={{ flex: '0 0 50%', borderRight: '1px solid var(--cc-border-strong)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}><TerminalView sessionId={activeTabId} /></div><div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}><ChatView events={events} /><ComposerBar viewMode="split" sessionRuntimeMode={activeSession?.runtimeMode} disabled={!isComposerEnabled(activeTabId)} onSend={handleSend} /></div></div>)}
+              {viewMode === 'split' && (<div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}><div style={{ flex: '0 0 50%', borderRight: '1px solid var(--cc-border-strong)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}><TerminalView sessionId={activeTabId} /></div><div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}><ChatView events={events} /><ComposerBar viewMode="split" sessionRuntimeMode={activeSession?.runtimeMode} disabled={!isComposerEnabled(activeTabId)} disabledReason={isSetupIncomplete() ? 'setup' : 'runtime'} onDisabledClick={isSetupIncomplete() ? () => { useSurfaceStore.getState().navigateTo('settings'); } : undefined} onSend={handleSend} /></div></div>)}
             </div>
             <SessionInspector session={activeSession} events={rawEvents.slice(0, 200)} collapsed={inspectorCollapsed} expanded={inspectorExpanded} onToggleCollapse={() => setInspectorCollapsed((v) => !v)} onToggleExpand={() => setInspectorExpanded((v) => !v)} />
           </div>

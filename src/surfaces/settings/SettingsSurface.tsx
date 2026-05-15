@@ -369,6 +369,7 @@ function SetupApiConfigCard() {
   const [error, setError] = useState<string | null>(null);
 
   const PRESETS: Record<string, string> = {
+    anthropic: 'https://api.anthropic.com',
     deepseek: 'https://api.deepseek.com',
     zhipu: 'https://open.bigmodel.cn/api/paas/v4',
     minimax: 'https://api.minimax.chat/v1',
@@ -410,7 +411,7 @@ function SetupApiConfigCard() {
             background: provider === id ? 'var(--cc-brand-soft)' : 'var(--cc-bg)',
             color: 'var(--cc-text)', cursor: 'pointer',
           }}>
-            {id === 'deepseek' ? 'DeepSeek' : id === 'zhipu' ? '智谱 GLM' : id === 'minimax' ? 'MiniMax' : '通义千问'}
+            {id === 'anthropic' ? 'Anthropic' : id === 'deepseek' ? 'DeepSeek' : id === 'zhipu' ? '智谱 GLM' : id === 'minimax' ? 'MiniMax' : '通义千问'}
           </button>
         ))}
       </div>

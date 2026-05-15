@@ -45,6 +45,22 @@ pub fn setup_read_provider_config_safe() -> ProviderConfigSafe {
 }
 
 #[tauri::command]
+pub fn setup_install_nodejs_lts(
+    app: AppHandle,
+    tasks: State<SetupTaskManager>,
+) -> Result<String, String> {
+    crate::setup::installer::install_nodejs_lts(app, &tasks)
+}
+
+#[tauri::command]
+pub fn setup_install_git_for_windows(
+    app: AppHandle,
+    tasks: State<SetupTaskManager>,
+) -> Result<String, String> {
+    crate::setup::installer::install_git_for_windows(app, &tasks)
+}
+
+#[tauri::command]
 pub fn setup_get_task_progress(
     tasks: State<SetupTaskManager>,
 ) -> Vec<crate::setup::types::SetupTaskProgress> {

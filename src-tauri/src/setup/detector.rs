@@ -327,6 +327,34 @@ fn check_path_issues() -> SetupCheckResult {
     r
 }
 
+fn check_claude_command() -> SetupCheckResult {
+    let cmds = crate::runtime_v2::claude_command_resolver::discover_claude_commands();
+    let usable = cmds.iter().filter(|c| c.version_ok).count();
+    let total = cmds.len();
+
+    let ok = usable > 0;
+
+    let mut r = check("Claude 命令入口", "claudeCommand", ok, true);
+    r.details = serde_json::json!({
+        "total": total,
+        "usable": usable,
+        "commands": cmds.iter().filter(|c| c.version_ok).map(|c| serde_json::json!({
+            "id": c.id,
+            "kind": c.kind,
+            "program": c.program,
+            "version": c.version_text,
+        })).collect::<Vec<_>>(),
+    });
+
+    if !ok {
+        r.fix_hint = Some("未找到可用的 Claude CLI 命令入口。请安装 Claude Code CLI 或运行 Setup Center。".to_string());
+    } else {
+        r.message = Some(format!("找到 {} 个可用命令入口 / {} 总计", usable, total));
+    }
+
+    r
+}
+
 fn check_workspace() -> SetupCheckResult {
     let home = path_helper::user_home();
     let ok = home.exists();
@@ -395,6 +423,7 @@ pub fn detect_all_setup() -> SetupSnapshot {
         check_git(),
         check_git_bash(),
         check_claude_code(),
+        check_claude_command(),
         check_claude_auth(),
         check_claude_config(),
         check_windows_terminal(),

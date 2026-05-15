@@ -95,9 +95,11 @@ export function FirstRunSetupWizard() {
           {step === 'welcome' && (
             <div>
               <h1>欢迎使用 Ctrl-CC</h1>
+              <p className="cc-caption" style={{ marginBottom: 12 }}>
+                我们将帮助你部署 Claude Code CLI 环境。
+              </p>
               <p className="cc-caption" style={{ marginBottom: 20 }}>
-                Ctrl-CC 是 Claude Code CLI 的可视化操作平台，不是 Claude 桌面端应用。
-                首次使用前，请完成环境配置向导。
+                这不是 Claude 桌面端应用，而是用于项目开发的命令行工具。
               </p>
               <div style={{
                 padding: '16px 20px', borderRadius: 'var(--cc-radius-lg)',
@@ -110,15 +112,15 @@ export function FirstRunSetupWizard() {
                 <ul style={{ margin: 0, paddingLeft: 20, fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-muted)', lineHeight: 1.8 }}>
                   <li>检测已有的 Node.js / npm / Git / Claude Code CLI</li>
                   <li>安全安装缺失的依赖</li>
-                  <li>配置 API Provider（DeepSeek / 智谱 / MiniMax / 通义千问等）</li>
+                  <li>配置 API Provider（官方 Anthropic / DeepSeek / 智谱 / MiniMax / 通义千问等）</li>
                   <li>验证 Claude Code CLI 可用性</li>
                 </ul>
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={handleStartCheck} disabled={checking} style={primaryBtnStyle}>
-                  {checking ? '检测中...' : '开始配置'}
+                  {checking ? '检测中...' : '开始检测'}
                 </button>
-                <button onClick={handleFinish} style={skipBtnStyle}>跳过，稍后配置</button>
+                <button onClick={handleFinish} style={skipBtnStyle}>稍后再配置</button>
               </div>
             </div>
           )}
@@ -180,7 +182,7 @@ export function FirstRunSetupWizard() {
             <div>
               <h1>验证环境</h1>
               <p className="cc-caption" style={{ marginBottom: 20 }}>
-                验证 Claude Code CLI 是否可用。
+                验证 Claude Code CLI 是否可用。基础检测不消耗 API。
               </p>
               {verifyResult && (
                 <div style={{
@@ -214,6 +216,31 @@ export function FirstRunSetupWizard() {
                   正在验证...
                 </div>
               )}
+              {/* Smoke test button */}
+              <div style={{ marginTop: 20 }}>
+                <button onClick={async () => {
+                  setVerifyResult(null);
+                  setVerifyError(null);
+                  try {
+                    const result = await detectAll();
+                    if (result.selectedChatCommandId) {
+                      setVerifyResult(`Claude Code CLI 可用 (${result.selectedChatCommandId})。环境就绪，可以开始使用。`);
+                    } else {
+                      setVerifyError('Claude 命令未找到。请返回修复步骤安装 Claude Code CLI。');
+                    }
+                  } catch (e) {
+                    setVerifyError(String(e));
+                  }
+                }} style={{
+                  ...secondaryBtnStyle,
+                  padding: '6px 16px', fontSize: 'var(--cc-font-xs)',
+                }}>
+                  运行联网验证
+                </button>
+                <span style={{ marginLeft: 8, fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
+                  仅检测可启动，不消耗 API Token
+                </span>
+              </div>
               <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
                 <button onClick={() => setStep('config')} style={secondaryBtnStyle}>返回配置</button>
                 <button onClick={handleFinish} style={primaryBtnStyle}>完成配置</button>

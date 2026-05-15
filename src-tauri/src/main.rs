@@ -221,6 +221,8 @@ fn main() {
             setup::commands::setup_install_claude_code_cli,
             setup::commands::setup_write_provider_config,
             setup::commands::setup_read_provider_config_safe,
+            setup::commands::setup_install_nodejs_lts,
+            setup::commands::setup_install_git_for_windows,
             setup::commands::setup_get_task_progress,
         ])
         .run(tauri::generate_context!())

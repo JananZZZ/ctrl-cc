@@ -168,10 +168,30 @@ export function SetupRepairPanel({ onDone }: Props) {
         </div>
       )}
 
-      <SetupCommandPreview
-        label="手动安装 Claude Code CLI"
-        command="npm install -g @anthropic-ai/claude-code@latest"
-      />
+      <div style={{ marginBottom: 16 }}>
+        <h4 style={{ fontSize: 'var(--cc-font-sm)', fontWeight: 600, color: 'var(--cc-text)', marginBottom: 8 }}>
+          Claude Code CLI 安装策略
+        </h4>
+        <p style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', marginBottom: 8 }}>
+          推荐 native installer。npm 是兼容 fallback。不要安装 Claude Desktop App。
+        </p>
+        <SetupCommandPreview
+          label="推荐 (native)"
+          command="irm https://claude.ai/install.ps1 | iex"
+        />
+        <div style={{ marginTop: 6 }}>
+          <SetupCommandPreview
+            label="winget"
+            command="winget install Anthropic.ClaudeCode"
+          />
+        </div>
+        <div style={{ marginTop: 6 }}>
+          <SetupCommandPreview
+            label="npm fallback"
+            command="npm install -g @anthropic-ai/claude-code@latest"
+          />
+        </div>
+      </div>
 
       <SetupSafeConfirmDialog
         open={confirmAction !== null}

@@ -1,4 +1,4 @@
-export type SetupStatus = 'unknown' | 'checking' | 'ok' | 'warning' | 'missing' | 'error' | 'installing' | 'done';
+export type SetupStatus = 'ok' | 'warning' | 'missing' | 'error' | 'checking' | 'installing';
 
 export type SetupItemId =
   | 'nodejs'
@@ -6,6 +6,7 @@ export type SetupItemId =
   | 'git'
   | 'gitBash'
   | 'claudeCode'
+  | 'claudeCommand'
   | 'claudeAuth'
   | 'claudeConfig'
   | 'windowsTerminal'
