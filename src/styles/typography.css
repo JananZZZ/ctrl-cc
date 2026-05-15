@@ -1,5 +1,6 @@
-/* Ctrl-CC Typography Hierarchy — v24.0 */
+/* Ctrl-CC Typography Hierarchy — v24.0 P2 Commercial-Grade */
 :root {
+  /* Font scale (controlled by --cc-font-scale in tokens.css) */
   --cc-font-xs: calc(12px * var(--cc-font-scale, 1));
   --cc-font-sm: calc(13px * var(--cc-font-scale, 1));
   --cc-font-md: calc(14px * var(--cc-font-scale, 1));
@@ -8,28 +9,73 @@
   --cc-font-2xl: calc(28px * var(--cc-font-scale, 1));
   --cc-font-3xl: calc(34px * var(--cc-font-scale, 1));
 
+  /* Line heights */
   --cc-line-tight: 1.15;
   --cc-line-normal: 1.45;
   --cc-line-relaxed: 1.65;
 
-  --cc-type-display: clamp(28px, 3.2vw, 40px);
-  --cc-type-title: clamp(22px, 2vw, 28px);
-  --cc-type-section: 18px;
-  --cc-type-card-title: 15px;
-  --cc-type-body: 14px;
-  --cc-type-caption: 12px;
-  --cc-type-micro: 11px;
+  /* P2 Semantic type scale */
+  --cc-text-display: clamp(30px, 2.8vw, 42px);
+  --cc-text-title: clamp(22px, 2vw, 30px);
+  --cc-text-section: 18px;
+  --cc-text-card: 15px;
+  --cc-text-body: 14px;
+  --cc-text-caption: 12px;
+  --cc-text-micro: 11px;
+
+  /* P2 Semantic weights */
+  --cc-weight-display: 780;
+  --cc-weight-title: 720;
+  --cc-weight-section: 680;
+  --cc-weight-body: 430;
+
+  /* P2 Semantic color aliases */
+  --cc-color-text: var(--cc-text);
+  --cc-color-muted: var(--cc-text-muted);
+  --cc-color-soft: var(--cc-text-soft);
+
+  /* Legacy type scale (backwards compat) */
+  --cc-type-display: var(--cc-text-display);
+  --cc-type-title: var(--cc-text-title);
+  --cc-type-section: var(--cc-text-section);
+  --cc-type-card-title: var(--cc-text-card);
+  --cc-type-body: var(--cc-text-body);
+  --cc-type-caption: var(--cc-text-caption);
+  --cc-type-micro: var(--cc-text-micro);
 }
 
-.cc-display { font-size: var(--cc-type-display); line-height: 1.08; font-weight: 760; letter-spacing: -0.03em; }
-.cc-title { font-size: var(--cc-type-title); line-height: 1.15; font-weight: 720; letter-spacing: -0.025em; }
-.cc-section-title { font-size: var(--cc-type-section); font-weight: 680; }
+/* Legacy type classes */
+.cc-display { font-size: var(--cc-type-display); line-height: var(--cc-line-tight); font-weight: var(--cc-weight-display); letter-spacing: -0.03em; }
+.cc-title { font-size: var(--cc-type-title); line-height: var(--cc-line-tight); font-weight: var(--cc-weight-title); letter-spacing: -0.025em; }
+.cc-section-title { font-size: var(--cc-type-section); font-weight: var(--cc-weight-section); }
 .cc-card-title { font-size: var(--cc-type-card-title); font-weight: 650; }
-.cc-body { font-size: var(--cc-type-body); line-height: 1.55; }
-.cc-caption { font-size: var(--cc-type-caption); color: var(--cc-text-muted); }
-.cc-micro { font-size: var(--cc-type-micro); color: var(--cc-text-soft); }
+.cc-body { font-size: var(--cc-type-body); line-height: var(--cc-line-normal); }
+.cc-caption { font-size: var(--cc-type-caption); color: var(--cc-color-muted); }
+.cc-micro { font-size: var(--cc-type-micro); color: var(--cc-color-soft); }
 .cc-mono { font-family: var(--cc-font-mono); font-size: var(--cc-type-caption); }
 
+/* P2: Surface page container */
+.cc-surface-page {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  overflow: auto;
+  padding: clamp(18px, 2.4vw, 36px);
+}
+
+.cc-surface-inner {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+}
+
+/* P2: Adaptive grid */
+.cc-adaptive-grid {
+  display: grid;
+  gap: clamp(12px, 1.5vw, 20px);
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+}
+
+/* P2: Dashboard grid fallback */
 .cc-dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -40,4 +86,14 @@
 .cc-dashboard-card {
   min-width: 0;
   overflow: hidden;
+}
+
+/* P2: Responsive behavior */
+@media (max-width: 900px) {
+  .cc-surface-inner {
+    width: 100%;
+  }
+  .cc-adaptive-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -224,6 +224,11 @@ fn main() {
             setup::commands::setup_install_nodejs_lts,
             setup::commands::setup_install_git_for_windows,
             setup::commands::setup_get_task_progress,
+            // AI Dock (v24.0 P2)
+            commands::dock_commands::open_ai_dock,
+            commands::dock_commands::close_ai_dock,
+            commands::dock_commands::toggle_ai_dock,
+            commands::dock_commands::get_dock_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

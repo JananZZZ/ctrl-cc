@@ -16,3 +16,4 @@ pub mod audit_export;
 pub mod credential_guard;
 pub mod discovery;
 pub mod session_replay;
+pub mod dock_commands;

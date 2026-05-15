@@ -109,6 +109,36 @@ export function RuntimeDiagnosticsPanel() {
         {error && <span style={{ color: 'var(--cc-red)' }}>{error}</span>}
       </div>
 
+      {/* P2: Health Overview */}
+      <Section title="Health Overview">
+        <div className="cc-adaptive-grid" style={{ marginBottom: 0 }}>
+          <HealthMetric label="Runtime Channels" value={`${Object.keys(rtSessions).length} sessions`} color="var(--cc-blue)" />
+          <HealthMetric label="PTY Registry" value={`${probe?.backendPtySessions?.length ?? 0} active`} color={probe && probe.backendPtySessions.length > 0 ? 'var(--cc-green)' : 'var(--cc-text-muted)'} />
+          <HealthMetric label="Errors (24h)" value={String(traceEvents.filter(e => e.level === 'error').length)} color={traceEvents.filter(e => e.level === 'error').length === 0 ? 'var(--cc-green)' : 'var(--cc-red)'} />
+          <HealthMetric label="Contract" value={getContractStatus(probe).label} color={toneColors[getContractStatus(probe).tone]} />
+        </div>
+      </Section>
+
+      {/* P2: Recent Errors (last 10) */}
+      <Section title="Recent Errors">
+        {traceEvents.filter(e => e.level === 'error').slice(0, 10).length === 0 ? (
+          <p style={{ color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-xs)' }}>No recent errors</p>
+        ) : (
+          traceEvents.filter(e => e.level === 'error').slice(0, 10).map((e) => (
+            <div key={e.id} style={{
+              padding: '4px 8px', marginBottom: 2,
+              borderLeft: '3px solid var(--cc-red)',
+              fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-mono)',
+              color: 'var(--cc-text)', background: 'var(--cc-red-soft)',
+              borderRadius: 'var(--cc-radius-xs)', wordBreak: 'break-word',
+            }}>
+              <span style={{ color: 'var(--cc-text-soft)' }}>{formatTraceTime(e.ts)}</span>
+              <span style={{ marginLeft: 6 }}>{e.message}</span>
+            </div>
+          ))
+        )}
+      </Section>
+
       {/* Legacy Launch Plan Matrix (v2 discovery) — default collapsed */}
       {discovery && Array.isArray((discovery as any).plans) && (
         <details>
@@ -330,11 +360,25 @@ export function RuntimeDiagnosticsPanel() {
         </div>
       </Section>
 
-      {/* Copy Diagnostic Bundle */}
+      {/* P2 Diagnostic Bundle */}
       <Section title="Diagnostic Bundle">
-        <button style={btnStyle} onClick={() => {
+        <p style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', marginBottom: 8 }}>
+          Contains: app version, OS info, smoke test, runtime sessions, PTY registry, mismatches, recent errors and traces.
+        </p>
+        <button style={btnStyle} onClick={async () => {
+          const [smokeTest] = await Promise.all([
+            (async () => {
+              try {
+                const { invoke } = await import('@tauri-apps/api/core');
+                return await invoke('runtime_smoke_test');
+              } catch { return null; }
+            })(),
+          ]);
           const bundle = {
             generatedAt: new Date().toISOString(),
+            appVersion: '0.1.0',
+            os: navigator.userAgent,
+            smokeTest,
             frontendSessionCount: Object.keys(rtSessions).length,
             backendPtyCount: probe?.backendPtySessions?.length ?? 0,
             mismatchCount: probe?.mismatches?.length ?? 0,
@@ -342,6 +386,7 @@ export function RuntimeDiagnosticsPanel() {
             sessions: Object.values(rtSessions).map(s => ({ id: s.id, ptySessionId: s.ptySessionId, status: s.status, cwd: s.cwd, error: s.error })),
             backendPtySessions: probe?.backendPtySessions ?? [],
             mismatches: probe?.mismatches ?? [],
+            recentErrors: traceEvents.filter(e => e.level === 'error').slice(0, 20),
             recentTraces: traceEvents.slice(-50),
           };
           const json = JSON.stringify(bundle, null, 2);
@@ -429,3 +474,15 @@ const btnStyle: React.CSSProperties = {
 const tableStyle: React.CSSProperties = { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cc-font-xs)' };
 const thStyle: React.CSSProperties = { textAlign: 'left', padding: '4px 8px', borderBottom: '1px solid var(--cc-border)', color: 'var(--cc-text-muted)', fontWeight: 600 };
 const tdStyle: React.CSSProperties = { padding: '3px 8px', borderBottom: '1px solid var(--cc-border-soft)', color: 'var(--cc-text)' };
+
+function HealthMetric({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div style={{
+      padding: '12px 16px', borderRadius: 'var(--cc-radius-md)',
+      background: 'var(--cc-surface-solid)', border: '1px solid var(--cc-border)',
+    }}>
+      <div style={{ fontSize: 'var(--cc-font-2xl)', fontWeight: 700, color }}>{value}</div>
+      <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', marginTop: 4 }}>{label}</div>
+    </div>
+  );
+}
