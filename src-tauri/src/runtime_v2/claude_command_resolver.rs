@@ -1,9 +1,9 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClaudeCommandSpec {
     pub id: String,
@@ -57,18 +57,16 @@ pub fn discover_claude_commands() -> Vec<ClaudeCommandSpec> {
     }
 
     if let Some(cmd) = find_cmd_shim() {
-        if env::var("CTRL_CC_ALLOW_CMD_SHIM").ok().as_deref() == Some("1") {
-            specs.push(shell_spec(
-                "cmd-claude-cmd",
-                "cmd.exe + claude.cmd",
-                PathBuf::from(r"C:\Windows\System32\cmd.exe"),
-                vec!["/d".to_string(), "/s".to_string(), "/c".to_string(), cmd.to_string_lossy().to_string()],
-                "cmdShim",
-                "APPDATA npm shim",
-                true,
-                false,
-            ));
-        }
+        specs.push(shell_spec(
+            "cmd-claude-cmd",
+            "cmd.exe + claude.cmd",
+            PathBuf::from(r"C:\Windows\System32\cmd.exe"),
+            vec!["/d".to_string(), "/s".to_string(), "/c".to_string(), format!("\"{}\"", cmd.to_string_lossy())],
+            "cmdShim",
+            "APPDATA npm shim",
+            true,
+            true,
+        ));
     }
 
     if let Some(npx) = find_npx_cli_js() {
@@ -178,8 +176,8 @@ fn inspect_spec(mut spec: ClaudeCommandSpec) -> ClaudeCommandSpec {
         }
         "cmdShim" => {
             spec.selectable_for_chat = true;
-            spec.selectable_for_terminal = false;
-            spec.interactive_pty_ok = false;
+            spec.selectable_for_terminal = true;
+            spec.interactive_pty_ok = true;
         }
         "npxDiagnostic" => {
             spec.selectable_for_chat = false;
@@ -325,4 +323,84 @@ fn dedupe_specs(specs: Vec<ClaudeCommandSpec>) -> Vec<ClaudeCommandSpec> {
 
 fn sanitize(s: &str) -> String {
     s.chars().map(|c| if c.is_ascii_alphanumeric() { c } else { '-' }).collect()
+}
+
+#[derive(Debug, Clone)]
+pub struct ResolvedInvocation {
+    pub program: String,
+    pub args: Vec<String>,
+}
+
+/// Build the actual command invocation for a given spec and Claude CLI args.
+/// Handles native, cmdShim, gitBash, and npxDiagnostic formats correctly.
+pub fn build_invocation(spec: &ClaudeCommandSpec, claude_args: &[String]) -> ResolvedInvocation {
+    match spec.kind.as_str() {
+        "cmdShim" => {
+            // cmd.exe /d /s /c "C:\Users\...\npm\claude.cmd" <args...>
+            let mut cmd_args = vec![
+                "/d".to_string(),
+                "/s".to_string(),
+                "/c".to_string(),
+            ];
+            // spec.program is cmd.exe, spec.args_prefix contains [/d, /s, /c, shim_path]
+            // Reconstruct with quoted shim path + claude args
+            if let Some(shim) = spec.args_prefix.get(3) {
+                let mut command = shim.clone();
+                for a in claude_args {
+                    command.push(' ');
+                    command.push_str(&shell_quote(a));
+                }
+                cmd_args.push(command);
+            } else {
+                cmd_args.extend(claude_args.iter().cloned());
+            }
+            ResolvedInvocation {
+                program: spec.program.clone(),
+                args: cmd_args,
+            }
+        }
+        "gitBash" => {
+            // bash.exe -lc "claude <args...>"
+            let quoted = if claude_args.is_empty() {
+                "claude".to_string()
+            } else {
+                format!("claude {}", shell_quote_args(claude_args))
+            };
+            ResolvedInvocation {
+                program: spec.program.clone(),
+                args: vec!["-lc".to_string(), quoted],
+            }
+        }
+        "npxDiagnostic" => {
+            let mut args = spec.args_prefix.clone();
+            args.extend(claude_args.iter().cloned());
+            ResolvedInvocation {
+                program: spec.program.clone(),
+                args,
+            }
+        }
+        _ => {
+            // nativeExe and unknown: append args directly
+            let mut args = spec.args_prefix.clone();
+            args.extend(claude_args.iter().cloned());
+            ResolvedInvocation {
+                program: spec.program.clone(),
+                args,
+            }
+        }
+    }
+}
+
+fn shell_quote(s: &str) -> String {
+    if s.contains('"') {
+        format!("\"{}\"", s.replace('"', "\\\""))
+    } else if s.contains(' ') {
+        format!("\"{}\"", s)
+    } else {
+        s.to_string()
+    }
+}
+
+fn shell_quote_args(args: &[String]) -> String {
+    args.iter().map(|a| shell_quote(a)).collect::<Vec<_>>().join(" ")
 }

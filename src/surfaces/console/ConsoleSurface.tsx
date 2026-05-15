@@ -7,6 +7,7 @@ import { useOpenSessionStore } from '../../stores/openSessionStore';
 import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
 import { useRuntimeTraceStore } from '../../features/runtime/stores/runtimeTraceStore';
 import { useEnvironmentStore } from '../../features/environment/stores/environmentStore';
+import { useSetupStore } from '../../features/setup/stores/setupStore';
 import { CcButton } from '../../components/ui/CcButton';
 import { CcStatusDot } from '../../components/ui/CcStatusDot';
 import { CcCard } from '../../components/ui/CcCard';
@@ -53,9 +54,37 @@ export function ConsoleSurface() {
 
   const openWorkspace = (sid: string) => { const s = sessions.find((x) => x.id === sid); if (s) { openSession({ sessionId: s.id, projectId: s.projectId, projectName: s.title, title: s.title, status: s.status, viewMode: 'chat', pendingConfirms: 0, riskCount: s.riskCount, isPinned: false }); navigateTo('workspace'); } };
 
+  // v23.0: Setup environment incomplete banner
+  const setupSnapshot = useSetupStore((s) => s.snapshot);
+  const setupDismissedUntil = useSetupStore((s) => s.dismissedUntil);
+  const setupDismiss = useSetupStore((s) => s.dismissBanner);
+  const showSetupBanner = setupSnapshot && !setupSnapshot.ready
+    && (!setupDismissedUntil || Date.now() > setupDismissedUntil);
+
   return (
     <SurfacePage variant="dashboard" testId="surface-console">
       <div className="console-page">
+
+      {showSetupBanner && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+          padding: '10px 16px', marginBottom: 16,
+          borderRadius: 'var(--cc-radius-md)',
+          background: 'var(--cc-amber-soft)', border: '1px solid var(--cc-amber)',
+          fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text)',
+        }}>
+          <span style={{ fontWeight: 600, color: 'var(--cc-amber)' }}>⚠️ Claude Code CLI 环境未完成</span>
+          <span style={{ color: 'var(--cc-text-muted)', flex: 1 }}>Chat / Terminal 可能不可用。</span>
+          <CcButton size="sm" variant="primary" onClick={() => {
+            useSurfaceStore.getState().navigateTo('settings');
+          }}>立即配置</CcButton>
+          <CcButton size="sm" variant="ghost" onClick={() => {
+            useSetupStore.getState().detectAll().catch(() => {});
+          }}>重新检测</CcButton>
+          <CcButton size="sm" variant="ghost" onClick={setupDismiss}>今天不再提醒</CcButton>
+        </div>
+      )}
+
       <div className="cc-hero">
         <div>
           <h1 style={{ fontSize: 'var(--cc-font-3xl)', fontWeight: 700, color: 'var(--cc-text)', marginBottom: 4 }}>{t(greetKey)}, {t('greeting.developer')}</h1>

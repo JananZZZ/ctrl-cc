@@ -10,6 +10,8 @@ import { useErrorStore } from '../stores/errorStore';
 import { listen } from '@tauri-apps/api/event';
 import { installRuntimeLifecycleBridge } from '../features/runtime/services/runtimeLifecycleBridge';
 import { installRuntimeFabricEventBridge } from '../features/runtime-fabric/services/runtimeFabricEventBridge';
+import { FirstRunSetupWizard } from '../features/setup/components/FirstRunSetupWizard';
+import { useSetupStore } from '../features/setup/stores/setupStore';
 import i18n from '../i18n';
 
 export function App() {
@@ -165,6 +167,17 @@ export function App() {
     });
     return () => { unlisten.then((fn) => fn()); };
   }, []);
+
+  // v23.0: First-run onboarding gate
+  const onboardingCompleted = useSetupStore((s) => s.onboardingCompleted);
+
+  if (!onboardingCompleted) {
+    return (
+      <ErrorBoundary>
+        <FirstRunSetupWizard />
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>

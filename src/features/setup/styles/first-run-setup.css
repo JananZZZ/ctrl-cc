@@ -1,0 +1,81 @@
+/* Ctrl-CC v23.0 — First Run Setup Wizard */
+.setup-v23-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 3vw, 42px);
+  background:
+    radial-gradient(circle at 18% 10%, var(--cc-brand-soft), transparent 34%),
+    radial-gradient(circle at 82% 88%, var(--cc-accent-soft, var(--cc-blue-soft)), transparent 30%),
+    var(--cc-bg);
+}
+
+.setup-v23-card {
+  width: min(1060px, 100%);
+  min-height: min(720px, calc(100vh - 64px));
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-2xl);
+  background: var(--cc-surface);
+  box-shadow: var(--cc-shadow-floating);
+  overflow: hidden;
+}
+
+.setup-v23-stepper {
+  padding: 28px 20px;
+  border-right: 1px solid var(--cc-border);
+  background: color-mix(in srgb, var(--cc-surface) 86%, var(--cc-brand-soft));
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setup-v23-main {
+  padding: clamp(28px, 4vw, 52px);
+  overflow: auto;
+}
+
+.setup-v23-main h1 {
+  margin: 8px 0 12px;
+  font-size: var(--cc-type-display);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 760;
+  color: var(--cc-text);
+}
+
+.setup-v23-check-row {
+  display: grid;
+  grid-template-columns: 160px 96px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--cc-border-soft);
+  border-radius: var(--cc-radius-lg);
+  padding: 12px 14px;
+  background: var(--cc-surface-solid);
+}
+
+@media (max-width: 820px) {
+  .setup-v23-card { grid-template-columns: 1fr; }
+  .setup-v23-stepper {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--cc-border);
+    padding: 12px 16px;
+    gap: 4px;
+    background: var(--cc-bg-muted);
+  }
+  .setup-v23-stepper button {
+    flex-shrink: 0;
+    width: auto !important;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 560px) {
+  .setup-v23-check-row { grid-template-columns: 1fr; }
+  .setup-v23-main { padding: 20px; }
+}

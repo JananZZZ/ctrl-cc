@@ -263,8 +263,12 @@ export function RuntimeDiagnosticsPanel() {
             </Section>
           )}
 
-          {/* Backend PTY Registry */}
-          <Section title={`PTY Registry (${probe.backendPtySessions.length})`}>
+          {/* Backend PTY Registry — default collapsed */}
+          <details>
+          <summary style={{ cursor: 'pointer', fontSize: 'var(--cc-font-md)', fontWeight: 600, color: 'var(--cc-text)', marginBottom: 8 }}>
+            PTY Registry ({probe.backendPtySessions.length})
+          </summary>
+          <Section title="">
             <div style={{ overflowX: 'auto', width: '100%', borderRadius: 'var(--cc-radius-sm)' }}>
             <table style={{ ...tableStyle, minWidth: 980 }}>
               <thead><tr>{['PTY Session ID','UI Session ID','CWD','PID','Status','Has Writer','Created'].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr></thead>
@@ -285,11 +289,16 @@ export function RuntimeDiagnosticsPanel() {
             </table>
             </div>
           </Section>
+          </details>
         </>
       )}
 
-      {/* Trace Timeline */}
-      <Section title={`Trace Timeline (${traceEvents.length})`}>
+      {/* Trace Timeline — default collapsed */}
+      <details>
+        <summary style={{ cursor: 'pointer', fontSize: 'var(--cc-font-md)', fontWeight: 600, color: 'var(--cc-text)', marginBottom: 8 }}>
+          Trace Timeline ({traceEvents.length})
+        </summary>
+        <Section title="">
         <div style={{ maxHeight: 300, overflow: 'auto' }}>
           {traceEvents.slice(0, 50).map((e) => (
             <div key={e.id} style={{ padding: '2px 8px', borderLeft: `3px solid ${e.level === 'error' ? 'var(--cc-red)' : e.level === 'warning' ? 'var(--cc-amber)' : 'var(--cc-border)'}`, marginBottom: 2, fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-mono)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
@@ -302,6 +311,7 @@ export function RuntimeDiagnosticsPanel() {
           ))}
         </div>
       </Section>
+      </details>
 
       {/* Raw Log Paths */}
       <Section title="Raw Log Paths">

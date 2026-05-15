@@ -52,10 +52,15 @@ export function WorkspaceSurface() {
     return fabric.status !== 'failed';
   }, []);
 
+  const fabricChatEvents = useRuntimeFabricStore(
+    useCallback((s) => activeTabId ? (s.chatEvents[activeTabId] ?? []) : [], [activeTabId])
+  );
+
   const events = useMemo(() => {
+    const merged = [...rawEvents, ...fabricChatEvents];
     const result: RuntimeEvent[] = [];
     const seenIds = new Set<string>();
-    for (const evt of rawEvents) {
+    for (const evt of merged) {
       const coalesced = coalescerRef.current.feed(evt);
       if (coalesced) {
         if (evt.type === 'assistant_delta') {
@@ -70,7 +75,7 @@ export function WorkspaceSurface() {
       }
     }
     return result;
-  }, [rawEvents]);
+  }, [rawEvents, fabricChatEvents]);
 
   useEffect(() => {
     const tab = tabs.find((t) => t.sessionId === activeTabId);

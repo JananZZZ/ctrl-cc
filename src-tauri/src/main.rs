@@ -6,6 +6,7 @@ mod error;
 mod pty;
 mod runtime;
 mod runtime_v2;
+mod setup;
 
 use pty::PtyManager;
 use runtime::commands::ClaudeManager;
@@ -123,6 +124,7 @@ fn main() {
         .manage(process_watchdog)
         .manage(pty_session_manager)
         .manage(runtime_v2::runtime_manager::RuntimeManager::default())
+        .manage(setup::task_manager::SetupTaskManager::new())
         .invoke_handler(tauri::generate_handler![
             // Database persistence
             commands::db_commands::save_session_to_db,
@@ -212,6 +214,14 @@ fn main() {
             runtime_v2::runtime_commands::runtime_discover_native_claude,
             runtime_v2::runtime_commands::runtime_discover_claude_commands,
             runtime_v2::runtime_commands::runtime_start_chat_stream,
+            // Setup domain (v23.0)
+            setup::commands::setup_detect_all,
+            setup::commands::setup_fix_powershell_policy,
+            setup::commands::setup_set_npm_mirror,
+            setup::commands::setup_install_claude_code_cli,
+            setup::commands::setup_write_provider_config,
+            setup::commands::setup_read_provider_config_safe,
+            setup::commands::setup_get_task_progress,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -4,6 +4,7 @@ import type { CtrlCcSession, RuntimeChannel } from '../types/runtimeFabricTypes'
 import { useOpenSessionStore } from '../../../stores/openSessionStore';
 import { useSurfaceStore } from '../../../stores/surfaceStore';
 import { useSessionStore } from '../../../stores/sessionStore';
+import { useSetupStore } from '../../setup/stores/setupStore';
 
 function now() {
   return new Date().toISOString();
@@ -128,6 +129,20 @@ export async function sendChatMessage(
     message: prompt,
   });
 
+  // v23.0: Check setup readiness before sending
+  const setup = useSetupStore.getState().snapshot;
+  if (setup && !setup.selectedChatCommandId) {
+    const err = new Error('Claude Code CLI 尚未配置完成，请先打开 Setup Center 完成环境配置。');
+    useRuntimeFabricStore.getState().appendEvent({
+      sessionId,
+      channelId: channel.id,
+      level: 'error',
+      type: 'chat.failed',
+      message: err.message,
+    });
+    throw err;
+  }
+
   try {
     const started = await invokeCommand<{ pid?: number }>('runtime_start_chat_stream', {
       req: {
@@ -190,6 +205,21 @@ export async function startTerminalChannel(sessionId: string) {
     terminalChannelId: channel.id,
     activeView: 'terminal',
   });
+
+  // v23.0: Check setup readiness for terminal
+  const setup = useSetupStore.getState().snapshot;
+  if (setup && !setup.selectedTerminalCommandId) {
+    const err = new Error('Exact CLI Terminal 尚未就绪，请先安装 Git Bash 或修复 Claude Code CLI。');
+    useRuntimeFabricStore.getState().patchChannel(channel.id, { status: 'failed', error: err.message, exitedAt: new Date().toISOString() });
+    useRuntimeFabricStore.getState().appendEvent({
+      sessionId,
+      channelId: channel.id,
+      level: 'error',
+      type: 'terminal.failed',
+      message: err.message,
+    });
+    throw err;
+  }
 
   try {
     await invokeCommand('runtime_start_interactive_v2', {

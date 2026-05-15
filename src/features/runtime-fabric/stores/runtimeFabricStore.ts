@@ -6,11 +6,13 @@ import type {
   RuntimeChannelId,
   LedgerEvent,
 } from '../types/runtimeFabricTypes';
+import type { RuntimeEvent } from '../../../types';
 
 interface RuntimeFabricState {
   sessions: Record<CtrlCcSessionId, CtrlCcSession>;
   channels: Record<RuntimeChannelId, RuntimeChannel>;
   ledger: LedgerEvent[];
+  chatEvents: Record<string, RuntimeEvent[]>;
 
   addSession: (session: CtrlCcSession) => void;
   patchSession: (id: CtrlCcSessionId, patch: Partial<CtrlCcSession>) => void;
@@ -20,12 +22,14 @@ interface RuntimeFabricState {
 
   appendEvent: (event: Omit<LedgerEvent, 'id' | 'ts'> & { id?: string; ts?: string }) => void;
   getSessionEvents: (sessionId: CtrlCcSessionId) => LedgerEvent[];
+  appendChatEvent: (sessionId: string, event: RuntimeEvent) => void;
 }
 
 export const useRuntimeFabricStore = create<RuntimeFabricState>((set, get) => ({
   sessions: {},
   channels: {},
   ledger: [],
+  chatEvents: {},
 
   addSession: (session) => {
     set((state) => ({ sessions: { ...state.sessions, [session.id]: session } }));
@@ -72,5 +76,17 @@ export const useRuntimeFabricStore = create<RuntimeFabricState>((set, get) => ({
 
   getSessionEvents: (sessionId) => {
     return get().ledger.filter((e) => e.sessionId === sessionId);
+  },
+
+  appendChatEvent: (sessionId, event) => {
+    set((state) => {
+      const prev = state.chatEvents[sessionId] ?? [];
+      return {
+        chatEvents: {
+          ...state.chatEvents,
+          [sessionId]: [...prev, event].slice(-500),
+        },
+      };
+    });
   },
 }));

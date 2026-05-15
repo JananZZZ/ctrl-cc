@@ -1,0 +1,19 @@
+/* Ctrl-CC Typography Hierarchy — v23.0 */
+:root {
+  --cc-type-display: clamp(28px, 3.2vw, 40px);
+  --cc-type-title: clamp(22px, 2vw, 28px);
+  --cc-type-section: 18px;
+  --cc-type-card-title: 15px;
+  --cc-type-body: 14px;
+  --cc-type-caption: 12px;
+  --cc-type-micro: 11px;
+}
+
+.cc-display { font-size: var(--cc-type-display); line-height: 1.08; font-weight: 760; letter-spacing: -0.03em; }
+.cc-title { font-size: var(--cc-type-title); line-height: 1.15; font-weight: 720; letter-spacing: -0.025em; }
+.cc-section-title { font-size: var(--cc-type-section); font-weight: 680; }
+.cc-card-title { font-size: var(--cc-type-card-title); font-weight: 650; }
+.cc-body { font-size: var(--cc-type-body); line-height: 1.55; }
+.cc-caption { font-size: var(--cc-type-caption); color: var(--cc-text-muted); }
+.cc-micro { font-size: var(--cc-type-micro); color: var(--cc-text-soft); }
+.cc-mono { font-family: var(--cc-font-mono); font-size: var(--cc-type-caption); }

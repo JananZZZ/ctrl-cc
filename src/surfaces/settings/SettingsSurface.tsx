@@ -9,6 +9,7 @@ import type { CtrlCcTheme } from '../../design/theme-types';
 import { RuntimeDiagnosticsPanel } from '../../features/runtime/components/RuntimeDiagnosticsPanel';
 import { SurfacePage } from '../../components/layout/SurfacePage';
 import { useEnvironmentStore } from '../../features/environment/stores/environmentStore';
+import { useSetupStore } from '../../features/setup/stores/setupStore';
 import { PermissionCenterCard } from './PermissionCenterCard';
 
 const THEME_I18N_KEYS: Record<CtrlCcTheme, string> = {
@@ -223,6 +224,31 @@ export function SettingsSurface() {
         )}
       </CcCard>
 
+      {/* v23.0 Setup Center — 环境配置 */}
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
+        <div className="cc-card-header">
+          <h3 style={sectH3}>Setup Center</h3>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <CcButton size="sm" variant="primary" onClick={() => {
+              const store = useSetupStore.getState();
+              store.detectAll().catch(() => {});
+            }}>
+              一键检测
+            </CcButton>
+            <CcButton size="sm" variant="ghost" onClick={() => {
+              const store = useSetupStore.getState();
+              store.resetOnboarding();
+            }}>
+              重置引导
+            </CcButton>
+          </div>
+        </div>
+        <SetupCenterSummary />
+      </CcCard>
+
+      {/* v23.0 API 配置 */}
+      <SetupApiConfigCard />
+
       {/* Runtime */}
       <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
         <h3 style={sectH3}>{t('settings.runtime')}</h3>
@@ -284,4 +310,133 @@ const selStyle: React.CSSProperties = {
   padding: '4px 8px', fontSize: 'var(--cc-font-sm)',
   border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-xs)',
   background: 'var(--cc-bg)', color: 'var(--cc-text)', cursor: 'pointer', minWidth: 140,
+};
+
+function SetupCenterSummary() {
+  const snapshot = useSetupStore((s) => s.snapshot);
+  const checking = useSetupStore((s) => s.checking);
+
+  if (checking) {
+    return <div style={{ color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-sm)', padding: '20px 0' }}>检测中...</div>;
+  }
+
+  if (!snapshot) {
+    return <div className="cc-empty-hint">尚未运行环境检测。点击"一键检测"开始。</div>;
+  }
+
+  const checks = snapshot.checks;
+  const required = Object.values(checks).filter((c) => c.required);
+  const missing = required.filter((c) => !c.ok);
+  const allOk = missing.length === 0;
+
+  return (
+    <div>
+      <div style={{
+        padding: '10px 14px', marginBottom: 12, borderRadius: 'var(--cc-radius-md)',
+        background: allOk ? 'var(--cc-green-soft)' : 'var(--cc-red-soft)',
+        border: `1px solid ${allOk ? 'var(--cc-green)' : 'var(--cc-red)'}`,
+        fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text)',
+      }}>
+        <strong style={{ color: allOk ? 'var(--cc-green)' : 'var(--cc-red)' }}>
+          {allOk ? '环境就绪' : `缺少 ${missing.length} 个组件`}
+        </strong>
+        <span style={{ marginLeft: 8, color: 'var(--cc-text-muted)' }}>{snapshot.summary}</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 6 }}>
+        {required.map((item) => (
+          <div key={item.id} style={{
+            display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--cc-font-xs)',
+            padding: '4px 8px', borderRadius: 'var(--cc-radius-xs)',
+            background: item.ok ? 'var(--cc-green-soft)' : 'var(--cc-red-soft)',
+            color: item.ok ? 'var(--cc-green)' : 'var(--cc-red)',
+          }}>
+            <span>{item.ok ? '✓' : '✗'}</span>
+            <span>{item.label}</span>
+            {item.version && <span style={{ color: 'var(--cc-text-muted)', marginLeft: 'auto' }}>{item.version}</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SetupApiConfigCard() {
+  const [provider, setProvider] = useState('deepseek');
+  const [apiKey, setApiKey] = useState('');
+  const [baseUrl, setBaseUrl] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const PRESETS: Record<string, string> = {
+    deepseek: 'https://api.deepseek.com',
+    zhipu: 'https://open.bigmodel.cn/api/paas/v4',
+    minimax: 'https://api.minimax.chat/v1',
+    qwen: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+  };
+
+  const handleProviderChange = (id: string) => {
+    setProvider(id);
+    setBaseUrl(PRESETS[id] || '');
+  };
+
+  const handleSave = async () => {
+    if (!apiKey.trim()) { setError('请输入 API Key'); return; }
+    setSaving(true);
+    setError(null);
+    try {
+      await useSetupStore.getState().writeProviderConfig({
+        provider, apiKey: apiKey.trim(),
+        baseUrl: baseUrl || undefined,
+      });
+      setStatus('配置已保存');
+      setApiKey('');
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
+      <h3 style={sectH3}>API 配置</h3>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+        {Object.entries(PRESETS).map(([id]) => (
+          <button key={id} onClick={() => handleProviderChange(id)} style={{
+            padding: '5px 14px', fontSize: 'var(--cc-font-xs)',
+            border: provider === id ? '2px solid var(--cc-brand)' : '1px solid var(--cc-border)',
+            borderRadius: 'var(--cc-radius-sm)',
+            background: provider === id ? 'var(--cc-brand-soft)' : 'var(--cc-bg)',
+            color: 'var(--cc-text)', cursor: 'pointer',
+          }}>
+            {id === 'deepseek' ? 'DeepSeek' : id === 'zhipu' ? '智谱 GLM' : id === 'minimax' ? 'MiniMax' : '通义千问'}
+          </button>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 200px' }}>
+          <label style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', display: 'block', marginBottom: 2 }}>API Key</label>
+          <input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="sk-..." style={apiInputStyle} />
+        </div>
+        <div style={{ flex: '1 1 200px' }}>
+          <label style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', display: 'block', marginBottom: 2 }}>Base URL</label>
+          <input type="text" value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder={PRESETS[provider] || ''} style={apiInputStyle} />
+        </div>
+        <CcButton size="sm" variant="primary" onClick={handleSave} disabled={saving}>
+          {saving ? '保存中...' : '保存'}
+        </CcButton>
+      </div>
+      {error && <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-red-soft)', color: 'var(--cc-red)', fontSize: 'var(--cc-font-xs)' }}>{error}</div>}
+      {status && <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-green-soft)', color: 'var(--cc-green)', fontSize: 'var(--cc-font-xs)' }}>{status}</div>}
+    </CcCard>
+  );
+}
+
+const apiInputStyle: React.CSSProperties = {
+  width: '100%', padding: '6px 10px',
+  fontSize: 'var(--cc-font-sm)', fontFamily: 'var(--cc-font-mono)',
+  border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-sm)',
+  background: 'var(--cc-bg)', color: 'var(--cc-text)',
+  boxSizing: 'border-box' as const,
 };
