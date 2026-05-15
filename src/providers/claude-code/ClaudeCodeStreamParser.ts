@@ -1,55 +1,92 @@
-export interface NormalizedRuntimeEvent {
-  id: string;
-  sessionId: string;
-  type: 'assistant_text' | 'assistant_delta' | 'tool_call' | 'tool_result' | 'usage' | 'error' | 'result';
-  content: string;
-  toolName?: string;
-  toolInput?: Record<string, unknown>;
-  usage?: { inputTokens: number; outputTokens: number };
-  createdAt: string;
+export interface ClaudeCodeParsedEvent {
+  type: 'session_init' | 'assistant_delta' | 'assistant_message' | 'tool_use' | 'tool_result' | 'turn_result' | 'error' | 'raw';
+  claudeSessionId?: string;
+  model?: string;
+  tools?: string[];
+  text?: string;
+  message?: unknown;
+  result?: unknown;
+  raw: Record<string, unknown>;
 }
 
 export class ClaudeCodeStreamParser {
-  parseLine(line: string): NormalizedRuntimeEvent | null {
-    let parsed: Record<string, unknown>;
+  parseLine(line: string): ClaudeCodeParsedEvent {
+    let raw: Record<string, unknown>;
     try {
-      parsed = JSON.parse(line);
+      raw = JSON.parse(line);
     } catch {
-      return null;
+      return { type: 'raw', raw: { _unparseable: line } };
     }
 
-    const type = this.classify(parsed);
-    if (!type) return null;
+    // system/init — extract real session_id from Claude
+    if (raw.type === 'system' && raw.subtype === 'init') {
+      return {
+        type: 'session_init',
+        claudeSessionId: raw.session_id as string | undefined,
+        model: raw.model as string | undefined,
+        tools: raw.tools as string[] | undefined ?? [],
+        raw,
+      };
+    }
 
-    return {
-      id: `evt-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      sessionId: '',
-      type,
-      content: this.extractText(parsed),
-      toolName: parsed.tool as string | undefined,
-      toolInput: parsed.input as Record<string, unknown> | undefined,
-      usage: parsed.usage as { inputTokens: number; outputTokens: number } | undefined,
-      createdAt: new Date().toISOString(),
-    };
-  }
+    // stream_event + content_block_delta + text_delta → coalesced assistant delta
+    if (
+      raw.type === 'stream_event' &&
+      (raw.event as Record<string, unknown>)?.type === 'content_block_delta' &&
+      ((raw.event as Record<string, unknown>)?.delta as Record<string, unknown>)?.type === 'text_delta'
+    ) {
+      const delta = (raw.event as Record<string, unknown>)?.delta as Record<string, unknown>;
+      return {
+        type: 'assistant_delta',
+        text: delta?.text as string,
+        raw,
+      };
+    }
 
-  private classify(parsed: Record<string, unknown>): NormalizedRuntimeEvent['type'] | null {
-    if (parsed.type === 'assistant') return 'assistant_text';
-    if (parsed.type === 'content_block_delta') return 'assistant_delta';
-    if (parsed.type === 'tool_use') return 'tool_call';
-    if (parsed.type === 'tool_result') return 'tool_result';
-    if (parsed.type === 'error') return 'error';
-    if (parsed.type === 'result') return 'result';
-    if (parsed.delta || parsed.text || parsed.content) return 'assistant_delta';
-    return null;
-  }
+    // assistant message block
+    if (raw.type === 'assistant') {
+      return {
+        type: 'assistant_message',
+        message: raw.message,
+        raw,
+      };
+    }
 
-  private extractText(parsed: Record<string, unknown>): string {
-    if (typeof parsed.text === 'string') return parsed.text;
-    if (typeof parsed.delta === 'string') return parsed.delta;
-    if (typeof parsed.content === 'string') return parsed.content;
-    const msg = parsed.message as Record<string, unknown> | undefined;
-    if (msg?.content && typeof msg.content === 'string') return msg.content;
-    return '';
+    // tool_use start
+    if (raw.type === 'tool_use') {
+      return {
+        type: 'tool_use',
+        text: raw.name as string,
+        raw,
+      };
+    }
+
+    // tool_result
+    if (raw.type === 'tool_result') {
+      return {
+        type: 'tool_result',
+        raw,
+      };
+    }
+
+    // turn result — contains usage, cost, stop reason
+    if (raw.type === 'result') {
+      return {
+        type: 'turn_result',
+        result: raw,
+        raw,
+      };
+    }
+
+    // error event
+    if (raw.type === 'error') {
+      return {
+        type: 'error',
+        text: raw.message as string,
+        raw,
+      };
+    }
+
+    return { type: 'raw', raw };
   }
 }

@@ -474,11 +474,26 @@ pub fn detect_all_setup() -> SetupSnapshot {
     let chat_cmd = crate::runtime_v2::claude_command_resolver::select_for_chat().ok();
     let term_cmd = crate::runtime_v2::claude_command_resolver::select_for_terminal().ok();
 
+    let claude_code_ok = checks.get("claudeCode").map(|c| c.ok).unwrap_or(false);
+    let claude_auth_ok = checks.get("claudeAuth").map(|c| c.ok).unwrap_or(false);
+    let claude_config_ok = checks.get("claudeConfig").map(|c| c.ok).unwrap_or(false);
+    let api_provider_ok = checks.get("apiProvider").map(|c| c.ok).unwrap_or(false);
+    let workspace_ok = checks.get("workspace").map(|c| c.ok).unwrap_or(false);
+
+    let ready_for_chat = chat_cmd.is_some() && claude_code_ok && (claude_auth_ok || claude_config_ok);
+    let ready_for_terminal = term_cmd.is_some();
+    let ready_for_api = claude_auth_ok || api_provider_ok;
+    let ready_for_project = workspace_ok;
+
     SetupSnapshot {
         generated_at: chrono::Utc::now().to_rfc3339(),
         ready: required_ok,
         severity: severity.to_string(),
         summary,
+        ready_for_chat,
+        ready_for_terminal,
+        ready_for_api,
+        ready_for_project,
         checks,
         claude_commands,
         selected_chat_command_id: chat_cmd.map(|c| c.id),

@@ -1,0 +1,88 @@
+/* Ctrl-CC Shared Components v25 */
+
+/* Table containment */
+.cc-table-wrap {
+  overflow-x: auto;
+  width: 100%;
+  border-radius: var(--cc-radius-sm);
+}
+
+.cc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--cc-font-xs);
+}
+
+.cc-table th {
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--cc-border);
+  color: var(--cc-text-muted);
+  font-weight: 600;
+}
+
+.cc-table td {
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--cc-border-soft);
+  color: var(--cc-text);
+}
+
+/* Scroll panels (prevent layout break) */
+.cc-scroll-y {
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.cc-scroll-x {
+  overflow-x: auto;
+}
+
+/* Status badges */
+.cc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: var(--cc-radius-xs);
+  font-size: var(--cc-font-2xs);
+  font-weight: 600;
+}
+
+.cc-badge-ok { background: var(--cc-green-soft); color: var(--cc-green); }
+.cc-badge-warn { background: var(--cc-amber-soft); color: var(--cc-amber); }
+.cc-badge-error { background: var(--cc-red-soft); color: var(--cc-red); }
+.cc-badge-info { background: var(--cc-blue-soft); color: var(--cc-blue); }
+
+/* Button variants */
+.cc-btn-primary {
+  padding: 8px 20px;
+  font-size: var(--cc-font-sm);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-brand);
+  color: var(--cc-text-inverse);
+  cursor: pointer;
+}
+
+.cc-btn-secondary {
+  padding: 8px 20px;
+  font-size: var(--cc-font-sm);
+  font-weight: 500;
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-bg);
+  color: var(--cc-text);
+  cursor: pointer;
+}
+
+.cc-btn-danger {
+  padding: 8px 20px;
+  font-size: var(--cc-font-sm);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-red);
+  color: var(--cc-text-inverse);
+  cursor: pointer;
+}

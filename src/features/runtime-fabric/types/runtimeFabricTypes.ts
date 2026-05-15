@@ -33,6 +33,7 @@ export interface CtrlCcSession {
 
   status: RuntimeChannelStatus;
   error: string | null;
+  providerState: Record<string, unknown>;
 
   createdAt: string;
   updatedAt: string;

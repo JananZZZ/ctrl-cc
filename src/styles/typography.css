@@ -1,6 +1,7 @@
-/* Ctrl-CC Typography Hierarchy — v24.0 P2 Commercial-Grade */
+/* Ctrl-CC Typography v25 — Commercial Design System */
 :root {
-  /* Font scale (controlled by --cc-font-scale in tokens.css) */
+  --cc-font-family: "Inter", "Segoe UI", "Microsoft YaHei UI", system-ui, sans-serif;
+
   --cc-font-xs: calc(12px * var(--cc-font-scale, 1));
   --cc-font-sm: calc(13px * var(--cc-font-scale, 1));
   --cc-font-md: calc(14px * var(--cc-font-scale, 1));
@@ -9,32 +10,32 @@
   --cc-font-2xl: calc(28px * var(--cc-font-scale, 1));
   --cc-font-3xl: calc(34px * var(--cc-font-scale, 1));
 
-  /* Line heights */
   --cc-line-tight: 1.15;
   --cc-line-normal: 1.45;
   --cc-line-relaxed: 1.65;
 
-  /* P2 Semantic type scale */
-  --cc-text-display: clamp(30px, 2.8vw, 42px);
-  --cc-text-title: clamp(22px, 2vw, 30px);
+  /* v25 Semantic type scale */
+  --cc-text-display: clamp(28px, 2.2vw, 36px);
+  --cc-text-title: clamp(22px, 1.7vw, 28px);
   --cc-text-section: 18px;
   --cc-text-card: 15px;
   --cc-text-body: 14px;
   --cc-text-caption: 12px;
   --cc-text-micro: 11px;
 
-  /* P2 Semantic weights */
+  /* v25 Semantic weights */
   --cc-weight-display: 780;
   --cc-weight-title: 720;
   --cc-weight-section: 680;
+  --cc-weight-card: 640;
   --cc-weight-body: 430;
 
-  /* P2 Semantic color aliases */
+  /* v25 Color aliases */
   --cc-color-text: var(--cc-text);
   --cc-color-muted: var(--cc-text-muted);
   --cc-color-soft: var(--cc-text-soft);
 
-  /* Legacy type scale (backwards compat) */
+  /* Legacy backwards-compat aliases */
   --cc-type-display: var(--cc-text-display);
   --cc-type-title: var(--cc-text-title);
   --cc-type-section: var(--cc-text-section);
@@ -44,56 +45,12 @@
   --cc-type-micro: var(--cc-text-micro);
 }
 
-/* Legacy type classes */
+/* v25 Type classes */
 .cc-display { font-size: var(--cc-type-display); line-height: var(--cc-line-tight); font-weight: var(--cc-weight-display); letter-spacing: -0.03em; }
 .cc-title { font-size: var(--cc-type-title); line-height: var(--cc-line-tight); font-weight: var(--cc-weight-title); letter-spacing: -0.025em; }
 .cc-section-title { font-size: var(--cc-type-section); font-weight: var(--cc-weight-section); }
-.cc-card-title { font-size: var(--cc-type-card-title); font-weight: 650; }
+.cc-card-title { font-size: var(--cc-type-card-title); font-weight: var(--cc-weight-card); }
 .cc-body { font-size: var(--cc-type-body); line-height: var(--cc-line-normal); }
 .cc-caption { font-size: var(--cc-type-caption); color: var(--cc-color-muted); }
 .cc-micro { font-size: var(--cc-type-micro); color: var(--cc-color-soft); }
 .cc-mono { font-family: var(--cc-font-mono); font-size: var(--cc-type-caption); }
-
-/* P2: Surface page container */
-.cc-surface-page {
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  overflow: auto;
-  padding: clamp(18px, 2.4vw, 36px);
-}
-
-.cc-surface-inner {
-  width: min(1440px, 100%);
-  margin: 0 auto;
-}
-
-/* P2: Adaptive grid */
-.cc-adaptive-grid {
-  display: grid;
-  gap: clamp(12px, 1.5vw, 20px);
-  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
-}
-
-/* P2: Dashboard grid fallback */
-.cc-dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
-  align-items: stretch;
-}
-
-.cc-dashboard-card {
-  min-width: 0;
-  overflow: hidden;
-}
-
-/* P2: Responsive behavior */
-@media (max-width: 900px) {
-  .cc-surface-inner {
-    width: 100%;
-  }
-  .cc-adaptive-grid {
-    grid-template-columns: 1fr;
-  }
-}

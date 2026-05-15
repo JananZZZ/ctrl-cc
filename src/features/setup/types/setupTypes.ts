@@ -58,6 +58,10 @@ export interface SetupSnapshot {
   ready: boolean;
   severity: 'ok' | 'warning' | 'error';
   summary: string;
+  readyForChat: boolean;
+  readyForTerminal: boolean;
+  readyForApi: boolean;
+  readyForProject: boolean;
   checks: Record<SetupItemId, SetupCheckResult>;
   claudeCommands: ClaudeCommandCapability[];
   selectedChatCommandId: string | null;

@@ -30,7 +30,12 @@ export function createCtrlCcSession(input: CreateSessionInput): CtrlCcSession {
     cwd: input.cwd,
     title: input.title ?? `${input.projectName}-${ts.slice(0, 16).replace(/[:T]/g, '-')}`,
     activeView: 'chat',
-    claudeSessionId: crypto.randomUUID(),
+    claudeSessionId: null,
+    providerState: {
+      claudeSessionId: null,
+      claudeProjectPath: null,
+      previousClaudeSessionIds: [],
+    },
     chatChannelId: null,
     terminalChannelId: null,
     backgroundChannelId: null,

@@ -178,9 +178,26 @@ fn shell_spec(
     }
 }
 
+fn is_forbidden_windows_extensionless(path: &Path) -> bool {
+    cfg!(windows)
+        && path.file_name().and_then(|s| s.to_str()).map(|s| s.eq_ignore_ascii_case("claude")).unwrap_or(false)
+        && path.extension().is_none()
+}
+
 fn inspect_spec(mut spec: ClaudeCommandSpec) -> ClaudeCommandSpec {
-    if !Path::new(&spec.program).exists() {
+    let prog_path = Path::new(&spec.program);
+
+    if !prog_path.exists() {
         spec.error = Some("program not found".to_string());
+        return spec;
+    }
+
+    // v25: Permanently blacklist extensionless npm shim on Windows
+    if is_forbidden_windows_extensionless(prog_path) {
+        spec.error = Some("EXTENSIONLESS_WINDOWS_SHIM: Do not execute extensionless npm shim directly on Windows.".to_string());
+        spec.selectable_for_chat = false;
+        spec.selectable_for_terminal = false;
+        spec.interactive_pty_ok = false;
         return spec;
     }
 
