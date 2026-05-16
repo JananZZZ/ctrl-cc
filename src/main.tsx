@@ -10,6 +10,7 @@ import './styles/surfaces.css';
 import './styles/components.css';
 import './styles/commercial.css';
 import './styles/chat.css';
+import './styles/motion.css';
 
 const root = createRoot(document.getElementById('root')!);
 root.render(<App />);

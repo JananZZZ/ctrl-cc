@@ -12,6 +12,22 @@ const SETUP_CACHE_KEY = 'ctrlcc.setup.snapshot.v2';
 
 type SetupRunState = 'idle' | 'running' | 'success' | 'partial' | 'failed';
 
+interface TaskProgressPayload {
+  taskId: string;
+  kind?: string;
+  title: string;
+  status?: string;
+  currentStepId?: string;
+  currentStepLabel?: string;
+  message?: string;
+  progress: number;
+  canPause: boolean;
+  canResume: boolean;
+  canCancel: boolean;
+  canTerminate: boolean;
+  error?: string;
+}
+
 interface SetupState {
   snapshot: SetupSnapshot | null;
   checking: boolean;
@@ -22,6 +38,13 @@ interface SetupState {
   onboardingCompleted: boolean;
   dismissedUntil: number | null;
   hydrated: boolean;
+
+  /** v29: progressive detection fields */
+  currentTaskId: string | null;
+  currentStepLabel: string | null;
+  currentMessage: string | null;
+  progress: number;
+  paused: boolean;
 
   hydrate: () => void;
   loadCached: () => void;
@@ -49,6 +72,13 @@ interface SetupState {
   resetOnboarding: () => void;
   dismissBanner: () => void;
   installListeners: () => Promise<() => void>;
+
+  /** v29: task control actions */
+  pauseDetection: () => Promise<void>;
+  resumeDetection: () => Promise<void>;
+  cancelDetection: () => Promise<void>;
+  restartDetection: () => Promise<void>;
+  exitApp: () => Promise<void>;
 }
 
 function readOnboarding(): boolean {
@@ -71,6 +101,13 @@ export const useSetupStore = create<SetupState>((set, get) => ({
   dismissedUntil: readDismissed(),
   hydrated: false,
 
+  /** v29: progressive detection fields */
+  currentTaskId: null,
+  currentStepLabel: null,
+  currentMessage: null,
+  progress: 0,
+  paused: false,
+
   hydrate: () => {
     try {
       const raw = localStorage.getItem(SETUP_CACHE_KEY);
@@ -92,11 +129,20 @@ export const useSetupStore = create<SetupState>((set, get) => ({
   },
 
   detectAll: async () => {
-    set({ runState: 'running', checking: true, error: null });
+    set({
+      runState: 'running',
+      checking: true,
+      error: null,
+      currentTaskId: null,
+      currentStepLabel: null,
+      currentMessage: null,
+      progress: 0,
+      paused: false,
+    });
 
     try {
       const snapshot = await invokeCommand<SetupSnapshot>(
-        'setup_detect_all',
+        'setup_detect_all_v2',
         undefined,
         { timeoutMs: 180_000, source: 'setup', title: 'Environment detection failed' }
       );
@@ -113,6 +159,11 @@ export const useSetupStore = create<SetupState>((set, get) => ({
         runState: hasCriticalFailure ? 'partial' : 'success',
         error: hasCriticalFailure ? 'Some required checks failed' : null,
         lastCheckedAt: new Date().toISOString(),
+        currentTaskId: null,
+        currentStepLabel: null,
+        currentMessage: null,
+        progress: 1,
+        paused: false,
       });
 
       return snapshot;
@@ -123,6 +174,11 @@ export const useSetupStore = create<SetupState>((set, get) => ({
         runState: 'failed',
         error: message,
         lastCheckedAt: new Date().toISOString(),
+        currentTaskId: null,
+        currentStepLabel: null,
+        currentMessage: null,
+        progress: 0,
+        paused: false,
       });
       return null;
     }
@@ -216,6 +272,8 @@ export const useSetupStore = create<SetupState>((set, get) => ({
 
   installListeners: async () => {
     const unlisteners: UnlistenFn[] = [];
+
+    // 旧版 setup://task-progress 事件（安装器等兼容）
     unlisteners.push(
       await listen<SetupTaskProgress>('setup://task-progress', (event) => {
         const p = event.payload;
@@ -224,6 +282,87 @@ export const useSetupStore = create<SetupState>((set, get) => ({
         }));
       })
     );
+
+    // v29: 新版 task://progress 事件（逐项检测进度）
+    unlisteners.push(
+      await listen<TaskProgressPayload>('task://progress', (event) => {
+        const p = event.payload;
+        set({
+          currentTaskId: p.taskId,
+          currentStepLabel: p.currentStepLabel ?? p.title ?? null,
+          currentMessage: p.message ?? null,
+          progress: p.progress,
+        });
+        if (p.status === 'paused') {
+          set({ paused: true });
+        } else if (p.status === 'running') {
+          const state = get();
+          if (state.paused) set({ paused: false });
+        }
+        if (p.error) {
+          set({ error: p.error });
+        }
+      })
+    );
+
     return () => unlisteners.forEach((fn) => fn());
+  },
+
+  /** v29: 暂停当前检测任务 */
+  pauseDetection: async () => {
+    const { currentTaskId } = get();
+    if (!currentTaskId) return;
+    try {
+      await invokeCommand('task_pause', { taskId: currentTaskId });
+      set({ paused: true });
+    } catch (err) {
+      set({ error: String(err) });
+    }
+  },
+
+  /** v29: 恢复已暂停的检测任务 */
+  resumeDetection: async () => {
+    const { currentTaskId } = get();
+    if (!currentTaskId) return;
+    try {
+      await invokeCommand('task_resume', { taskId: currentTaskId });
+      set({ paused: false });
+    } catch (err) {
+      set({ error: String(err) });
+    }
+  },
+
+  /** v29: 取消当前检测任务 */
+  cancelDetection: async () => {
+    const { currentTaskId } = get();
+    if (!currentTaskId) return;
+    try {
+      await invokeCommand('task_cancel', { taskId: currentTaskId });
+      set({
+        paused: false,
+        checking: false,
+        runState: 'idle',
+        currentTaskId: null,
+        currentStepLabel: null,
+        currentMessage: null,
+        progress: 0,
+      });
+    } catch (err) {
+      set({ error: String(err) });
+    }
+  },
+
+  /** v29: 重新运行检测 */
+  restartDetection: async () => {
+    await get().detectAll();
+  },
+
+  /** v29: 退出应用 */
+  exitApp: async () => {
+    try {
+      await invokeCommand('plugin:process|exit');
+    } catch {
+      // Best effort — if the command fails the user can close the window manually
+    }
   },
 }));

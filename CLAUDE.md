@@ -1,30 +1,64 @@
 # Ctrl-CC Engineering Memory
 
-每次修改前必须先阅读：
+## 项目定位
 
-1. docs/ENGINEERING_PRINCIPLES.md
-2. docs/RUNTIME_ARCHITECTURE.md
-3. docs/UI_DESIGN_SYSTEM.md
-4. docs/V28_ACCEPTANCE_TESTS.md
+Ctrl-CC 是 Claude Code CLI 的商用级图形化控制台，不是 Claude 桌面端替代品。  
+它必须帮助小白用户完成环境部署、配置 API、创建项目、启动 Claude Code CLI、通过 Chat 或 Terminal 连续交互，并提供可视化诊断、权限控制、资源管理、GitHub 浏览和 AI Dock。
 
-## 不可违反的底层规则
+## 最高优先级
 
-- 一个 GUI session 只能绑定一个 Runtime session。
-- 一个 Runtime session 只能绑定一个长期存活的 Claude Code CLI 进程。
-- 发送消息不得新建 Claude 进程。
-- Chat 和 Terminal 是同一个 Runtime session 的两个 projection。
-- 关闭 tab 默认 detach，不杀进程。
-- Stop/Kill 才能杀进程。
-- 环境检测统一由 setupStore + setup_detect_all_v2 提供。
-- 所有外部命令必须 CREATE_NO_WINDOW / 后台静默。
-- 所有长任务必须 async / spawn_blocking / task queue。
-- React render 中禁止写 store、写 localStorage、触发 invoke。
-- 所有页面必须使用统一 design tokens。
-- 所有运行输出必须先进入 Raw Runtime Event Ledger，再投影到 Chat/Terminal/Inspector。
+1. UI 永不因耗时任务未响应。
+2. 一个 GUI session 对应一个长期存活 Runtime session。
+3. Chat、Terminal、Split 是同一个 Runtime session 的不同视图。
+4. 所有环境检测数据统一进入 setupStore。
+5. 所有后台任务统一进入 Task Registry。
+6. 所有错误统一进入 Diagnostic Ledger。
+7. 默认中文。
+8. 默认浅色主题。
+9. 所有功能必须小白友好。
+10. 所有复杂代码必须有中文注释。
+
+## Runtime 硬规则
+
+- 创建 GUI session 时可创建 Runtime。
+- 发送 Chat 消息绝不能隐式创建新 Runtime。
+- Terminal 输入必须调用 writeTerminal。
+- Chat 输入必须调用 submitUserMessage。
+- Close Tab 默认 detach，不杀后台 Runtime。
+- Stop Runtime 才杀进程。
+- Kill Runtime 才强杀进程。
+- Runtime 输出必须同时进入 raw event ledger、terminal buffer、chat projection。
+- 任何丢输出、重复输出、错序输出都必须视为严重 bug。
+
+## Setup 硬规则
+
+- 首次启动必须完整引导语言、主题、字体、工作方式、环境检测、修复依赖、API 配置、Chat 设置、AI Dock、权限、GitHub、最终验证。
+- 环境检测必须逐项显示。
+- 环境检测必须可暂停、继续、终止、重新检测、退出软件。
+- 环境检测失败必须显示失败项、错误明细、修复建议、复制诊断包。
+- Console、Settings、FirstRun、Diagnostics 使用同一个 setupStore snapshot。
+
+## UI 硬规则
+
+- 最小正常文字不低于 12px。
+- 正文字号默认约 15px。
+- 所有页面使用统一 Design Token。
+- 主题只有 light、dark、pale-blue、warm-sand 四种。
+- 默认主题是 light。
+- 所有中文文案必须温和、清楚、礼貌。
+- 所有页面必须小窗口和全屏都不重叠、不空洞。
+
+## 性能硬规则
+
+- 不允许 render 阶段写 store/localStorage/invoke。
+- 不允许高频 setState 形成 render loop。
+- 后端长任务必须 spawn_blocking 或异步任务。
+- 外部命令必须隐藏窗口运行。
+- 事件流必须批处理，不允许每字符触发重渲染。
 
 ---
 
-**版本**: v28 | **架构**: RuntimeKernel (唯一 Runtime 入口) | **语言**: zh-CN
+**版本**: v29 | **架构**: RuntimeKernel (唯一 Runtime 入口) + Task Registry (全局任务系统) | **语言**: zh-CN
 **框架**: Tauri v2 + React 18 + TypeScript 5 + Zustand 5 + Vite 6
 
 ## 技术栈
@@ -45,6 +79,7 @@
 src/
 ├── app/           # App root (App.tsx + AppShell.tsx + SurfaceHost.tsx)
 ├── components/    # dock/ error/ layout/ ui/ (Cc* reusable components)
+├── core/          # tasks/ lifecycle/ settings/ diagnostics/
 ├── debug/         # useRenderLoopGuard.ts (React #185 prevention)
 ├── design/        # theme-types.ts, theme-registry.ts, xterm-themes.ts
 ├── features/      # chat/ composer/ console/ dock/ projects/ resources/ runtime/ terminal/ workspace/ setup/
@@ -62,6 +97,7 @@ src-tauri/src/
 ├── runtime/         # Claude PTY 运行时
 ├── runtime_v2/      # Runtime V2
 ├── runtime_kernel/  # RuntimeKernel (唯一 Runtime 主链路)
+├── task_control/    # 全局任务控制器
 ├── pty/             # PTY 会话管理
 ├── setup/           # 环境检测/安装
 ├── utils/           # hidden_command, command_timeout
@@ -89,3 +125,7 @@ cargo build --release --manifest-path src-tauri/Cargo.toml
 - 设计 tokens ONLY (`--cc-*`)。禁止硬编码颜色。
 - 每次修改后必须 `npm run typecheck` + `cargo check` 通过
 - 禁止假数据/假按钮/假状态
+- 全局任务系统: 所有超 300ms 的操作必须进入 Task Registry
+- 任务策略: safe-background / confirm-on-leave / cancel-on-leave / critical-noninterruptible / destructive-confirm
+- 页面切换时必须检查 blockingTasks()，必要时显示 NavigationGuardModal
+- 所有后台任务通过 task://progress 事件推送，前端订阅而非轮询
