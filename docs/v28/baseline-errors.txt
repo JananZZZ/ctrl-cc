@@ -1,0 +1,10 @@
+v28 Baseline Check Results
+===========================
+Date: 2026-05-16
+Branch: v28-supreme-runtime-ui-rebuild
+
+npm run typecheck: PASS (no errors)
+npm run build: PASS (4.67s)
+cargo check: PASS (20 warnings, 0 errors)
+
+Baseline is CLEAN. Ready for v28 rebuild.

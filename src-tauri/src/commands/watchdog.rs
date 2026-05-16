@@ -1,6 +1,8 @@
 use serde::Serialize;
 use std::sync::Mutex;
 
+use crate::utils::hidden_command::hidden_command;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct WatchdogStatus {
     pub healthy: bool,
@@ -32,7 +34,7 @@ impl ProcessWatchdog {
         let mut total_count = 0u32;
 
         #[cfg(target_os = "windows")]
-        if let Ok(out) = std::process::Command::new("tasklist").args(["/FO", "CSV", "/NH"]).output() {
+        if let Ok(out) = hidden_command("tasklist").args(["/FO", "CSV", "/NH"]).output() {
             for line in String::from_utf8_lossy(&out.stdout).lines() {
                 total_count += 1;
                 let lower = line.to_lowercase();
@@ -60,7 +62,7 @@ impl ProcessWatchdog {
         let mut killed = 0u32;
         #[cfg(target_os = "windows")]
         {
-            if let Ok(out) = std::process::Command::new("tasklist").args(["/FO", "CSV", "/NH"]).output() {
+            if let Ok(out) = hidden_command("tasklist").args(["/FO", "CSV", "/NH"]).output() {
                 for line in String::from_utf8_lossy(&out.stdout).lines() {
                     let lower = line.to_lowercase();
                     if lower.contains("claude") {
@@ -68,7 +70,7 @@ impl ProcessWatchdog {
                         if parts.len() >= 2 {
                             if let Ok(pid) = parts[1].trim_matches('"').parse::<u32>() {
                                 // Kill Claude processes that have been running > 30 min (simplified)
-                                let _ = std::process::Command::new("taskkill").args(["/PID", &pid.to_string(), "/F"]).output();
+                                let _ = hidden_command("taskkill").args(["/PID", &pid.to_string(), "/F"]).output();
                                 killed += 1;
                             }
                         }

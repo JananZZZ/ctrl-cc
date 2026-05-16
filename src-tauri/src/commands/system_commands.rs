@@ -1,5 +1,7 @@
 use serde::Serialize;
 
+use crate::utils::hidden_command::hidden_command;
+
 #[derive(Debug, Serialize)]
 pub struct SystemHealth {
     pub os: String,
@@ -31,8 +33,7 @@ pub fn get_system_health() -> Result<SystemHealth, String> {
 
     #[cfg(target_os = "windows")]
     {
-        use std::process::Command;
-        if let Ok(out) = Command::new("wmic").args(["OS", "get", "TotalVisibleMemorySize", "/Value"]).output() {
+        if let Ok(out) = hidden_command("wmic").args(["OS", "get", "TotalVisibleMemorySize", "/Value"]).output() {
             let s = String::from_utf8_lossy(&out.stdout);
             for line in s.lines() {
                 if let Some(v) = line.split('=').nth(1) {
@@ -42,7 +43,7 @@ pub fn get_system_health() -> Result<SystemHealth, String> {
                 }
             }
         }
-        if let Ok(out) = Command::new("wmic").args(["OS", "get", "FreePhysicalMemory", "/Value"]).output() {
+        if let Ok(out) = hidden_command("wmic").args(["OS", "get", "FreePhysicalMemory", "/Value"]).output() {
             let s = String::from_utf8_lossy(&out.stdout);
             for line in s.lines() {
                 if let Some(v) = line.split('=').nth(1) {
@@ -53,11 +54,11 @@ pub fn get_system_health() -> Result<SystemHealth, String> {
             }
         }
         // Count processes
-        if let Ok(out) = Command::new("tasklist").output() {
+        if let Ok(out) = hidden_command("tasklist").output() {
             health.process_count = String::from_utf8_lossy(&out.stdout).lines().count() as u32;
         }
         // Check if claude is running
-        if let Ok(out) = Command::new("tasklist").args(["/FI", "IMAGENAME eq claude.exe"]).output() {
+        if let Ok(out) = hidden_command("tasklist").args(["/FI", "IMAGENAME eq claude.exe"]).output() {
             health.claude_running = String::from_utf8_lossy(&out.stdout).contains("claude.exe");
         }
     }

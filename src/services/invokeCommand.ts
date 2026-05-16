@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import type { ErrorSource } from '../stores/errorStore';
+import { useErrorStore } from '../stores/errorStore';
 
 export interface InvokeOptions {
   timeoutMs?: number;
@@ -79,21 +80,47 @@ export async function invokeCommandSafe<T>(
   }
 }
 
-export function runAsyncAction(
-  action: () => Promise<void>,
-  options?: { source?: ErrorSource; title?: string },
-) {
-  void action().catch(async (error) => {
-    const msg = String(error);
-    try {
-      const { useErrorStore } = await import('../stores/errorStore');
-      useErrorStore.getState().addError({
-        severity: 'error',
-        source: options?.source || 'unknown',
-        title: options?.title || 'Async action failed',
-        detail: msg,
-        rawError: msg,
-      });
-    } catch {}
-  });
+type AsyncActionOptions<T> = {
+  key?: string;
+  source?: ErrorSource;
+  title?: string;
+  timeoutMs?: number;
+  run: (signal: AbortSignal) => Promise<T>;
+  onSuccess?: (result: T) => void;
+  onError?: (error: unknown) => void;
+};
+
+export async function runAsyncAction<T>(options: AsyncActionOptions<T>): Promise<T | undefined> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs ?? 60_000);
+
+  try {
+    const result = await options.run(controller.signal);
+    options.onSuccess?.(result);
+    return result;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      try {
+        useErrorStore.getState().addError({
+          severity: 'warning',
+          source: (options.source ?? 'unknown') as ErrorSource,
+          title: options.title ?? 'Action timed out',
+          detail: `Timed out after ${options.timeoutMs ?? 60_000}ms`,
+        });
+      } catch {}
+    } else {
+      try {
+        useErrorStore.getState().addError({
+          severity: 'error',
+          source: (options.source ?? 'unknown') as ErrorSource,
+          title: options.title ?? 'Action failed',
+          detail: String(error),
+        });
+      } catch {}
+    }
+    options.onError?.(error);
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }

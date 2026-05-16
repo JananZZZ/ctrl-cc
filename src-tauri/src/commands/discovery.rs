@@ -1,4 +1,5 @@
 //! Claude Discovery Matrix — returns shell strategies and Claude candidates.
+use crate::utils::hidden_command::hidden_command;
 use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
@@ -220,7 +221,7 @@ fn probe_candidate(name: &str, path: Option<&str>) -> (bool, String, bool, Optio
     }
 
     // Try claude --version
-    match std::process::Command::new(&path_str).arg("--version").output() {
+    match hidden_command(&path_str).arg("--version").output() {
         Ok(output) => {
             let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
             let version_ok = !version.is_empty() && output.status.success();

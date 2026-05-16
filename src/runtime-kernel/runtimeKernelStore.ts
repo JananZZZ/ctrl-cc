@@ -1,37 +1,161 @@
 import { create } from 'zustand';
-import type { KernelChatMessage, RuntimeKernelEvent, RuntimeKernelSessionSnapshot } from './types';
+import type { ChatBlock, RuntimeKernelEvent, RuntimeKernelSessionSnapshot } from './types';
+import { projectRawToChat } from './parsers/chatProjection';
 
 interface RuntimeKernelState {
   sessions: Record<string, RuntimeKernelSessionSnapshot>;
-  rawOutput: Record<string, string>;
-  chatMessages: Record<string, KernelChatMessage[]>;
-  lastEvent: Record<string, RuntimeKernelEvent>;
+  rawEvents: Record<string, RuntimeKernelEvent[]>;
+  terminalBuffers: Record<string, string>;
+  chatBlocks: Record<string, ChatBlock[]>;
+  activeAssistantBlockId: Record<string, string | null>;
+
   upsertSession: (snapshot: RuntimeKernelSessionSnapshot) => void;
-  appendChatMessage: (sessionId: string, msg: KernelChatMessage) => void;
-  applyEvent: (event: RuntimeKernelEvent) => void;
-  removeSession: (sessionId: string) => void;
+  ingestEventBatch: (events: RuntimeKernelEvent[]) => void;
+  appendUserMessage: (sessionId: string, text: string) => void;
+  detachView: (sessionId: string) => void;
+  markStopped: (sessionId: string) => void;
 }
 
 export const useRuntimeKernelStore = create<RuntimeKernelState>((set) => ({
-  sessions: {}, rawOutput: {}, chatMessages: {}, lastEvent: {},
-  upsertSession: (snapshot) => set((s) => ({ sessions: { ...s.sessions, [snapshot.guiSessionId]: snapshot } })),
-  appendChatMessage: (sessionId, msg) => set((s) => {
-    const old = s.chatMessages[sessionId] ?? [];
-    if (old.some((x) => x.id === msg.id)) return s;
-    return { chatMessages: { ...s.chatMessages, [sessionId]: [...old, msg].slice(-1000) } };
-  }),
-  applyEvent: (event) => set((s) => {
-    const old = s.sessions[event.guiSessionId];
-    const patched = old && event.status ? { ...old, status: event.status, pid: event.pid ?? old.pid, cwd: event.cwd ?? old.cwd, updatedAt: event.createdAt, lastError: event.eventType.includes('error') ? (event.message ?? old.lastError) : old.lastError } : old;
-    return {
-      sessions: patched ? { ...s.sessions, [event.guiSessionId]: patched } : s.sessions,
-      lastEvent: { ...s.lastEvent, [event.guiSessionId]: event },
-      rawOutput: event.eventType === 'pty.data' && event.data ? { ...s.rawOutput, [event.guiSessionId]: ((s.rawOutput[event.guiSessionId] ?? '') + event.data).slice(-300_000) } : s.rawOutput,
+  sessions: {},
+  rawEvents: {},
+  terminalBuffers: {},
+  chatBlocks: {},
+  activeAssistantBlockId: {},
+
+  upsertSession: (snapshot) => {
+    set((state) => ({
+      sessions: {
+        ...state.sessions,
+        [snapshot.guiSessionId]: snapshot,
+      },
+    }));
+  },
+
+  appendUserMessage: (sessionId, text) => {
+    const now = new Date().toISOString();
+    const block: ChatBlock = {
+      id: `user-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      kind: 'user',
+      content: text,
+      createdAt: now,
     };
-  }),
-  removeSession: (sessionId) => set((s) => {
-    const sessions = { ...s.sessions }; const rawOutput = { ...s.rawOutput }; const chatMessages = { ...s.chatMessages }; const lastEvent = { ...s.lastEvent };
-    delete sessions[sessionId]; delete rawOutput[sessionId]; delete chatMessages[sessionId]; delete lastEvent[sessionId];
-    return { sessions, rawOutput, chatMessages, lastEvent };
-  }),
+
+    set((state) => ({
+      chatBlocks: {
+        ...state.chatBlocks,
+        [sessionId]: [...(state.chatBlocks[sessionId] ?? []), block],
+      },
+      activeAssistantBlockId: {
+        ...state.activeAssistantBlockId,
+        [sessionId]: null,
+      },
+    }));
+  },
+
+  ingestEventBatch: (events) => {
+    if (events.length === 0) return;
+
+    set((state) => {
+      let sessions = state.sessions;
+      let rawEvents = state.rawEvents;
+      let terminalBuffers = state.terminalBuffers;
+      let chatBlocks = state.chatBlocks;
+      let activeAssistantBlockId = state.activeAssistantBlockId;
+
+      for (const evt of events) {
+        const sid = evt.guiSessionId;
+
+        rawEvents = {
+          ...rawEvents,
+          [sid]: [...(rawEvents[sid] ?? []), evt].slice(-2000),
+        };
+
+        if (evt.channel === 'raw' && evt.data) {
+          terminalBuffers = {
+            ...terminalBuffers,
+            [sid]: (terminalBuffers[sid] ?? '') + evt.data,
+          };
+
+          const projected = projectRawToChat({
+            sessionId: sid,
+            raw: evt.data,
+            existingBlocks: chatBlocks[sid] ?? [],
+            activeAssistantBlockId: activeAssistantBlockId[sid] ?? null,
+          });
+
+          chatBlocks = {
+            ...chatBlocks,
+            [sid]: projected.blocks,
+          };
+
+          activeAssistantBlockId = {
+            ...activeAssistantBlockId,
+            [sid]: projected.activeAssistantBlockId,
+          };
+        }
+
+        if (evt.channel === 'status' && evt.status) {
+          const existing = sessions[sid];
+          if (existing) {
+            sessions = {
+              ...sessions,
+              [sid]: {
+                ...existing,
+                status: evt.status,
+                pid: evt.pid ?? existing.pid,
+                cwd: evt.cwd ?? existing.cwd,
+                updatedAt: evt.createdAt,
+              },
+            };
+          }
+        }
+
+        if (evt.channel === 'error') {
+          const block: ChatBlock = {
+            id: `err-${evt.seq}-${evt.createdAt}`,
+            kind: 'error',
+            content: evt.data ?? 'Runtime error',
+            createdAt: evt.createdAt,
+          };
+
+          chatBlocks = {
+            ...chatBlocks,
+            [sid]: [...(chatBlocks[sid] ?? []), block],
+          };
+        }
+      }
+
+      return {
+        sessions,
+        rawEvents,
+        terminalBuffers,
+        chatBlocks,
+        activeAssistantBlockId,
+      };
+    });
+  },
+
+  detachView: (_sessionId) => {
+    // no-op for backend; App tab store handles UI removal
+  },
+
+  markStopped: (sessionId) => {
+    set((state) => {
+      const existing = state.sessions[sessionId];
+      if (!existing) return state;
+      return {
+        sessions: {
+          ...state.sessions,
+          [sessionId]: {
+            ...existing,
+            status: 'stopped' as const,
+            hasWriter: false,
+            readerAlive: false,
+            updatedAt: new Date().toISOString(),
+          },
+        },
+      };
+    });
+  },
 }));

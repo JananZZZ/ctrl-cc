@@ -1,37 +1,49 @@
-export interface RuntimeKernelSessionSnapshot {
-  traceId: string;
-  guiSessionId: string;
-  runtimeProcessId: string;
-  projectId: string;
-  cwd: string;
-  pid: number | null;
-  status: string;
-  hasWriter: boolean;
-  readerAlive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastError: string | null;
-}
+export type RuntimeKernelStatus =
+  | 'starting'
+  | 'ready'
+  | 'busy'
+  | 'waiting-input'
+  | 'waiting-permission'
+  | 'exited'
+  | 'failed'
+  | 'stopped';
 
 export interface RuntimeKernelEvent {
+  seq: number;
   traceId: string;
   guiSessionId: string;
-  runtimeProcessId: string;
+  runtimeSessionId: string;
   eventType: string;
-  status?: string | null;
+  channel: 'raw' | 'status' | 'error' | 'lifecycle';
   data?: string | null;
-  message?: string | null;
+  status?: RuntimeKernelStatus | null;
   pid?: number | null;
   cwd?: string | null;
   createdAt: string;
 }
 
-export interface KernelChatMessage {
-  id: string;
-  sessionId: string;
+export interface RuntimeKernelSessionSnapshot {
+  traceId: string;
+  guiSessionId: string;
+  runtimeSessionId: string;
+  claudeSessionId?: string | null;
   projectId: string;
-  type: 'user_message' | 'assistant_message' | 'system' | 'thinking' | 'raw';
-  content: string;
-  severity: 'low' | 'medium' | 'high';
+  cwd: string;
+  pid?: number | null;
+  status: RuntimeKernelStatus;
+  hasWriter: boolean;
+  readerAlive: boolean;
   createdAt: string;
+  updatedAt: string;
+  lastError?: string | null;
 }
+
+export type ChatBlock =
+  | { id: string; kind: 'user'; content: string; createdAt: string }
+  | { id: string; kind: 'assistant'; content: string; streaming: boolean; createdAt: string; updatedAt: string }
+  | { id: string; kind: 'status'; label: string; content: string; createdAt: string }
+  | { id: string; kind: 'tool'; name: string; content: string; createdAt: string }
+  | { id: string; kind: 'error'; content: string; createdAt: string };
+
+// Legacy compat
+export type KernelChatMessage = ChatBlock;

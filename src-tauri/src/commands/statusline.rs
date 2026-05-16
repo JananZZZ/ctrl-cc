@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
-use std::process::{Command, Stdio};
+use crate::utils::hidden_command::hidden_command;
+use std::process::Stdio;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use tauri::{AppHandle, Emitter};
@@ -43,7 +44,7 @@ impl StatusLineProbe {
             // Poll Claude Code for statusLine output
             while *r.lock().expect("mutex poisoned") {
                 // Try reading status from Claude CLI
-                if let Ok(output) = Command::new("claude")
+                if let Ok(output) = hidden_command("claude")
                     .args(["status", "--json"])
                     .stdout(Stdio::piped())
                     .stderr(Stdio::null())

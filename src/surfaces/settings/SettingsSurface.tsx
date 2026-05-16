@@ -8,7 +8,6 @@ import { CTRL_CC_THEMES } from '../../design/theme-registry';
 import type { CtrlCcTheme } from '../../design/theme-types';
 import { RuntimeDiagnosticsPanel } from '../../features/runtime/components/RuntimeDiagnosticsPanel';
 import { SurfacePage } from '../../components/layout/SurfacePage';
-import { useEnvironmentStore } from '../../features/environment/stores/environmentStore';
 import { useSetupStore } from '../../features/setup/stores/setupStore';
 import { PermissionCenterCard } from './PermissionCenterCard';
 
@@ -45,18 +44,17 @@ export function SettingsSurface() {
     return 'warm-sand';
   });
 
-  const envSnapshot = useEnvironmentStore((s) => s.snapshot);
-  const envLoading = useEnvironmentStore((s) => s.loading);
-  const envError = useEnvironmentStore((s) => s.error);
-  const refreshEnv = useEnvironmentStore((s) => s.refresh);
-  const loadCachedEnv = useEnvironmentStore((s) => s.loadCached);
-  const clearEnv = useEnvironmentStore((s) => s.clear);
+  // v28: Unified setup snapshot via useSetupStore
+  const envSnapshot = useSetupStore((s) => s.snapshot);
+  const envChecking = useSetupStore((s) => s.checking);
+  const envError = useSetupStore((s) => s.error);
+  const refreshEnv = useSetupStore((s) => s.detectAll);
+  const loadCachedEnv = useSetupStore((s) => s.hydrate);
+  const clearEnv = useSetupStore((s) => s.clearCache);
 
   useEffect(() => {
     loadCachedEnv();
   }, [loadCachedEnv]);
-
-  const cap = envSnapshot?.capability ?? null;
 
   useEffect(() => { localStorage.setItem('ctrl-cc-model', model); }, [model]);
   useEffect(() => { localStorage.setItem('ctrl-cc-effort', effort); }, [effort]);
@@ -74,7 +72,7 @@ export function SettingsSurface() {
   };
 
   const exportDiag = () => {
-    const diag = { cap, model, effort, permMode, fontSize, theme: currentTheme, lang: i18n.language, time: new Date().toISOString(), env: envSnapshot };
+    const diag = { model, effort, permMode, fontSize, theme: currentTheme, lang: i18n.language, time: new Date().toISOString(), env: envSnapshot };
     const blob = new Blob([JSON.stringify(diag, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'ctrl-cc-diagnostics.json'; a.click();
@@ -195,8 +193,8 @@ export function SettingsSurface() {
         <div className="cc-card-header">
           <h3 style={sectH3}>{t('settings.environment')}</h3>
           <div style={{ display: 'flex', gap: 8 }}>
-            <CcButton size="sm" variant="ghost" onClick={() => void refreshEnv()} disabled={envLoading}>
-              {envLoading ? t('common.detecting') : envSnapshot ? '刷新环境配置' : '检测环境配置'}
+            <CcButton size="sm" variant="ghost" onClick={() => void refreshEnv()} disabled={envChecking}>
+              {envChecking ? t('common.detecting') : envSnapshot ? '刷新环境配置' : '检测环境配置'}
             </CcButton>
             {envSnapshot && (
               <CcButton size="sm" variant="ghost" onClick={clearEnv}>
@@ -214,11 +212,11 @@ export function SettingsSurface() {
           </div>
         ) : (
           <div className="cc-settings-grid">
-            <F label={t('console.claudeCli')} value={cap?.exists ? String(t('common.installed')) : String(t('common.notDetected'))} color={cap?.exists ? 'var(--cc-green)' : 'var(--cc-red)'} />
-            <F label={t('console.version')} value={cap?.version || 'N/A'} />
-            <F label={t('console.authStatus')} value={cap?.authStatus || String(t('common.unknown'))} color={cap?.authStatus === 'authenticated' ? 'var(--cc-green)' : 'var(--cc-amber)'} />
-            <F label="LaunchPlan" value={envSnapshot.launchPlans.find((p) => p.selected)?.id ?? 'not selected'} />
-            <F label="Claude JS candidates" value={String(envSnapshot.jsCandidates.filter((c) => c.exists).length)} />
+            <F label={t('console.claudeCli')} value={envSnapshot?.checks?.claudeCode?.ok ? String(t('common.installed')) : String(t('common.notDetected'))} color={envSnapshot?.checks?.claudeCode?.ok ? 'var(--cc-green)' : 'var(--cc-red)'} />
+            <F label={t('console.version')} value={envSnapshot?.checks?.claudeCode?.version || 'N/A'} />
+            <F label={t('console.authStatus')} value={envSnapshot?.checks?.claudeAuth?.ok ? 'authenticated' : String(t('common.unknown'))} color={envSnapshot?.checks?.claudeAuth?.ok ? 'var(--cc-green)' : 'var(--cc-amber)'} />
+            <F label="LaunchPlan" value={envSnapshot?.selectedChatCommandId ?? 'not selected'} />
+            <F label="Claude commands" value={String((envSnapshot?.claudeCommands ?? []).filter((c) => c.printOk).length)} />
             <F label={t('console.checkedAt')} value={fmtTime(envSnapshot.generatedAt)} />
           </div>
         )}

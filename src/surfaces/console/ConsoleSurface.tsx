@@ -6,13 +6,13 @@ import { useSurfaceStore } from '../../stores/surfaceStore';
 import { useOpenSessionStore } from '../../stores/openSessionStore';
 import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
 import { useRuntimeTraceStore } from '../../features/runtime/stores/runtimeTraceStore';
-import { useEnvironmentStore } from '../../features/environment/stores/environmentStore';
 import { useSetupStore } from '../../features/setup/stores/setupStore';
 import { useRuntimeKernelStore } from '../../runtime-kernel/runtimeKernelStore';
 import { CcButton } from '../../components/ui/CcButton';
 import { CcStatusDot } from '../../components/ui/CcStatusDot';
 import { CcCard } from '../../components/ui/CcCard';
 import { CcBadge } from '../../components/ui/CcBadge';
+import { CcKpiCard } from '../../components/ui/CcKpiCard';
 import { SurfacePage } from '../../components/layout/SurfacePage';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 import './console-surface.css';
@@ -51,18 +51,17 @@ export function ConsoleSurface() {
   ).length;
   const kernelOk = kernelErrorCount === 0;
 
-  const envSnapshot = useEnvironmentStore((s) => s.snapshot);
-  const envLoading = useEnvironmentStore((s) => s.loading);
-  const refreshEnv = useEnvironmentStore((s) => s.refresh);
-  const loadCachedEnv = useEnvironmentStore((s) => s.loadCached);
+  // v28: Unified setup snapshot — same as Console/Settings/FirstRun
+  const setupSnap = useSetupStore((s) => s.snapshot);
+  const setupRunState = useSetupStore((s) => s.runState);
+  const detectAll = useSetupStore((s) => s.detectAll);
+  const hydrate = useSetupStore((s) => s.hydrate);
 
   useEffect(() => {
-    loadCachedEnv();
-  }, [loadCachedEnv]);
+    hydrate();
+  }, [hydrate]);
 
-  const cap = envSnapshot?.capability ?? null;
-  const hasEnvInfo = Boolean(envSnapshot);
-  const selectedLaunchPlan = envSnapshot?.launchPlans?.find((p) => p.selected);
+  const hasEnvInfo = Boolean(setupSnap);
 
   const openWorkspace = (sid: string) => { const s = sessions.find((x) => x.id === sid); if (s) { openSession({ sessionId: s.id, projectId: s.projectId, projectName: s.title, title: s.title, status: s.status, viewMode: 'chat', pendingConfirms: 0, riskCount: s.riskCount, isPinned: false }); navigateTo('workspace'); } };
 
@@ -97,20 +96,25 @@ export function ConsoleSurface() {
         </div>
       )}
 
-      <div className="cc-hero">
+      <section className="cc-page-header">
         <div>
           <h1 style={{ fontSize: 'var(--cc-font-3xl)', fontWeight: 700, color: 'var(--cc-text)', marginBottom: 4 }}>{t(greetKey)}, {t('greeting.developer')}</h1>
           <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-soft)' }}>{t('console.subtitle')}</p>
-          <p style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>{t('console.footer')}</p>
         </div>
-      </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <CcButton variant="primary" onClick={() => navigateTo('workspace')}>{t('workspace.newSession')}</CcButton>
+          <CcButton variant="ghost" onClick={() => void detectAll()} disabled={setupRunState === 'running'}>
+            {setupSnap ? '刷新环境配置' : '检测环境配置'}
+          </CcButton>
+        </div>
+      </section>
 
       <div className="console-stat-grid">
-        <Stat title={t('console.running')} value={running} color="var(--cc-green)" sub={`${sessions.length} ${t('console.totalSessions')}`} />
-        <Stat title={t('console.projects')} value={projects.filter((p) => p.activeSessionCount > 0).length} color="var(--cc-blue)" sub={`${projects.length} ${t('console.total')}`} />
-        <Stat title={t('console.costToday')} value={'$' + costToday.toFixed(3)} color="var(--cc-amber)" sub={`${today.length} ${t('console.sessionsToday')}`} />
-        <Stat title={t('console.claudeCli')} value={envLoading ? '...' : cap?.exists ? cap?.version || 'OK' : 'N/A'} color={cap?.exists ? 'var(--cc-green)' : 'var(--cc-red)'} sub={cap?.authStatus || t('common.unknown')} />
-        <Stat title={t('console.totalTokens')} value={totalTokens >= 1000 ? (totalTokens / 1000).toFixed(1) + 'k' : String(totalTokens)} color="var(--cc-text)" sub={t('console.tokensDesc')} />
+        <CcKpiCard label={t('console.running')} value={running} color="var(--cc-green)" hint={`${sessions.length} ${t('console.totalSessions')}`} />
+        <CcKpiCard label={t('console.projects')} value={projects.filter((p) => p.activeSessionCount > 0).length} color="var(--cc-blue)" hint={`${projects.length} ${t('console.total')}`} />
+        <CcKpiCard label={t('console.costToday')} value={'$' + costToday.toFixed(3)} color="var(--cc-amber)" hint={`${today.length} ${t('console.sessionsToday')}`} />
+        <CcKpiCard label={t('console.claudeCli')} value={setupRunState === 'running' ? '...' : setupSnap?.checks?.claudeCode?.ok ? setupSnap?.checks?.claudeCode?.version || 'OK' : 'N/A'} color={setupSnap?.checks?.claudeCode?.ok ? 'var(--cc-green)' : 'var(--cc-red)'} hint={setupSnap?.checks?.claudeAuth?.ok ? 'authenticated' : t('common.unknown')} />
+        <CcKpiCard label={t('console.totalTokens')} value={totalTokens >= 1000 ? (totalTokens / 1000).toFixed(1) + 'k' : String(totalTokens)} color="var(--cc-text)" hint={t('console.tokensDesc')} />
       </div>
 
       {/* Runtime Health Strip — v10 Mission Control */}
@@ -142,8 +146,8 @@ export function ConsoleSurface() {
         <CcCard className="cc-section-card console-card">
           <div className="cc-card-header">
             <h3 style={st}>{t('console.environment')}</h3>
-            <CcButton size="sm" variant="ghost" onClick={() => void refreshEnv()} disabled={envLoading}>
-              {envLoading ? t('common.detecting') : hasEnvInfo ? '刷新环境配置' : '检测环境配置'}
+            <CcButton size="sm" variant="ghost" onClick={() => void detectAll()} disabled={setupRunState === 'running'}>
+              {setupRunState === 'running' ? t('common.detecting') : hasEnvInfo ? '刷新环境配置' : '检测环境配置'}
             </CcButton>
           </div>
 
@@ -153,11 +157,11 @@ export function ConsoleSurface() {
             </div>
           ) : (
             <div className="console-env-grid">
-              <E label={t('console.claudeCli')} value={cap?.exists ? cap?.version || String(t('common.installed')) : String(t('common.notDetected'))} c={cap?.exists ? 'var(--cc-green)' : 'var(--cc-red)'} />
-              <E label={t('console.authStatus')} value={cap?.authStatus || String(t('common.unknown'))} c={cap?.authStatus === 'authenticated' ? 'var(--cc-green)' : 'var(--cc-amber)'} />
-              <E label="LaunchPlan" value={selectedLaunchPlan?.id ?? 'not selected'} c={selectedLaunchPlan ? 'var(--cc-green)' : 'var(--cc-red)'} />
-              <E label="Claude JS" value={`${envSnapshot?.jsCandidates?.filter((c: { exists: boolean }) => c.exists).length ?? 0} candidates`} />
-              <E label={t('console.streamJson')} value={cap?.supportsStreamJson ? String(t('common.supported')) : String(t('common.unknown'))} />
+              <E label={t('console.claudeCli')} value={setupSnap?.checks?.claudeCode?.ok ? setupSnap?.checks?.claudeCode?.version || String(t('common.installed')) : String(t('common.notDetected'))} c={setupSnap?.checks?.claudeCode?.ok ? 'var(--cc-green)' : 'var(--cc-red)'} />
+              <E label={t('console.authStatus')} value={setupSnap?.checks?.claudeAuth?.ok ? 'authenticated' : String(t('common.unknown'))} c={setupSnap?.checks?.claudeAuth?.ok ? 'var(--cc-green)' : 'var(--cc-amber)'} />
+              <E label="LaunchPlan" value={setupSnap?.selectedTerminalCommandId || setupSnap?.selectedChatCommandId || 'not selected'} c={(setupSnap?.selectedTerminalCommandId || setupSnap?.selectedChatCommandId) ? 'var(--cc-green)' : 'var(--cc-red)'} />
+              <E label="Claude JS" value="N/A" />
+              <E label={t('console.streamJson')} value={String(t('common.supported'))} />
               <E label={t('console.frontend')} value={t('console.techFrontend')} />
               <E label={t('console.backend')} value={t('console.techBackend')} />
               <E label={t('console.terminal')} value={t('console.techTerminal')} />
@@ -200,7 +204,8 @@ export function ConsoleSurface() {
     </SurfacePage>
   );
 }
-function Stat({ title, value, color, sub }: { title: string; value: string | number; color: string; sub: string }) { return <div style={{ padding: '12px 14px', borderRadius: 'var(--cc-radius-lg)', background: 'var(--cc-surface-solid)', border: '1px solid var(--cc-border)' }}><div style={{ fontSize: 'var(--cc-font-2xl)', fontWeight: 700, color }}>{value}</div><div style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)', marginTop: 2 }}>{title}</div><div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', marginTop: 2 }}>{sub}</div></div>; }
+/** @deprecated Use CcKpiCard component from ../../components/ui/CcKpiCard instead */
+export function Stat({ title, value, color, sub }: { title: string; value: string | number; color: string; sub: string }) { return <div style={{ padding: '12px 14px', borderRadius: 'var(--cc-radius-lg)', background: 'var(--cc-surface-solid)', border: '1px solid var(--cc-border)' }}><div style={{ fontSize: 'var(--cc-font-2xl)', fontWeight: 700, color }}>{value}</div><div style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)', marginTop: 2 }}>{title}</div><div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', marginTop: 2 }}>{sub}</div></div>; }
 function Plane({ label, pct, color, desc }: { label: string; pct: number; color: string; desc: string }) { return <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ color: 'var(--cc-text-soft)', width: 80, fontSize: 'var(--cc-font-2xs)' }}>{label}</span><div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--cc-bg-muted)', overflow: 'hidden' }}><div style={{ width: pct + '%', height: '100%', borderRadius: 3, background: color }} /></div><span style={{ color, fontWeight: 600, fontSize: 'var(--cc-font-2xs)', width: 30 }}>{pct}%</span><span style={{ color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-3xs)', flex: 1 }}>{desc}</span></div>; }
 function E({ label, value, c }: { label: string; value: string; c?: string }) {
   return (

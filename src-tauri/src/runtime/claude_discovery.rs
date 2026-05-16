@@ -1,5 +1,5 @@
 use crate::runtime::event_payloads::ClaudeCapabilityPayload;
-use std::process::Command;
+use crate::utils::hidden_command::hidden_command;
 
 /// Multi-strategy Claude CLI path discovery.
 /// Tries: which → known install paths → npx fallback.
@@ -48,7 +48,7 @@ pub fn discover_claude_path() -> Option<String> {
     }
 
     // Strategy 3: npx — ultimate fallback (downloads if needed)
-    if Command::new("npx").arg("--version").output().is_ok() {
+    if hidden_command("npx").arg("--version").output().is_ok() {
         log::info!("Claude CLI not found locally; will use npx @anthropic-ai/claude-code");
         return Some("npx".to_string());
     }
@@ -73,13 +73,13 @@ pub fn get_claude_command() -> Vec<String> {
 
 fn run_shell_command(command_line: &str) -> Result<String, String> {
     #[cfg(target_os = "windows")]
-    let output = Command::new(std::env::var("COMSPEC").unwrap_or_else(|_| "cmd.exe".to_string()))
+    let output = hidden_command(&std::env::var("COMSPEC").unwrap_or_else(|_| "cmd.exe".to_string()))
         .args(["/d", "/s", "/c", command_line])
         .output()
         .map_err(|e| format!("failed to spawn command: {e}"))?;
 
     #[cfg(not(target_os = "windows"))]
-    let output = Command::new("bash")
+    let output = hidden_command("bash")
         .args(["-lc", command_line])
         .output()
         .map_err(|e| format!("failed to spawn command: {e}"))?;

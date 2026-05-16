@@ -1,7 +1,7 @@
 use crate::error::AppError;
 use crate::runtime::ndjson_parser::{self, ChatRuntimeEvent};
+use crate::utils::hidden_command::hidden_command;
 use std::io::{BufRead, BufReader};
-use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use tauri::{AppHandle, Emitter};
@@ -49,7 +49,7 @@ impl ClaudeSession {
         app: AppHandle,
     ) -> Result<Self, AppError> {
         let valid_cwd = Self::validate_cwd(&cwd);
-        let mut cmd = Command::new("claude");
+        let mut cmd = hidden_command("claude");
         cmd.arg("-p")
             .arg(&prompt)
             .arg("--output-format").arg("stream-json")
@@ -60,10 +60,7 @@ impl ClaudeSession {
         }
         cmd.arg("--model").arg(&model)
             .arg("--permission-mode").arg(permission_mode.as_deref().unwrap_or("default"))
-            .current_dir(&valid_cwd)
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped());
+            .current_dir(&valid_cwd);
 
         if let Some(ref resume_id) = resume_session {
             cmd.arg("--resume").arg(resume_id);

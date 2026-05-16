@@ -1,20 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
-
-#[cfg(windows)]
-use std::os::windows::process::CommandExt;
-
-#[cfg(windows)]
-const CREATE_NO_WINDOW: u32 = 0x08000000;
-
-fn hidden_command(program: &str) -> Command {
-    let mut cmd = Command::new(program);
-    #[cfg(windows)]
-    { cmd.creation_flags(CREATE_NO_WINDOW); }
-    cmd
-}
+use std::process::Stdio;
+use crate::utils::hidden_command::hidden_command;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -106,6 +94,16 @@ pub fn discover_claude_commands() -> Vec<ClaudeCommandSpec> {
     dedupe_specs(specs).into_iter().map(inspect_spec).collect()
 }
 
+fn terminal_priority(plan: &ClaudeCommandSpec) -> i32 {
+    match plan.kind.as_str() {
+        "nativeExe" => 0,
+        "cmdShim" => 10,
+        "gitBash" => 20,
+        "nodeWrapper" => 30,
+        _ => 1000,
+    }
+}
+
 fn command_rank(spec: &ClaudeCommandSpec, for_terminal: bool) -> i32 {
     if !spec.version_ok {
         return 10_000;
@@ -139,7 +137,7 @@ pub fn select_for_terminal() -> Result<ClaudeCommandSpec, String> {
         .filter(|s| s.version_ok && s.selectable_for_terminal && s.interactive_pty_ok)
         .collect();
 
-    specs.sort_by_key(|s| command_rank(s, true));
+    specs.sort_by_key(|s| terminal_priority(s));
 
     specs.into_iter().next().ok_or_else(|| {
         "No Claude command available for Terminal PTY. Install native Claude Code or npm wrapper, then run diagnostics.".to_string()

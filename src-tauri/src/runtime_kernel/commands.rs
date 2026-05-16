@@ -3,7 +3,7 @@ use super::manager::RuntimeKernel;
 use super::types::*;
 
 #[tauri::command]
-pub async fn runtime_kernel_start_session(app: tauri::AppHandle, kernel: State<'_, RuntimeKernel>, req: RuntimeKernelStartRequest) -> Result<RuntimeKernelSessionSnapshot, String> {
+pub async fn runtime_kernel_start_session(app: tauri::AppHandle, kernel: State<'_, RuntimeKernel>, req: RuntimeKernelStartRequest) -> Result<RuntimeKernelSnapshot, String> {
     let kernel = kernel.inner().clone();
     tauri::async_runtime::spawn_blocking(move || kernel.start_session(app, req)).await.map_err(|e| format!("runtime_kernel_start_session worker failed: {}", e))?
 }
@@ -27,6 +27,12 @@ pub async fn runtime_kernel_stop_session(kernel: State<'_, RuntimeKernel>, req: 
 }
 
 #[tauri::command]
-pub fn runtime_kernel_list_sessions(kernel: State<'_, RuntimeKernel>) -> Result<Vec<RuntimeKernelSessionSnapshot>, String> {
+pub async fn runtime_kernel_detach_session(gui_session_id: String, kernel: State<'_, RuntimeKernel>) -> Result<(), String> {
+    let kernel = kernel.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || kernel.detach_session(gui_session_id)).await.map_err(|e| format!("runtime_kernel_detach_session worker failed: {}", e))?
+}
+
+#[tauri::command]
+pub fn runtime_kernel_list_sessions(kernel: State<'_, RuntimeKernel>) -> Result<Vec<RuntimeKernelSnapshot>, String> {
     kernel.list_sessions()
 }
