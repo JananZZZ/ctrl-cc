@@ -44,13 +44,14 @@ impl TaskControlToken {
     ///
     /// 调用方应在每次循环迭代前调用此方法。
     /// 如果任务同时被取消或终止，此方法会立即返回。
-    pub fn wait_if_paused(&self) {
-        while self.paused.load(Ordering::Acquire)
-            && !self.cancelled.load(Ordering::Relaxed)
-            && !self.terminated.load(Ordering::Relaxed)
-        {
-            std::thread::sleep(std::time::Duration::from_millis(50));
+    pub fn wait_if_paused(&self) -> Result<(), String> {
+        while self.paused.load(Ordering::Acquire) {
+            if self.cancelled.load(Ordering::Relaxed) || self.terminated.load(Ordering::Relaxed) {
+                return Err("任务已取消".to_string());
+            }
+            std::thread::sleep(std::time::Duration::from_millis(80));
         }
+        Ok(())
     }
 
     /// 暂停任务。

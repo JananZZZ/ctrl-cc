@@ -178,6 +178,7 @@ export const useRuntimeKernelStore = create<RuntimeKernelState>((set) => ({
     set((state) => {
       const existing = state.sessions[sessionId];
       if (!existing) return state;
+      if (existing.status === 'stopped') return state;
       return {
         sessions: {
           ...state.sessions,

@@ -140,10 +140,27 @@ impl RuntimeKernel {
 
         std::thread::spawn(move || {
             let mut buf = [0u8; 8192];
+            let mut received_any = false;
             loop {
                 match reader.read(&mut buf) {
                     Ok(0) => break,
                     Ok(n) => {
+                        if !received_any {
+                            received_any = true;
+                            if let Ok(mut sessions) = inner.lock() {
+                                if let Some(handle) = sessions.get_mut(&gui_session_id) {
+                                    handle.status = RuntimeStatus::Ready;
+                                    handle.updated_at = Utc::now().to_rfc3339();
+                                }
+                            }
+                            emit(&app2, &make_event(
+                                &trace_id, &gui_session_id, &runtime_session_id2, 0,
+                                "runtime.ready", "status",
+                                None,
+                                Some(RuntimeStatus::Ready),
+                                pid, Some(cwd.clone()),
+                            ));
+                        }
                         let data = String::from_utf8_lossy(&buf[..n]).to_string();
                         let seq = {
                             let sessions = inner.lock().ok();
@@ -181,17 +198,19 @@ impl RuntimeKernel {
                     }
                 }
             }
-            // Reader exited — update status but preserve Failed if set by error
+            // Reader exited — update status based on whether any data was received
             if let Ok(mut sessions) = inner.lock() {
                 if let Some(h) = sessions.get_mut(&gui_session_id) {
                     h.reader_alive = false;
                     h.has_writer = false;
-                    // Preserve Failed if already set
-                    if h.status != RuntimeStatus::Failed {
+                    if !received_any {
+                        h.status = RuntimeStatus::Failed;
+                        h.last_error = Some("Claude 进程启动后未产生任何输出即退出".to_string());
+                    } else if h.status != RuntimeStatus::Failed {
                         h.status = RuntimeStatus::Exited;
+                        h.last_error = Some("PTY reader exited".to_string());
                     }
                     h.updated_at = Utc::now().to_rfc3339();
-                    h.last_error = Some("PTY reader exited".to_string());
                 }
             }
             emit(&app2, &make_event(
