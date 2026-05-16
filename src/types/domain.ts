@@ -1,6 +1,6 @@
 // Core domain types — single source of truth for all Ctrl-CC data models
 
-export type RuntimeMode = 'pty-interactive' | 'structured-print';
+export type RuntimeMode = 'pty-interactive' | 'structured-print' | 'kernel-persistent';
 
 export type SurfaceId = 'console' | 'projects' | 'workspace' | 'resources' | 'canvas' | 'github' | 'settings';
 
@@ -22,7 +22,7 @@ export type RuntimeEventType =
   | 'hook_event' | 'mcp_tool' | 'agent_started' | 'agent_completed'
   | 'token_usage' | 'cost_update' | 'summary' | 'error'
   | 'tool_use' | 'tool_result' | 'thinking' | 'thinking_delta'
-  | 'system_init' | 'raw_stderr';
+  | 'system_init' | 'raw_stderr' | 'system' | 'raw';
 
 export interface WorkspaceRoot {
   id: string;

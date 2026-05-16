@@ -6,6 +6,7 @@ mod error;
 mod pty;
 mod runtime;
 mod runtime_v2;
+mod runtime_kernel;
 mod setup;
 
 use pty::PtyManager;
@@ -70,6 +71,15 @@ fn structured_run(
 #[tauri::command]
 fn runtime_smoke_test() -> serde_json::Value {
     use std::process::{Command, Stdio};
+    #[cfg(windows)]
+    use std::os::windows::process::CommandExt;
+    #[cfg(windows)]
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+    fn hidden_cmd(path: &str) -> Command {
+        let mut cmd = Command::new(path);
+        #[cfg(windows)] { cmd.creation_flags(CREATE_NO_WINDOW); }
+        cmd
+    }
     let comspec = std::env::var("ComSpec").ok();
     let system_root = std::env::var("SystemRoot").ok();
     let windir = std::env::var("WINDIR").ok();
@@ -78,9 +88,9 @@ fn runtime_smoke_test() -> serde_json::Value {
         let root = system_root.clone().or(windir.clone()).unwrap_or_else(|| "C:\\Windows".to_string());
         format!("{}\\System32\\cmd.exe", root)
     });
-    let cmd_echo = Command::new(&cmd_path).args(["/d","/s","/c","echo CMD_OK"]).stdin(Stdio::null()).output();
-    let where_claude = Command::new(&cmd_path).args(["/d","/s","/c","where claude"]).stdin(Stdio::null()).output();
-    let claude_version = Command::new(&cmd_path).args(["/d","/s","/c","claude --version"]).stdin(Stdio::null()).output();
+    let cmd_echo = hidden_cmd(&cmd_path).args(["/d","/s","/c","echo CMD_OK"]).stdin(Stdio::null()).output();
+    let where_claude = hidden_cmd(&cmd_path).args(["/d","/s","/c","where claude"]).stdin(Stdio::null()).output();
+    let claude_version = hidden_cmd(&cmd_path).args(["/d","/s","/c","claude --version"]).stdin(Stdio::null()).output();
     fn fmt(r: std::io::Result<std::process::Output>) -> serde_json::Value {
         match r { Ok(o) => serde_json::json!({"success":o.status.success(),"code":o.status.code(),"stdout":String::from_utf8_lossy(&o.stdout),"stderr":String::from_utf8_lossy(&o.stderr)}), Err(e) => serde_json::json!({"success":false,"error":e.to_string()}) }
     }
@@ -106,6 +116,7 @@ fn main() {
     let file_lock_manager = commands::file_lock::FileLockManager::new();
     let process_watchdog = commands::watchdog::ProcessWatchdog::new();
     let pty_session_manager = PtySessionManager::default();
+    let runtime_kernel = runtime_kernel::manager::RuntimeKernel::default();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
@@ -124,6 +135,7 @@ fn main() {
         .manage(process_watchdog)
         .manage(pty_session_manager)
         .manage(runtime_v2::runtime_manager::RuntimeManager::default())
+        .manage(runtime_kernel)
         .manage(setup::task_manager::SetupTaskManager::new())
         .invoke_handler(tauri::generate_handler![
             // Database persistence
@@ -214,6 +226,12 @@ fn main() {
             runtime_v2::runtime_commands::runtime_discover_native_claude,
             runtime_v2::runtime_commands::runtime_discover_claude_commands,
             runtime_v2::runtime_commands::runtime_start_chat_stream,
+            // RuntimeKernel (v27) — persistent Claude CLI runtime
+            runtime_kernel::commands::runtime_kernel_start_session,
+            runtime_kernel::commands::runtime_kernel_submit_user_message,
+            runtime_kernel::commands::runtime_kernel_write_terminal,
+            runtime_kernel::commands::runtime_kernel_stop_session,
+            runtime_kernel::commands::runtime_kernel_list_sessions,
             // Setup domain (v23.0)
             setup::commands::setup_detect_all,
             setup::commands::setup_fix_powershell_policy,

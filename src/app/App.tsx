@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AppShell } from './AppShell';
 import { ErrorBoundary } from '../components/error/ErrorBoundary';
 import { useProjectStore } from '../stores/projectStore';
-import type { SessionStatus, PermissionMode, Project } from '../types';
+import type { RuntimeMode, SessionStatus, PermissionMode, Project } from '../types';
 import { useSessionStore } from '../stores/sessionStore';
 import { invokeCommand, warnLog } from '../services/invokeCommand';
 import { useErrorStore } from '../stores/errorStore';
@@ -12,6 +12,7 @@ import { installRuntimeLifecycleBridge } from '../features/runtime/services/runt
 import { installRuntimeFabricEventBridge } from '../features/runtime-fabric/services/runtimeFabricEventBridge';
 import { FirstRunSetupWizard } from '../features/setup/components/FirstRunSetupWizard';
 import { useSetupStore } from '../features/setup/stores/setupStore';
+import { RuntimeKernelBridge } from '../runtime-kernel/runtimeKernelBridge';
 import i18n from '../i18n';
 
 export function App() {
@@ -38,6 +39,14 @@ export function App() {
     installRuntimeFabricEventBridge()
       .then((fn) => { cleanup = fn; })
       .catch((err) => console.error('[Ctrl-CC] RuntimeFabricEventBridge failed', err));
+    return () => cleanup?.();
+  }, []);
+
+  // v27.0: Install RuntimeKernelBridge — persistent Claude CLI runtime event bridge
+  useEffect(() => {
+    let cleanup: undefined | (() => void);
+    RuntimeKernelBridge.install().then((fn) => { cleanup = fn; }).catch((err) => console.error('[Ctrl-CC] RuntimeKernelBridge install failed', err));
+    RuntimeKernelBridge.listSessions().catch(() => {});
     return () => cleanup?.();
   }, []);
 
@@ -102,7 +111,7 @@ export function App() {
           id: r.id as string,
           projectId: (r.projectId as string) || 'default',
           title: (r.title as string) || t('session.notFound'),
-          runtimeMode: ((r.runtimeMode as string) === 'structured-print' ? 'structured-print' : 'pty-interactive') as 'pty-interactive' | 'structured-print',
+          runtimeMode: ((r.runtimeMode as string) === 'structured-print' ? 'structured-print' : (r.runtimeMode as string) === 'kernel-persistent' ? 'kernel-persistent' : 'pty-interactive') as RuntimeMode,
           status: ((r.status as string) || 'created') as SessionStatus,
           model: (r.model as string) || 'sonnet',
           effort: r.effort as string | undefined,

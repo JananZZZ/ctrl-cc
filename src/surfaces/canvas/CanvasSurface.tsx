@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useProjectStore } from '../../stores/projectStore';
@@ -27,7 +27,7 @@ export function CanvasSurface() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [nodePos, setNodePos] = useState<Record<string,{x:number;y:number}>>({});
 
-  const colors = {
+  const colors = useMemo(() => ({
     project: getCssVar('--cc-brand') || '#3b82f6',
     running: getCssVar('--cc-green') || '#22c55e',
     failed: getCssVar('--cc-red') || '#ef4444',
@@ -38,12 +38,12 @@ export function CanvasSurface() {
     text: getCssVar('--cc-text-muted') || '#d1d5db',
     bg: getCssVar('--cc-bg') || '#0d1117',
     btnText: getCssVar('--cc-text-on-accent') || '#fff',
-  };
+  }), []);
 
-  const nodes: Node[] = [
+  const nodes: Node[] = useMemo(() => [
     ...projects.map((p, i) => ({ id: p.id, label: p.name, x: nodePos[p.id]?.x ?? 80 + i * 240, y: nodePos[p.id]?.y ?? 80, color: colors.project, size: 22, type: 'project', connections: sessions.filter((s) => s.projectId === p.id).map((s) => s.id) })),
     ...sessions.slice(0, 20).map((s, i) => ({ id: s.id, label: s.title, x: nodePos[s.id]?.x ?? 100 + (i % 6) * 150, y: nodePos[s.id]?.y ?? 200 + Math.floor(i / 6) * 140, color: s.status === 'running' ? colors.running : s.status === 'failed' ? colors.failed : colors.idle, size: 13, type: 'session', connections: [s.projectId] })),
-  ];
+  ], [projects, sessions, nodePos, colors]);
 
   useEffect(() => {
     const c = canvasRef.current; if (!c) return;

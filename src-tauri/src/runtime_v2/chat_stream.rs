@@ -1,6 +1,12 @@
 use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 use tauri::{AppHandle, Emitter};
 
 use super::claude_command_resolver::{build_invocation, select_for_chat};
@@ -49,12 +55,17 @@ pub fn start_chat_stream(app: AppHandle, req: ChatStreamRequest) -> Result<ChatS
 
     let invocation = build_invocation(&spec, &claude_args);
 
-    let mut child = Command::new(&invocation.program)
-        .args(&invocation.args)
+    let mut cmd = Command::new(&invocation.program);
+    cmd.args(&invocation.args)
         .current_dir(&req.cwd)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stderr(Stdio::piped());
+    #[cfg(windows)]
+    {
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    let mut child = cmd
         .spawn()
         .map_err(|e| format!("failed to spawn claude print stream: {}", e))?;
 

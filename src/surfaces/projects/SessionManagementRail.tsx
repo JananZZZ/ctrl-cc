@@ -105,7 +105,7 @@ function SessionCard({ session, isSelected, onSelect, onResume, onFork, t }: { s
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <CcStatusDot status={statusMap[session.status]} size={7} pulse={isRunning} />
         <span style={{ fontWeight: 500, fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{session.title}</span>
-        <CcBadge variant={session.runtimeMode === 'pty-interactive' ? 'info' : 'default'}>{session.runtimeMode === 'pty-interactive' ? 'PTY' : 'CLI'}</CcBadge>
+        <CcBadge variant={session.runtimeMode === 'pty-interactive' ? 'info' : session.runtimeMode === 'kernel-persistent' ? 'success' : 'default'}>{session.runtimeMode === 'pty-interactive' ? 'PTY' : session.runtimeMode === 'kernel-persistent' ? 'Kernel' : 'CLI'}</CcBadge>
       </div>
       <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', marginTop: 2 }}>
         <span style={{ marginRight: 8 }}>{session.model}</span>

@@ -9,7 +9,7 @@ export type SendResult = { ok: true } | { ok: false; error: string };
 
 interface Props {
   viewMode: 'chat' | 'terminal' | 'split' | 'structured-task';
-  sessionRuntimeMode?: 'pty-interactive' | 'structured-print';
+  sessionRuntimeMode?: RuntimeMode;
   disabled?: boolean;
   disabledReason?: 'runtime' | 'setup';
   onDisabledClick?: () => void;

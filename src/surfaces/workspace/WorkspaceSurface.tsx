@@ -1,12 +1,9 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useOpenSessionStore } from '../../stores/openSessionStore';
-import { RuntimeFabricBridge } from '../../features/runtime-fabric/services/runtimeFabricBridge';
-import { useRuntimeFabricStore } from '../../features/runtime-fabric/stores/runtimeFabricStore';
-import { useSetupStore } from '../../features/setup/stores/setupStore';
-import { useSurfaceStore } from '../../stores/surfaceStore';
+import { RuntimeKernelBridge } from '../../runtime-kernel/runtimeKernelBridge';
+import { useRuntimeKernelStore } from '../../runtime-kernel/runtimeKernelStore';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
 import { CcButton } from '../../components/ui/CcButton';
@@ -23,8 +20,6 @@ import type { RuntimeEvent, Session } from '../../types';
 
 type ViewMode = 'chat' | 'terminal' | 'split';
 
-const EMPTY_RUNTIME_EVENTS: RuntimeEvent[] = [];
-
 export function WorkspaceSurface() {
   useRenderLoopGuard('WorkspaceSurface');
   const { t } = useTranslation();
@@ -35,7 +30,6 @@ export function WorkspaceSurface() {
   const [viewMode, setViewMode] = useState<ViewMode>('chat');
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
   const [inspectorExpanded, setInspectorExpanded] = useState(false);
-  const [rawEvents, setRawEvents] = useState<RuntimeEvent[]>([]);
   const [starting, setStarting] = useState(false);
   const [showNewSessionDialog, setShowNewSessionDialog] = useState(false);
   const [showNewProjectFromSession, setShowNewProjectFromSession] = useState(false);
@@ -48,75 +42,18 @@ export function WorkspaceSurface() {
 
   const isComposerEnabled = useCallback((sessionId: string | null): boolean => {
     if (!sessionId) return false;
-    const setup = useSetupStore.getState().snapshot;
-    if (setup && !setup.ready) return false;
-    const fabric = useRuntimeFabricStore.getState().sessions[sessionId];
-    if (!fabric) return true;
-    return fabric.status !== 'failed';
+    const rt = useRuntimeKernelStore.getState().sessions[sessionId];
+    return Boolean(rt && rt.hasWriter && rt.readerAlive && !['failed', 'exited', 'stopped'].includes(rt.status));
   }, []);
 
-  const isSetupIncomplete = useCallback((): boolean => {
-    const setup = useSetupStore.getState().snapshot;
-    return Boolean(setup && !setup.ready);
-  }, []);
-
-  const fabricChatEvents = useRuntimeFabricStore(
-    useCallback(
-      (s) => (activeTabId ? (s.chatEvents[activeTabId] ?? EMPTY_RUNTIME_EVENTS) : EMPTY_RUNTIME_EVENTS),
-      [activeTabId]
-    )
-  );
-
-  const events = useMemo(() => {
-    const merged = [...rawEvents, ...fabricChatEvents];
-    const byId = new Map<string, RuntimeEvent>();
-
-    for (const evt of merged) {
-      byId.set(evt.id, evt);
-    }
-
-    return Array.from(byId.values()).sort((a, b) => {
-      const at = Date.parse(a.createdAt || '');
-      const bt = Date.parse(b.createdAt || '');
-      if (Number.isNaN(at) || Number.isNaN(bt)) return 0;
-      return at - bt;
-    });
-  }, [rawEvents, fabricChatEvents]);
+  const events = useRuntimeKernelStore(
+    useCallback((s) => (activeTabId ? (s.chatMessages[activeTabId] ?? []) : []), [activeTabId])
+  ) as unknown as RuntimeEvent[];
 
   useEffect(() => {
     const tab = tabs.find((t) => t.sessionId === activeTabId);
     if (tab?.viewMode) setViewMode(tab.viewMode);
   }, [activeTabId, tabs]);
-
-  const activeTabIdRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    activeTabIdRef.current = activeTabId;
-  }, [activeTabId]);
-
-  useEffect(() => {
-    let cancelled = false;
-    let cleanup: UnlistenFn | null = null;
-
-    listen<RuntimeEvent>('runtime:event', (e) => {
-      const current = activeTabIdRef.current;
-      if (current && e.payload.sessionId === current) {
-        setRawEvents((prev) => {
-          if (prev.some((x) => x.id === e.payload.id)) return prev;
-          const next = [...prev, e.payload];
-          return next.length > 500 ? next.slice(-200) : next;
-        });
-      }
-    }).then((fn) => {
-      if (cancelled) fn();
-      else cleanup = fn;
-    });
-
-    return () => {
-      cancelled = true;
-      cleanup?.();
-    };
-  }, []);
 
   const handleSend = useCallback(async (
     text: string,
@@ -124,51 +61,42 @@ export function WorkspaceSurface() {
   ): Promise<SendResult> => {
     if (!activeTabId) return { ok: false, error: 'No active session' };
 
-    const userEvent: RuntimeEvent = {
-      id: `usr-${Date.now()}`,
-      sessionId: activeTabId,
-      projectId: activeSession?.projectId ?? '',
-      type: 'user_message',
-      content: text,
-      severity: 'low',
-      createdAt: new Date().toISOString(),
-    };
-    setRawEvents((prev) => [...prev, userEvent]);
-
     try {
-      await RuntimeFabricBridge.sendChatMessage(activeTabId, text, {
-        model: config.model,
-        permissionMode: config.permissionMode,
-        effort: config.effort,
-        cwd: activeSession?.cwd,
-        projectId: activeSession?.projectId,
-      } as any);
+      const existing = useRuntimeKernelStore.getState().sessions[activeTabId];
+      const deadStatuses = new Set(['failed', 'exited', 'stopped']);
+
+      if (!existing || deadStatuses.has(String(existing.status))) {
+        await RuntimeKernelBridge.startSession({
+          guiSessionId: activeTabId,
+          projectId: activeSession?.projectId ?? '',
+          cwd: activeSession?.cwd ?? '.',
+          model: config.model,
+          permissionMode: config.permissionMode,
+          sessionName: activeSession?.title ?? activeTabId,
+        });
+      }
+
+      await RuntimeKernelBridge.submitUserMessage({ guiSessionId: activeTabId, projectId: activeSession?.projectId ?? 'default', text });
+
       return { ok: true };
     } catch (err) {
       const msg = String(err);
       setError(`${t('workspace.sendFailed')}: ${msg}`);
-      setRawEvents((prev) => [...prev, {
-        id: `sys-${Date.now()}`,
-        sessionId: activeTabId,
-        projectId: activeSession?.projectId ?? '',
-        type: 'system',
-        content: `Chat Runtime failed: ${msg}`,
-        severity: 'medium',
-        createdAt: new Date().toISOString(),
-      } as unknown as RuntimeEvent]);
+
       try {
         useErrorStore.getState().addError({
           severity: 'error',
           source: 'session',
-          title: 'Chat failed',
+          title: 'Runtime submit failed',
           detail: msg,
         });
       } catch {}
+
       return { ok: false, error: msg };
     }
   }, [activeTabId, activeSession, t]);
 
-  // v20.0: Session creation via RuntimeFabricBridge — does NOT auto-start PTY.
+  // v26.0: Session creation via RuntimeKernelBridge with persistent PTY
   const startSessionWithProject = useCallback((projectId: string, projectPath?: string) => {
     setError(null);
     let cwd = projectPath || '.';
@@ -183,21 +111,27 @@ export function WorkspaceSurface() {
     setShowNewProjectFromSession(false);
     setStarting(true);
 
+    const sessionId = `ses-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const title = cwd.split(/[/\\]/).pop() || projName;
+
     try {
-      const session = RuntimeFabricBridge.createCtrlCcSession({
-        projectId, projectName: projName, cwd,
-        title: cwd.split(/[/\\]/).pop() || undefined,
+      const session = { id: sessionId, projectId, title, runtimeMode: 'pty-interactive' as const, status: 'starting' as const, model: 'sonnet', permissionMode: 'default' as const, cwd, inputTokens: 0, outputTokens: 0, totalCostUsd: 0, fileChangeCount: 0, riskCount: 0, auditCount: 0, isPinned: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as Session;
+      useSessionStore.getState().addSession(session);
+      useOpenSessionStore.getState().openSession({ sessionId, projectId, projectName: projName, title, status: 'starting', viewMode: 'chat', pendingConfirms: 0, riskCount: 0, isPinned: false });
+      useOpenSessionStore.getState().setActiveTab(sessionId);
+      RuntimeKernelBridge.startSession({ guiSessionId: sessionId, projectId, cwd, model: 'sonnet', permissionMode: 'default', sessionName: title }).catch((err) => {
+        const msg = String(err);
+        setError(`Runtime start failed: ${msg}`);
+        useErrorStore.getState().addError({ severity: 'error', source: 'session', title: 'Runtime start failed', detail: msg });
       });
-      try { useErrorStore.getState().addError({ severity: 'info', source: 'session', title: `Session created: ${session.id.slice(0, 8)}...`, detail: `CWD: ${cwd}` }); } catch {}
-    } catch (err) {
-      setError(`${t('workspace.startFailed')}: ${String(err)}`);
-      try { useErrorStore.getState().addError({ severity: 'error', source: 'session', title: t('error.ptySessionFailed'), detail: `CWD: ${cwd}, Error: ${String(err)}` }); } catch {}
     } finally {
       setStarting(false);
     }
   }, [projects, t]);
 
   const handleCloseTab = useCallback((sessionId: string) => {
+    // Default detach: do not kill background Claude process
+    RuntimeKernelBridge.stopSession(sessionId).catch(() => {});
     closeTab(sessionId);
   }, [closeTab]);
 
@@ -251,20 +185,16 @@ export function WorkspaceSurface() {
                 onClick={() => {
                   setViewMode(mode);
                   if ((mode === 'terminal' || mode === 'split') && activeTabId) {
-                    const fabric = useRuntimeFabricStore.getState().sessions[activeTabId];
-                    if (fabric && !fabric.terminalChannelId) {
-                      RuntimeFabricBridge.startTerminalChannel(activeTabId).catch((e) => {
-                        const msg = String(e);
-                        setError(`Terminal start failed: ${msg}`);
-                        try {
-                          useErrorStore.getState().addError({
-                            severity: 'error',
-                            source: 'pty',
-                            title: 'Terminal start failed',
-                            detail: msg,
-                          });
-                        } catch {}
-                      });
+                    const existing = useRuntimeKernelStore.getState().sessions[activeTabId];
+                    if (!existing) {
+                      RuntimeKernelBridge.startSession({
+                        guiSessionId: activeTabId,
+                        projectId: activeSession?.projectId ?? '',
+                        cwd: activeSession?.cwd ?? '.',
+                        model: 'sonnet',
+                        permissionMode: 'default',
+                        sessionName: activeSession?.title ?? activeTabId,
+                      }).catch((e) => setError(`Runtime start failed: ${String(e)}`));
                     }
                   }
                 }}
@@ -275,11 +205,11 @@ export function WorkspaceSurface() {
           </div>
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              {viewMode === 'chat' && <><ChatView events={events} /><ComposerBar viewMode="chat" sessionRuntimeMode={activeSession?.runtimeMode} disabled={!isComposerEnabled(activeTabId)} disabledReason={isSetupIncomplete() ? 'setup' : 'runtime'} onDisabledClick={isSetupIncomplete() ? () => { useSurfaceStore.getState().navigateTo('settings'); } : undefined} onSend={handleSend} /></>}
+              {viewMode === 'chat' && <><ChatView events={events} /><ComposerBar viewMode="chat" sessionRuntimeMode={activeSession?.runtimeMode} disabled={!isComposerEnabled(activeTabId)} disabledReason="runtime" onDisabledClick={() => { if (activeTabId) { RuntimeKernelBridge.startSession({ guiSessionId: activeTabId, projectId: activeSession?.projectId ?? '', cwd: activeSession?.cwd ?? '.', model: 'sonnet', permissionMode: 'default', sessionName: activeSession?.title ?? activeTabId }).catch((e) => setError(`Runtime start failed: ${String(e)}`)); } }} onSend={handleSend} /></>}
               {viewMode === 'terminal' && <TerminalView sessionId={activeTabId} />}
-              {viewMode === 'split' && (<div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}><div style={{ flex: '0 0 50%', borderRight: '1px solid var(--cc-border-strong)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}><TerminalView sessionId={activeTabId} /></div><div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}><ChatView events={events} /><ComposerBar viewMode="split" sessionRuntimeMode={activeSession?.runtimeMode} disabled={!isComposerEnabled(activeTabId)} disabledReason={isSetupIncomplete() ? 'setup' : 'runtime'} onDisabledClick={isSetupIncomplete() ? () => { useSurfaceStore.getState().navigateTo('settings'); } : undefined} onSend={handleSend} /></div></div>)}
+              {viewMode === 'split' && (<div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}><div style={{ flex: '0 0 50%', borderRight: '1px solid var(--cc-border-strong)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}><TerminalView sessionId={activeTabId} /></div><div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}><ChatView events={events} /><ComposerBar viewMode="split" sessionRuntimeMode={activeSession?.runtimeMode} disabled={!isComposerEnabled(activeTabId)} disabledReason="runtime" onDisabledClick={() => { if (activeTabId) { RuntimeKernelBridge.startSession({ guiSessionId: activeTabId, projectId: activeSession?.projectId ?? '', cwd: activeSession?.cwd ?? '.', model: 'sonnet', permissionMode: 'default', sessionName: activeSession?.title ?? activeTabId }).catch((e) => setError(`Runtime start failed: ${String(e)}`)); } }} onSend={handleSend} /></div></div>)}
             </div>
-            <SessionInspector session={activeSession} events={rawEvents.slice(0, 200)} collapsed={inspectorCollapsed} expanded={inspectorExpanded} onToggleCollapse={() => setInspectorCollapsed((v) => !v)} onToggleExpand={() => setInspectorExpanded((v) => !v)} />
+            <SessionInspector session={activeSession} events={events.slice(0, 200)} collapsed={inspectorCollapsed} expanded={inspectorExpanded} onToggleCollapse={() => setInspectorCollapsed((v) => !v)} onToggleExpand={() => setInspectorExpanded((v) => !v)} />
           </div>
         </>
       )}

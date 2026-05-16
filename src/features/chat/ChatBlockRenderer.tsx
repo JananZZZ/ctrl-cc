@@ -25,7 +25,8 @@ export function ChatBlockRenderer({ event, onConfirm, onReject }: Props) {
     case 'summary': return <SummaryCard content={event.content} tokens={event.inputTokens ?? event.outputTokens} cost={event.totalCostUsd} duration={event.durationMs} />;
     case 'token_usage': return <TokenLine input={event.inputTokens ?? 0} output={event.outputTokens ?? 0} />;
     case 'cost_update': return <CostLine cost={event.totalCostUsd} />;
-    case 'system_init': return <SystemNotice content={event.content} />;
+    case 'system_init':
+    case 'system': return <SystemNotice content={event.content} />;
     default: return <SystemNotice content={`[${event.type}] ${event.content.slice(0, 200)}`} />;
   }
 }

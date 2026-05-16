@@ -8,6 +8,7 @@ import './styles/typography.css';
 import './styles/layout.css';
 import './styles/surfaces.css';
 import './styles/components.css';
+import './styles/commercial.css';
 
 const root = createRoot(document.getElementById('root')!);
 root.render(<App />);

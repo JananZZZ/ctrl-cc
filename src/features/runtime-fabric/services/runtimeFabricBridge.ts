@@ -1,3 +1,9 @@
+/**
+ * @deprecated v26: Workspace Chat/Terminal must use RuntimeKernelBridge.
+ * This bridge is retained only for historical diagnostics and secondary one-shot flows.
+ * Do not call sendChatMessage or startTerminalChannel from WorkspaceSurface.
+ */
+
 import { invokeCommand } from '../../../services/invokeCommand';
 import { useRuntimeFabricStore } from '../stores/runtimeFabricStore';
 import type { CtrlCcSession, RuntimeChannel } from '../types/runtimeFabricTypes';

@@ -86,3 +86,41 @@
   .setup-v23-check-row { grid-template-columns: 1fr; }
   .setup-v23-main { padding: 20px; }
 }
+
+/* v27: Setup failure recovery card */
+.setup-failure-card {
+  padding: 18px;
+  border-radius: var(--cc-radius-lg);
+  border: 1px solid var(--cc-red);
+  background: var(--cc-red-soft);
+  color: var(--cc-text);
+}
+.setup-failure-title {
+  font-size: var(--cc-text-section);
+  font-weight: var(--cc-weight-section);
+  color: var(--cc-red);
+  margin-bottom: 6px;
+}
+.setup-failure-desc {
+  font-size: var(--cc-text-body);
+  color: var(--cc-text-muted);
+  line-height: var(--cc-line-relaxed);
+  margin-bottom: 12px;
+}
+.setup-error-pre {
+  max-height: 160px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-bg-elevated);
+  border: 1px solid var(--cc-border);
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-caption);
+  color: var(--cc-text);
+  white-space: pre-wrap;
+}
+.setup-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

@@ -1,0 +1,18 @@
+.cc-commercial-page { display: grid; gap: clamp(16px, 1.6vw, 24px); min-width: 0; }
+.cc-page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; min-width: 0; }
+.cc-page-title-block { min-width: 0; }
+.cc-page-eyebrow { font-size: var(--cc-text-caption); color: var(--cc-text-soft); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; }
+.cc-page-title { margin: 0; font-size: var(--cc-text-display); line-height: var(--cc-line-tight); font-weight: var(--cc-weight-display); letter-spacing: -0.035em; color: var(--cc-text); }
+.cc-page-description { margin: 8px 0 0; max-width: 720px; font-size: var(--cc-text-body); line-height: var(--cc-line-relaxed); color: var(--cc-text-muted); }
+.cc-page-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.cc-dashboard-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(12px, 1.2vw, 18px); min-width: 0; }
+.cc-panel { border: 1px solid var(--cc-border); background: var(--cc-surface-solid); border-radius: var(--cc-radius-xl); box-shadow: var(--cc-shadow-card); min-width: 0; overflow: hidden; }
+.cc-panel-body { padding: clamp(16px, 1.5vw, 22px); }
+.cc-panel-title { font-size: var(--cc-text-section); font-weight: var(--cc-weight-section); color: var(--cc-text); margin: 0 0 10px; }
+.cc-kpi-card { grid-column: span 3; min-height: 116px; padding: 18px; border-radius: var(--cc-radius-xl); border: 1px solid var(--cc-border); background: radial-gradient(circle at top right, var(--cc-brand-soft), transparent 34%), var(--cc-surface-solid); box-shadow: var(--cc-shadow-card); }
+.cc-kpi-value { font-size: clamp(26px, 2vw, 36px); line-height: 1; font-weight: 760; color: var(--cc-text); }
+.cc-kpi-label { margin-top: 10px; font-size: var(--cc-text-body); font-weight: 660; color: var(--cc-text); }
+.cc-kpi-sub { margin-top: 4px; font-size: var(--cc-text-caption); color: var(--cc-text-muted); }
+.cc-work-grid { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr) minmax(280px, 360px); gap: 16px; min-width: 0; height: 100%; }
+@media (max-width: 1280px) { .cc-kpi-card { grid-column: span 6; } .cc-work-grid { grid-template-columns: 280px minmax(0, 1fr); } .cc-work-grid .cc-right-panel { display: none; } }
+@media (max-width: 820px) { .cc-page-header { align-items: stretch; flex-direction: column; } .cc-page-actions { justify-content: flex-start; } .cc-kpi-card { grid-column: span 12; } .cc-work-grid { grid-template-columns: 1fr; } .cc-hide-compact { display: none !important; } }

@@ -3,6 +3,19 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+fn hidden_command(program: &str) -> Command {
+    let mut cmd = Command::new(program);
+    #[cfg(windows)]
+    { cmd.creation_flags(CREATE_NO_WINDOW); }
+    cmd
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClaudeCommandSpec {
@@ -248,11 +261,9 @@ fn run_version(spec: &ClaudeCommandSpec) -> Result<String, String> {
     let mut args = spec.args_prefix.clone();
     args.push("--version".to_string());
 
-    let output = Command::new(&spec.program)
-        .args(&args)
-        .stdin(Stdio::null())
-        .output()
-        .map_err(|e| e.to_string())?;
+    let mut cmd = hidden_command(&spec.program);
+    cmd.args(&args).stdin(Stdio::null());
+    let output = cmd.output().map_err(|e| e.to_string())?;
 
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
@@ -382,11 +393,10 @@ fn find_npm_optional_native_candidates() -> Vec<PathBuf> {
 
 fn npm_root_g() -> Option<PathBuf> {
     let npm_cmd = find_path_candidates("npm.cmd").into_iter().next()?;
-    let output = Command::new(r"C:\Windows\System32\cmd.exe")
-        .args(["/d", "/s", "/c", &format!("\"{}\" root -g", npm_cmd.to_string_lossy())])
-        .stdin(Stdio::null())
-        .output()
-        .ok()?;
+    let mut cmd = hidden_command(r"C:\Windows\System32\cmd.exe");
+    cmd.args(["/d", "/s", "/c", &format!("\"{}\" root -g", npm_cmd.to_string_lossy())])
+        .stdin(Stdio::null());
+    let output = cmd.output().ok()?;
     if !output.status.success() {
         return None;
     }

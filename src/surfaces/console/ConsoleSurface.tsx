@@ -8,6 +8,7 @@ import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
 import { useRuntimeTraceStore } from '../../features/runtime/stores/runtimeTraceStore';
 import { useEnvironmentStore } from '../../features/environment/stores/environmentStore';
 import { useSetupStore } from '../../features/setup/stores/setupStore';
+import { useRuntimeKernelStore } from '../../runtime-kernel/runtimeKernelStore';
 import { CcButton } from '../../components/ui/CcButton';
 import { CcStatusDot } from '../../components/ui/CcStatusDot';
 import { CcCard } from '../../components/ui/CcCard';
@@ -38,6 +39,17 @@ export function ConsoleSurface() {
   const runtimeHealthyCount = Object.values(runtimeSessions).filter(s => s.status === 'claude-active' || s.status === 'pty-ready').length;
   const traceErrorCount = traceEvents.filter(e => e.level === 'error').length;
   const traceWarningCount = traceEvents.filter(e => e.level === 'warning').length;
+
+  // v26.0: RuntimeKernel health
+  const kernelSessions = useRuntimeKernelStore((s) => s.sessions);
+  const kernelSessionCount = Object.keys(kernelSessions).length;
+  const kernelActiveCount = Object.values(kernelSessions).filter(
+    s => s.hasWriter && s.readerAlive && !['failed', 'exited', 'stopped'].includes(String(s.status))
+  ).length;
+  const kernelErrorCount = Object.values(kernelSessions).filter(
+    s => s.status === 'failed' || s.lastError
+  ).length;
+  const kernelOk = kernelErrorCount === 0;
 
   const envSnapshot = useEnvironmentStore((s) => s.snapshot);
   const envLoading = useEnvironmentStore((s) => s.loading);
@@ -112,9 +124,10 @@ export function ConsoleSurface() {
         <HealthDot label="Claude" ok={runtimeHealthyCount > 0} detail={String(runtimeHealthyCount)} />
         <HealthDot label={t('console.errors')} ok={traceErrorCount === 0} detail={String(traceErrorCount)} color="var(--cc-red)" />
         <HealthDot label={t('console.warnings')} ok={traceWarningCount < 5} detail={String(traceWarningCount)} color="var(--cc-amber)" />
+        <HealthDot label="Kernel" ok={kernelOk} detail={kernelOk ? 'OK' : String(kernelErrorCount)} />
         <HealthDot label="Bridge" ok={true} detail="OK" />
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-muted)' }}>RuntimeBridge v9.0</span>
+        <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-muted)' }}>RuntimeKernel v26 · persistent-pty · {kernelActiveCount}/{kernelSessionCount} active</span>
       </div>
 
       <div className="console-two-col">
@@ -170,7 +183,7 @@ export function ConsoleSurface() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <CcStatusDot status={s.status === 'running' ? 'running' : s.status === 'failed' ? 'error' : 'idle'} size={6} pulse={s.status === 'running'} />
                   <span style={{ fontWeight: 500, color: 'var(--cc-text)' }}>{s.title}</span>
-                  <CcBadge variant={s.runtimeMode === 'pty-interactive' ? 'info' : 'default'}>{s.runtimeMode === 'pty-interactive' ? 'PTY' : 'CLI'}</CcBadge>
+                  <CcBadge variant={s.runtimeMode === 'pty-interactive' ? 'info' : s.runtimeMode === 'kernel-persistent' ? 'success' : 'default'}>{s.runtimeMode === 'pty-interactive' ? 'PTY' : s.runtimeMode === 'kernel-persistent' ? 'Kernel' : 'CLI'}</CcBadge>
                 </div>
                 <div style={{ display: 'flex', gap: 10, color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-xs)' }}>
                   <span>{s.model}</span><span>{'$' + s.totalCostUsd.toFixed(3)}</span><span>{fmtDate(s.updatedAt)}</span>

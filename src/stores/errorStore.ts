@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export type ErrorSeverity = 'info' | 'warning' | 'error' | 'critical';
-export type ErrorSource = 'pty' | 'db' | 'ipc' | 'claude-cli' | 'fs' | 'git' | 'settings' | 'session' | 'project' | 'unknown';
+export type ErrorSource = 'pty' | 'db' | 'ipc' | 'claude-cli' | 'fs' | 'git' | 'settings' | 'session' | 'project' | 'setup' | 'unknown';
 
 export interface ErrorEntry {
   id: string;

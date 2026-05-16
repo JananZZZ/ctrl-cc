@@ -8,6 +8,9 @@ interface Props { children: ReactNode; }
 interface State { hasError: boolean; error: Error | null; stack: string; }
 
 export class ErrorBoundary extends Component<Props, State> {
+  private lastErrorKey = '';
+  private lastErrorAt = 0;
+
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false, error: null, stack: '' };
@@ -19,6 +22,13 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     const stack = errorInfo.componentStack || '';
+
+    const key = `${error.message}|${stack}`;
+    const now = Date.now();
+    if (this.lastErrorKey === key && now - this.lastErrorAt < 3000) return;
+    this.lastErrorKey = key;
+    this.lastErrorAt = now;
+
     this.setState({ stack });
 
     // Save to localStorage for Diagnostics panel (Section 7.4)

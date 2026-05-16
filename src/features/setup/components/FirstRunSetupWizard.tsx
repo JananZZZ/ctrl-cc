@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSetupStore } from '../stores/setupStore';
 import { SetupCheckList } from './SetupCheckList';
 import { SetupRepairPanel } from './SetupRepairPanel';
 import { SetupProviderConfigStep } from './SetupProviderConfigStep';
 import { SetupCommandPreview } from './SetupCommandPreview';
+import { runAsyncAction } from '../../../services/invokeCommand';
 import '../styles/first-run-setup.css';
 
 type Step = 'welcome' | 'check' | 'repair' | 'config' | 'verify' | 'done';
@@ -20,12 +21,6 @@ const STEPS: { id: Step; label: string; icon: string }[] = [
 export function FirstRunSetupWizard() {
   const [step, setStep] = useState<Step>('welcome');
 
-  // Install setup://task-progress event listener
-  useEffect(() => {
-    let cleanup: undefined | (() => void);
-    useSetupStore.getState().installListeners().then((fn) => { cleanup = fn; });
-    return () => cleanup?.();
-  }, []);
   const snapshot = useSetupStore((s) => s.snapshot);
   const checking = useSetupStore((s) => s.checking);
   const detectAll = useSetupStore((s) => s.detectAll);
@@ -37,7 +32,10 @@ export function FirstRunSetupWizard() {
 
   const handleStartCheck = async () => {
     setStep('check');
-    await detectAll();
+    setVerifyResult(null);
+    setVerifyError(null);
+    try { await detectAll(); }
+    catch (err) { setVerifyError(String(err)); }
   };
 
   const handleFinish = () => {
@@ -144,7 +142,28 @@ export function FirstRunSetupWizard() {
                   </div>
                 </>
               ) : (
-                <div style={{ color: 'var(--cc-red)' }}>检测失败，请重试</div>
+                <div className="setup-failure-card">
+                  <div className="setup-failure-title">检测失败</div>
+                  <div className="setup-failure-desc">
+                    后台检测没有成功完成，但应用仍可继续打开。您可以重新检测、复制错误，或进入手动配置。
+                  </div>
+
+                  {verifyError && <pre className="setup-error-pre">{verifyError}</pre>}
+
+                  <div className="setup-action-row">
+                    <button
+                      onClick={() => runAsyncAction(handleStartCheck, { source: 'setup', title: 'Retry setup detection failed' })}
+                      style={primaryBtnStyle}
+                      disabled={checking}
+                    >
+                      {checking ? '检测中...' : '重新检测'}
+                    </button>
+                    <button onClick={() => setStep('repair')} style={secondaryBtnStyle}>手动修复</button>
+                    <button onClick={() => setStep('config')} style={secondaryBtnStyle}>先配置 API</button>
+                    <button onClick={() => navigator.clipboard.writeText(verifyError || useSetupStore.getState().error || '')} style={secondaryBtnStyle}>复制错误</button>
+                    <button onClick={handleFinish} style={skipBtnStyle}>跳过并进入应用</button>
+                  </div>
+                </div>
               )}
             </div>
           )}

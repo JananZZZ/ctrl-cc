@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePtyTerminal } from '../../features/terminal/usePtyTerminal';
-import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
+import { useRuntimeKernelStore } from '../../runtime-kernel/runtimeKernelStore';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
 interface Props { sessionId: string | null; }
 
@@ -32,8 +32,8 @@ export function TerminalView({ sessionId }: Props) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const containerCb = useCallback((node: HTMLDivElement | null) => setContainer(node), []);
   const handle = usePtyTerminal(sessionId, container);
-  const runtimeSession = useRuntimeStore((s) => (sessionId ? s.sessions[sessionId] : null));
-  const runtimeFailed = runtimeSession?.status === 'failed' || runtimeSession?.status === 'discovery-failed';
+  const runtimeSession = useRuntimeKernelStore((s) => (sessionId ? s.sessions[sessionId] : null));
+  const runtimeFailed = runtimeSession?.status === 'failed' || runtimeSession?.status === 'exited' || runtimeSession?.status === 'stopped';
   const fitFnRef = useRef<(() => void) | null>(null);
   fitFnRef.current = handle?.fit ?? null;
 
@@ -60,11 +60,11 @@ export function TerminalView({ sessionId }: Props) {
         <ToolBtn onClick={() => handle?.clear()} title={t('common.clear')}>⌧</ToolBtn>
         <div style={{ flex: 1 }} />
         <span style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-muted)' }}>
-          {runtimeSession?.status === 'claude-active' || runtimeSession?.status === 'pty-ready' ? '●' : runtimeFailed ? '×' : '○'} {runtimeSession?.status ?? handle?.status ?? 'idle'}
+          {runtimeSession?.hasWriter && runtimeSession?.readerAlive ? '●' : runtimeFailed ? '×' : '○'} {runtimeSession?.status ?? handle?.status ?? 'idle'}{runtimeSession?.pid ? ` · PID ${runtimeSession.pid}` : ''}
         </span>
       </div>
       {runtimeFailed && (() => {
-        const hint = parseRuntimeStartupHint(runtimeSession?.error);
+        const hint = parseRuntimeStartupHint(runtimeSession?.lastError);
         if (!hint) return null;
         return (
           <div className="runtime-startup-failure" style={{
@@ -83,7 +83,7 @@ export function TerminalView({ sessionId }: Props) {
               </ul>
             )}
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => navigator.clipboard.writeText(runtimeSession?.error || '')} style={{
+              <button onClick={() => navigator.clipboard.writeText(runtimeSession?.lastError || '')} style={{
                 padding: '4px 10px', border: '1px solid var(--cc-border)',
                 borderRadius: 'var(--cc-radius-sm)', background: 'transparent',
                 color: 'var(--cc-text-muted)', cursor: 'pointer',

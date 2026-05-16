@@ -1,38 +1,68 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
+import { CcEmptyState } from '../../components/ui/CcEmptyState';
+import { CcButton } from '../../components/ui/CcButton';
 
 export function GitHubSurface() {
   useRenderLoopGuard('GitHubSurface');
-  const { t } = useTranslation();
-  const [url, setUrl] = useState('https://github.com');
-  const [inputUrl, setInputUrl] = useState('https://github.com');
+  const [repoUrl, setRepoUrl] = useState('');
+  const [inputUrl, setInputUrl] = useState('');
+
+  const handleOpenExternal = () => {
+    const url = repoUrl || inputUrl;
+    if (url) window.open(url, '_blank');
+  };
 
   return (
     <div data-testid="surface-github" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ display: 'flex', gap: 6, padding: '8px 12px', borderBottom: '1px solid var(--cc-border)', background: 'var(--cc-surface-solid)', flexShrink: 0 }}>
+      {/* Toolbar */}
+      <div style={{ display: 'flex', gap: 6, padding: '8px 12px', borderBottom: '1px solid var(--cc-border)', background: 'var(--cc-surface-solid)', flexShrink: 0, alignItems: 'center' }}>
         <input
           type="text"
           value={inputUrl}
           onChange={(e) => setInputUrl(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') setUrl(inputUrl); }}
-          placeholder={t('github.urlPlaceholder')}
+          onKeyDown={(e) => { if (e.key === 'Enter') setRepoUrl(inputUrl); }}
+          placeholder="https://github.com/owner/repo"
           style={{ flex: 1, padding: '4px 10px', fontSize: 'var(--cc-font-sm)', border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-bg)', color: 'var(--cc-text)', outline: 'none' }}
         />
-        <button
-          onClick={() => setUrl(inputUrl)}
-          style={{ padding: '4px 14px', fontSize: 'var(--cc-font-sm)', border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-navy)', color: 'var(--cc-text-on-accent)', cursor: 'pointer', fontWeight: 600 }}
-        >
-          {t('github.go')}
-        </button>
-        <button
-          onClick={() => { setUrl('https://github.com'); setInputUrl('https://github.com'); }}
-          style={{ padding: '4px 10px', fontSize: 'var(--cc-font-sm)', border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-surface-solid)', color: 'var(--cc-text)', cursor: 'pointer' }}
-        >
-          {t('github.title')}
-        </button>
+        <CcButton variant="primary" size="sm" onClick={() => setRepoUrl(inputUrl)}>Load</CcButton>
+        <CcButton variant="ghost" size="sm" onClick={handleOpenExternal}>Open in Browser</CcButton>
       </div>
-      <iframe src={url} style={{ flex: 1, border: 'none', width: '100%' }} title="GitHub Browser" />
+
+      {/* Dashboard area — replaces banned iframe */}
+      {repoUrl ? (
+        <div style={{ flex: 1, padding: 24, overflow: 'auto' }}>
+          <div className="cc-dashboard-grid" style={{ marginBottom: 18 }}>
+            <div className="cc-kpi-card">
+              <div className="cc-kpi-value">{repoUrl.split('/').slice(-2).join('/')}</div>
+              <div className="cc-kpi-label">Repository</div>
+              <div className="cc-kpi-sub">Open in browser to view branches, PRs, and issues</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <CcButton variant="primary" onClick={() => window.open(repoUrl, '_blank')}>
+              Open Repository
+            </CcButton>
+            <CcButton variant="ghost" onClick={() => window.open(`${repoUrl}/issues`, '_blank')}>
+              Issues
+            </CcButton>
+            <CcButton variant="ghost" onClick={() => window.open(`${repoUrl}/pulls`, '_blank')}>
+              Pull Requests
+            </CcButton>
+            <CcButton variant="ghost" onClick={() => window.open(`${repoUrl}/actions`, '_blank')}>
+              Actions
+            </CcButton>
+          </div>
+        </div>
+      ) : (
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CcEmptyState
+            icon="📦"
+            title="Repository Dashboard"
+            description="GitHub does not allow iframe embedding. Enter a repo URL above to open it in your browser."
+          />
+        </div>
+      )}
     </div>
   );
 }

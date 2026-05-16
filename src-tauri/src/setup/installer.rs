@@ -1,4 +1,4 @@
-use crate::setup::subprocess_runner::{run_cmd_shell, run_powershell};
+use crate::setup::subprocess_runner::{run_cmd_shell, run_cmd_shell_install, run_powershell};
 use crate::setup::task_manager::SetupTaskManager;
 use tauri::AppHandle;
 
@@ -19,7 +19,7 @@ pub fn install_nodejs_lts(app: AppHandle, tasks: &SetupTaskManager) -> Result<St
         None,
     );
 
-    let out = run_cmd_shell("winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements");
+    let out = run_cmd_shell_install("winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements");
     if out.success {
         tasks.emit(
             &app, &task_id, "install-nodejs-lts", "complete",
@@ -55,7 +55,7 @@ pub fn install_git_for_windows(app: AppHandle, tasks: &SetupTaskManager) -> Resu
         None,
     );
 
-    let out = run_cmd_shell("winget install Git.Git --accept-package-agreements --accept-source-agreements");
+    let out = run_cmd_shell_install("winget install Git.Git --accept-package-agreements --accept-source-agreements");
     if out.success {
         tasks.emit(
             &app, &task_id, "install-git-for-windows", "complete",
@@ -223,7 +223,7 @@ pub fn install_claude_code_cli(
     );
 
     let install_out =
-        run_cmd_shell("npm install -g @anthropic-ai/claude-code@latest");
+        run_cmd_shell_install("npm install -g @anthropic-ai/claude-code@latest");
 
     if !install_out.success {
         let err = format!(

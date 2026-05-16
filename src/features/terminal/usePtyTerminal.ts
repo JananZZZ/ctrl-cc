@@ -6,9 +6,9 @@ import { SearchAddon } from '@xterm/addon-search';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { SerializeAddon } from '@xterm/addon-serialize';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import { RuntimeBridge } from '../runtime/services/runtimeBridge';
-import { useRuntimeStore } from '../runtime/stores/runtimeStore';
-import { isRuntimeWritable } from '../runtime/types/runtimeTypes';
+import { RuntimeKernelBridge } from '../../runtime-kernel/runtimeKernelBridge';
+import { useRuntimeKernelStore } from '../../runtime-kernel/runtimeKernelStore';
+import type { RuntimeKernelEvent } from '../../runtime-kernel/types';
 import { warnLog } from '../../services/invokeCommand';
 import '@xterm/xterm/css/xterm.css';
 
@@ -43,43 +43,6 @@ function buildXtermTheme() {
 
 export type PtyStatus = 'idle' | 'starting' | 'running' | 'waiting' | 'exited' | 'failed' | 'killed';
 
-interface PtyDataPayload {
-  session_id?: string;
-  uiSessionId?: string;
-  pty_id?: string;
-  ptySessionId?: string;
-  data: string;
-}
-
-interface PtyStatusPayload {
-  session_id?: string;
-  uiSessionId?: string;
-  pty_id?: string;
-  ptySessionId?: string;
-  status: string;
-}
-
-interface PtyExitPayload {
-  session_id?: string;
-  uiSessionId?: string;
-  pty_id?: string;
-  ptySessionId?: string;
-  exit_code?: number | null;
-}
-
-interface PtyErrorPayload {
-  session_id?: string;
-  uiSessionId?: string;
-  pty_id?: string;
-  ptySessionId?: string;
-  message?: string;
-  error?: string;
-}
-
-function sameUiSession(payload: { session_id?: string; uiSessionId?: string }, sessionId: string) {
-  return payload.uiSessionId === sessionId || payload.session_id === sessionId;
-}
-
 interface PtyTerminalHandle {
   status: PtyStatus;
   write: (data: string) => void;
@@ -98,11 +61,11 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
   const serializeRef = useRef<SerializeAddon | null>(null);
   const deadRef = useRef(false);
   const lastBlockedInputAtRef = useRef(0);
-  const runtimeStatus = useRuntimeStore((s) =>
+  const runtimeStatus = useRuntimeKernelStore((s) =>
     sessionId ? s.sessions[sessionId]?.status : undefined
   );
-  const runtimeError = useRuntimeStore((s) =>
-    sessionId ? s.sessions[sessionId]?.error : undefined
+  const runtimeError = useRuntimeKernelStore((s) =>
+    sessionId ? s.sessions[sessionId]?.lastError : undefined
   );
   const [status, setStatus] = useState<PtyStatus>('idle');
   const [ready, setReady] = useState(false);
@@ -114,9 +77,11 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     deadRef.current = false;
     lastBlockedInputAtRef.current = 0;
 
-    if (runtimeStatus === 'failed' || runtimeStatus === 'discovery-failed' || runtimeStatus === 'exited' || runtimeStatus === 'killed' || runtimeStatus === 'disconnected') {
+    // Check initial status from kernel store
+    const session = useRuntimeKernelStore.getState().sessions[sessionId];
+    if (session && ['failed', 'exited', 'stopped'].includes(String(session.status))) {
       deadRef.current = true;
-      setStatus(runtimeStatus === 'failed' || runtimeStatus === 'discovery-failed' ? 'failed' : 'exited');
+      setStatus(session.status === 'failed' ? 'failed' : 'exited');
     }
 
     const fit = new FitAddon();
@@ -157,59 +122,65 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
 
     const unlisteners: UnlistenFn[] = [];
 
-    listen<PtyDataPayload>('pty://data', (e) => {
-      if (!sameUiSession(e.payload, sessionId)) return;
-      if (deadRef.current) return;
-      term.write(e.payload.data);
-    }).then((fn) => unlisteners.push(fn));
+    // v26.0: Single kernel event listener instead of pty://data, pty://status, pty://exit, pty://error
+    listen<RuntimeKernelEvent>('runtime-kernel://event', (e) => {
+      const payload = e.payload;
+      if (payload.guiSessionId !== sessionId) return;
 
-    listen<PtyStatusPayload>('pty://status', (e) => {
-      if (!sameUiSession(e.payload, sessionId)) return;
-      const map: Record<string, PtyStatus> = { starting: 'starting', running: 'running', exited: 'exited', failed: 'failed', killed: 'killed' };
-      const newStatus = map[e.payload.status] ?? 'idle';
-      setStatus(newStatus);
-    }).then((fn) => unlisteners.push(fn));
-
-    listen<PtyExitPayload>('pty://exit', (e) => {
-      if (!sameUiSession(e.payload, sessionId)) return;
-      deadRef.current = true;
-      setStatus('exited');
-    }).then((fn) => unlisteners.push(fn));
-
-    listen<PtyErrorPayload>('pty://error', (e) => {
-      if (!sameUiSession(e.payload, sessionId)) return;
-      deadRef.current = true;
-      setStatus('failed');
+      if (payload.eventType === 'pty.data' && payload.data && !deadRef.current) {
+        term.write(payload.data);
+      }
+      if (payload.status) {
+        const map: Record<string, PtyStatus> = {
+          starting: 'starting',
+          ready: 'running',
+          streaming: 'running',
+          thinking: 'running',
+          idle: 'running',
+          exited: 'exited',
+          failed: 'failed',
+          stopped: 'killed',
+        };
+        setStatus(map[payload.status] ?? 'running');
+      }
+      if (payload.eventType === 'session.exited') {
+        deadRef.current = true;
+        setStatus('exited');
+      }
+      if (payload.eventType.includes('error')) {
+        deadRef.current = true;
+        setStatus('failed');
+      }
     }).then((fn) => unlisteners.push(fn));
 
     term.onData((data) => {
-      const current = useRuntimeStore.getState().sessions[sessionId];
+      const current = useRuntimeKernelStore.getState().sessions[sessionId];
+
+      if (deadRef.current) return;
 
       if (
-        deadRef.current ||
         !current ||
-        ['failed', 'discovery-failed', 'exited', 'killed', 'disconnected'].includes(current.status)
+        ['failed', 'exited', 'stopped'].includes(String(current.status)) ||
+        !current.hasWriter ||
+        !current.readerAlive
       ) {
         const now = Date.now();
         if (now - lastBlockedInputAtRef.current > 3000) {
           lastBlockedInputAtRef.current = now;
           term.writeln(
-            `\x1b[33m[Ctrl-CC] Claude Runtime is not writable (${current?.status ?? 'missing'}). Fix Runtime Diagnostics, then start a new session.\x1b[0m`
+            `\x1b[33m[Ctrl-CC] Claude Runtime is not writable (${current?.status ?? 'missing'}). Start or recover runtime first.\x1b[0m`
           );
         }
         return;
       }
 
-      RuntimeBridge.write(sessionId, data).catch((e: unknown) => {
+      RuntimeKernelBridge.writeTerminal({ guiSessionId: sessionId, data }).catch((e: unknown) => {
         const msg = String(e);
-        warnLog('pty', 'PTY write failed', msg);
-        if (msg.includes('not writable') || msg.includes('not ready') || msg.includes('exited') || msg.includes('os error 232') || msg.includes('管道')) {
-          deadRef.current = true;
-          setStatus('failed');
-        }
+        warnLog('pty', 'RuntimeKernel terminal write failed', msg);
         term.writeln(`\x1b[31m[Ctrl-CC] Write failed: ${msg}\x1b[0m`);
       });
     });
+
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const resizeObserver = new ResizeObserver(() => {
       if (resizeTimer != null) clearTimeout(resizeTimer);
@@ -217,7 +188,7 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
         fit.fit();
         const dims = fit.proposeDimensions();
         if (dims?.rows && dims?.cols) {
-          RuntimeBridge.resize(sessionId, dims.cols, dims.rows).catch((e: unknown) => warnLog('pty', 'PTY resize failed', String(e)));
+          // PTY resize not yet wired to RuntimeKernel v27 — fits xterm locally only
         }
       }, 120);
     });
@@ -238,7 +209,7 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
   useEffect(() => {
     if (!runtimeStatus) return;
 
-    if (['failed', 'discovery-failed', 'exited', 'killed', 'disconnected'].includes(runtimeStatus)) {
+    if (['failed', 'exited', 'stopped'].includes(String(runtimeStatus))) {
       deadRef.current = true;
       setStatus('failed');
 
@@ -257,12 +228,22 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
 
   const write = useCallback((data: string) => {
     if (!sessionId) return;
-    const rt = useRuntimeStore.getState().sessions[sessionId];
-    if (!rt || !isRuntimeWritable(rt.status)) return;
-    RuntimeBridge.write(sessionId, data).catch((e: unknown) => warnLog('pty', 'PTY write failed', String(e)));
+    RuntimeKernelBridge.writeTerminal({ guiSessionId: sessionId, data })
+      .catch((e: unknown) => warnLog('pty', 'RuntimeKernel write failed', String(e)));
   }, [sessionId]);
-  const sendCtrlC = useCallback(() => { RuntimeBridge.ctrlC(sessionId!).catch((e: unknown) => warnLog('pty', 'Ctrl+C failed', String(e))); }, [sessionId]);
-  const sendCtrlD = useCallback(() => { RuntimeBridge.ctrlD(sessionId!).catch((e: unknown) => warnLog('pty', 'Ctrl+D failed', String(e))); }, [sessionId]);
+
+  const sendCtrlC = useCallback(() => {
+    if (!sessionId) return;
+    RuntimeKernelBridge.writeTerminal({ guiSessionId: sessionId, data: '\x03' })
+      .catch((e: unknown) => warnLog('pty', 'Ctrl+C failed', String(e)));
+  }, [sessionId]);
+
+  const sendCtrlD = useCallback(() => {
+    if (!sessionId) return;
+    RuntimeKernelBridge.writeTerminal({ guiSessionId: sessionId, data: '\x04' })
+      .catch((e: unknown) => warnLog('pty', 'Ctrl+D failed', String(e)));
+  }, [sessionId]);
+
   const clear = useCallback(() => { termRef.current?.clear(); }, []);
   const searchFn = useCallback((query: string) => { searchRef.current?.findNext(query); }, []);
   const serializeFn = useCallback(() => serializeRef.current?.serialize() ?? '', []);

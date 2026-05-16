@@ -98,7 +98,7 @@ function ProjectDetail({ projectId, onSelectSession, onCreateSession }: { projec
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
                 <CcStatusDot status={statusDot(s.status)} size={7} pulse={s.status === 'running'} />
                 <span style={{ fontWeight: 500, fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text)' }}>{s.title}</span>
-                <CcBadge variant={s.runtimeMode === 'pty-interactive' ? 'info' : 'default'}>{s.runtimeMode === 'pty-interactive' ? 'PTY' : 'CLI'}</CcBadge>
+                <CcBadge variant={s.runtimeMode === 'pty-interactive' ? 'info' : s.runtimeMode === 'kernel-persistent' ? 'success' : 'default'}>{s.runtimeMode === 'pty-interactive' ? 'PTY' : s.runtimeMode === 'kernel-persistent' ? 'Kernel' : 'CLI'}</CcBadge>
               </div>
               <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
                 {s.model} &middot; {fmtDate(s.updatedAt)}

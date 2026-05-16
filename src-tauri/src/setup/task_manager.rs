@@ -3,7 +3,7 @@ use std::sync::Arc;
 use parking_lot::Mutex;
 use tauri::Emitter;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct SetupTaskManager {
     tasks: Arc<Mutex<Vec<SetupTaskProgress>>>,
 }
@@ -13,6 +13,10 @@ impl SetupTaskManager {
         Self {
             tasks: Arc::new(Mutex::new(Vec::new())),
         }
+    }
+
+    pub fn inner(&self) -> Arc<Mutex<Vec<SetupTaskProgress>>> {
+        self.tasks.clone()
     }
 
     pub fn new_task(&self, action_id: &str) -> String {

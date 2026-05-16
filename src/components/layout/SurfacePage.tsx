@@ -8,10 +8,10 @@ interface SurfacePageProps {
 }
 
 const maxWidthMap = {
-  dashboard: 1280,
-  management: 1500,
+  dashboard: 'min(1480px, calc(100vw - 64px))',
+  management: 'min(1680px, calc(100vw - 48px))',
   workspace: 'none',
-  diagnostics: 1360,
+  diagnostics: 'min(1560px, calc(100vw - 48px))',
 };
 
 export function SurfacePage({ children, variant = 'dashboard', style, testId }: SurfacePageProps) {
@@ -34,7 +34,7 @@ export function SurfacePage({ children, variant = 'dashboard', style, testId }: 
           maxWidth,
           minWidth: 0,
           margin: variant === 'workspace' ? 0 : '0 auto',
-          padding: 'clamp(16px, 2vw, 28px)',
+          padding: 'clamp(18px, 2.2vw, 36px)',
           boxSizing: 'border-box',
           ...style,
         }}

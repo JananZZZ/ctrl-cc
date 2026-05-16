@@ -2,6 +2,13 @@ use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
+
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 use tauri::{AppHandle, Emitter};
 use uuid::Uuid;
 
@@ -36,6 +43,10 @@ pub fn start_structured_run(
 
     std::thread::spawn(move || {
         let mut command = Command::new("claude");
+        #[cfg(windows)]
+        {
+            command.creation_flags(CREATE_NO_WINDOW);
+        }
         command
             .current_dir(req.cwd)
             .arg("-p")
