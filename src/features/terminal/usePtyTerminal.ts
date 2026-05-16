@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
-import { WebglAddon } from '@xterm/addon-webgl';
 import { SearchAddon } from '@xterm/addon-search';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { SerializeAddon } from '@xterm/addon-serialize';
@@ -111,10 +110,7 @@ export function usePtyTerminal(sessionId: string | null, container: HTMLDivEleme
     term.loadAddon(serialize);
 
     // WebGL disabled by default on Windows WebView2 — causes GPU lag
-    const enableWebgl = false;
-    if (enableWebgl) {
-      try { const wgl = new WebglAddon(); term.loadAddon(wgl); wgl.onContextLoss(() => wgl.dispose()); } catch {}
-    }
+    // v29: WebGL renderer removed — not needed, saves ~15KB gzipped
 
     term.open(container);
     fit.fit();

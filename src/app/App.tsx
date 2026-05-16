@@ -12,7 +12,8 @@ import { FirstRunSetupWizard } from '../features/setup/components/FirstRunSetupW
 import { useSetupStore } from '../features/setup/stores/setupStore';
 import { RuntimeKernelBridge } from '../runtime-kernel/runtimeKernelBridge';
 import { TaskBridge } from '../core/tasks/taskBridge';
-import i18n from '../i18n';
+import { useAppearanceStore } from '../core/settings/appearanceStore';
+import { useDiagnosticLedger } from '../core/diagnostics/diagnosticLedger';
 
 export function App() {
   const { t } = useTranslation();
@@ -30,26 +31,17 @@ export function App() {
   }, []);
 
   // v29.0: Install TaskBridge —全局任务事件桥接
-  // 所有后台任务统一通过 task://progress 进入前端
   useEffect(() => {
     let cleanup: undefined | (() => void);
     TaskBridge.install().then((fn) => { cleanup = fn; }).catch((err) => console.error('[Ctrl-CC] TaskBridge install failed', err));
     return () => cleanup?.();
   }, []);
 
+  // v29: Hydrate appearance (theme/font/language) from single source
+  const hydrateAppearance = useAppearanceStore((s) => s.hydrate);
+  useEffect(() => { hydrateAppearance(); }, [hydrateAppearance]);
+
   useEffect(() => {
-    // Restore theme from localStorage, default to warm-sand
-    const savedTheme = localStorage.getItem('ctrl-cc-theme') || 'warm-sand';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-
-    // Restore font scale
-    const savedScale = localStorage.getItem('ctrl-cc-font-scale');
-    if (savedScale) document.documentElement.style.setProperty('--cc-font-scale', savedScale);
-
-    // Restore language
-    const savedLang = localStorage.getItem('ctrlcc_lang') || 'zh';
-    if (i18n.language !== savedLang) i18n.changeLanguage(savedLang);
-
     // Load projects from DB, create default if none
     invokeCommand<Array<Record<string, unknown>>>('load_projects_from_db')
       .then((rows) => {
@@ -135,19 +127,31 @@ export function App() {
 
   useEffect(() => {
     const handler = (event: PromiseRejectionEvent) => {
+      const detail = String(event.reason);
+      // v29: Route to DiagnosticLedger for full traceability
+      try {
+        useDiagnosticLedger.getState().append({
+          source: 'window.unhandledrejection',
+          severity: 'error',
+          title: '未处理的异步错误',
+          detail,
+          raw: event.reason,
+        });
+      } catch {}
+
       try {
         useErrorStore.getState().addError({
           severity: 'error',
           source: 'unknown',
           title: t('error.unhandledRejection'),
-          detail: String(event.reason),
-          rawError: String(event.reason),
+          detail,
+          rawError: detail,
         });
       } catch {}
     };
     window.addEventListener('unhandledrejection', handler);
     return () => window.removeEventListener('unhandledrejection', handler);
-  }, []);
+  }, [t]);
 
   // Global PTY log listener — captures all ctrlcc://log events from Rust
   useEffect(() => {

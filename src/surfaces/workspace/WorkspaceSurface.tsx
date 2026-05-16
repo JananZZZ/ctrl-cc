@@ -56,8 +56,8 @@ export function WorkspaceSurface() {
 
   useEffect(() => {
     const tab = tabs.find((t) => t.sessionId === activeTabId);
-    if (tab?.viewMode) setViewMode(tab.viewMode);
-  }, [activeTabId, tabs]);
+    if (tab?.viewMode && tab.viewMode !== viewMode) setViewMode(tab.viewMode);
+  }, [activeTabId, tabs, viewMode]);
 
   const handleSend = useCallback(async (
     text: string,

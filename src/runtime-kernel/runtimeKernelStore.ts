@@ -95,7 +95,8 @@ export const useRuntimeKernelStore = create<RuntimeKernelState>((set) => ({
         if (evt.channel === 'raw' && evt.data) {
           terminalBuffers = {
             ...terminalBuffers,
-            [sid]: (terminalBuffers[sid] ?? '') + evt.data,
+            // v29: Enforce 32KB PTY tail cap per session
+            [sid]: ((terminalBuffers[sid] ?? '') + evt.data).slice(-32768),
           };
 
           const projected = projectRawToChat({
@@ -105,9 +106,10 @@ export const useRuntimeKernelStore = create<RuntimeKernelState>((set) => ({
             activeAssistantBlockId: activeAssistantBlockId[sid] ?? null,
           });
 
+          // v29: Cap chat blocks at 500 per session
           chatBlocks = {
             ...chatBlocks,
-            [sid]: projected.blocks,
+            [sid]: projected.blocks.slice(-500),
           };
 
           activeAssistantBlockId = {
