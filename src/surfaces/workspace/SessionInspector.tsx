@@ -6,12 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
 import { CcStatusDot } from '../../components/ui/CcStatusDot';
 import { CcBadge } from '../../components/ui/CcBadge';
-import type { Session, RuntimeEvent } from '../../types';
+import type { Session } from '../../types';
+import type { ChatBlock } from '../../runtime-kernel/types';
 import { useAuditStore } from '../../stores/auditStore';
 
 interface Props {
   session: Session | null;
-  events?: RuntimeEvent[];
+  events?: ChatBlock[];
   collapsed: boolean;
   expanded: boolean;
   onToggleCollapse: () => void;
@@ -22,10 +23,9 @@ export function SessionInspector({ session, events: rawEvents = [], collapsed, e
   const { t } = useTranslation();
   const width = collapsed ? 32 : expanded ? 520 : 320;
 
-  // Stable derived data — useMemo prevents new array refs on every render
-  const stableEvents = useMemo(() => rawEvents, [rawEvents.length]); // stable if length unchanged
-  const toolEvents = useMemo(() => stableEvents.filter((e) => e.type === 'tool_use' || e.type === 'tool_result').slice(-10), [stableEvents]);
-  const thinkingEvents = useMemo(() => stableEvents.filter((e) => e.type === 'thinking' || e.type === 'thinking_delta'), [stableEvents]);
+  const stableEvents = rawEvents;
+  const toolEvents = useMemo(() => stableEvents.filter((e) => e.kind === 'tool').slice(-10), [stableEvents]);
+  const thinkingEvents = useMemo(() => stableEvents.filter((e) => e.kind === 'status'), [stableEvents]);
   const recentEvents = useMemo(() => stableEvents.slice(-20), [stableEvents]);
   const latestEvent = recentEvents[recentEvents.length - 1];
 
@@ -105,9 +105,8 @@ export function SessionInspector({ session, events: rawEvents = [], collapsed, e
             <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {toolEvents.map((e) => (
                 <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--cc-font-xs)', padding: '2px 4px', borderRadius: 'var(--cc-radius-xs)', background: 'var(--cc-bg)' }}>
-                  <CcBadge variant={e.type === 'tool_use' ? 'info' : 'default'}>{e.type === 'tool_use' ? t('sessionInspector.toolCalls') : t('sessionInspector.toolResults')}</CcBadge>
-                  <span style={{ color: 'var(--cc-text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.toolName || e.title || e.content.slice(0, 60)}</span>
-                  {e.isError && <span style={{ color: 'var(--cc-red)', fontSize: 'var(--cc-font-2xs)' }}>&#x26A0;</span>}
+                  <CcBadge variant="info">{e.kind}</CcBadge>
+                  <span style={{ color: 'var(--cc-text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blockSummary(e)}</span>
                 </div>
               ))}
             </div>
@@ -204,6 +203,11 @@ function FieldGrid({ children }: { children: React.ReactNode }) {
 }
 function fmtDate(iso: string) { try { return new Date(iso).toLocaleString(navigator.language, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return iso; } }
 function fmtNum(n: number) { return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n); }
+function blockSummary(b: ChatBlock): string {
+  if (b.kind === 'tool') return b.name;
+  if (b.kind === 'status') return b.label;
+  return b.content.slice(0, 60);
+}
 
 const statuslineStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-bg-muted)', border: '1px solid var(--cc-border)', fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-mono)' };
 const collapseBtnStyle: React.CSSProperties = { background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', padding: 0 };

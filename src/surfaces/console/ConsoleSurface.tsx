@@ -6,7 +6,6 @@ import { useSurfaceStore } from '../../stores/surfaceStore';
 import { useOpenSessionStore } from '../../stores/openSessionStore';
 import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
 import { useRuntimeTraceStore } from '../../features/runtime/stores/runtimeTraceStore';
-import { useEnvironmentStore } from '../../features/environment/stores/environmentStore';
 import { useSetupStore } from '../../features/setup/stores/setupStore';
 import { useRuntimeKernelStore } from '../../runtime-kernel/runtimeKernelStore';
 import { CcButton } from '../../components/ui/CcButton';
@@ -51,18 +50,17 @@ export function ConsoleSurface() {
   ).length;
   const kernelOk = kernelErrorCount === 0;
 
-  const envSnapshot = useEnvironmentStore((s) => s.snapshot);
-  const envLoading = useEnvironmentStore((s) => s.loading);
-  const refreshEnv = useEnvironmentStore((s) => s.refresh);
-  const loadCachedEnv = useEnvironmentStore((s) => s.loadCached);
+  // v28: Unified setup snapshot — same as Console/Settings/FirstRun
+  const setupSnap = useSetupStore((s) => s.snapshot);
+  const setupRunState = useSetupStore((s) => s.runState);
+  const detectAll = useSetupStore((s) => s.detectAll);
+  const hydrate = useSetupStore((s) => s.hydrate);
 
   useEffect(() => {
-    loadCachedEnv();
-  }, [loadCachedEnv]);
+    hydrate();
+  }, [hydrate]);
 
-  const cap = envSnapshot?.capability ?? null;
-  const hasEnvInfo = Boolean(envSnapshot);
-  const selectedLaunchPlan = envSnapshot?.launchPlans?.find((p) => p.selected);
+  const hasEnvInfo = Boolean(setupSnap);
 
   const openWorkspace = (sid: string) => { const s = sessions.find((x) => x.id === sid); if (s) { openSession({ sessionId: s.id, projectId: s.projectId, projectName: s.title, title: s.title, status: s.status, viewMode: 'chat', pendingConfirms: 0, riskCount: s.riskCount, isPinned: false }); navigateTo('workspace'); } };
 
@@ -97,19 +95,24 @@ export function ConsoleSurface() {
         </div>
       )}
 
-      <div className="cc-hero">
+      <section className="cc-page-header">
         <div>
           <h1 style={{ fontSize: 'var(--cc-font-3xl)', fontWeight: 700, color: 'var(--cc-text)', marginBottom: 4 }}>{t(greetKey)}, {t('greeting.developer')}</h1>
           <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-soft)' }}>{t('console.subtitle')}</p>
-          <p style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>{t('console.footer')}</p>
         </div>
-      </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <CcButton variant="primary" onClick={() => navigateTo('workspace')}>{t('workspace.newSession')}</CcButton>
+          <CcButton variant="ghost" onClick={() => void detectAll()} disabled={setupRunState === 'running'}>
+            {setupSnap ? '刷新环境配置' : '检测环境配置'}
+          </CcButton>
+        </div>
+      </section>
 
       <div className="console-stat-grid">
         <Stat title={t('console.running')} value={running} color="var(--cc-green)" sub={`${sessions.length} ${t('console.totalSessions')}`} />
         <Stat title={t('console.projects')} value={projects.filter((p) => p.activeSessionCount > 0).length} color="var(--cc-blue)" sub={`${projects.length} ${t('console.total')}`} />
         <Stat title={t('console.costToday')} value={'$' + costToday.toFixed(3)} color="var(--cc-amber)" sub={`${today.length} ${t('console.sessionsToday')}`} />
-        <Stat title={t('console.claudeCli')} value={envLoading ? '...' : cap?.exists ? cap?.version || 'OK' : 'N/A'} color={cap?.exists ? 'var(--cc-green)' : 'var(--cc-red)'} sub={cap?.authStatus || t('common.unknown')} />
+        <Stat title={t('console.claudeCli')} value={setupRunState === 'running' ? '...' : setupSnap?.checks?.claudeCode?.ok ? setupSnap?.checks?.claudeCode?.version || 'OK' : 'N/A'} color={setupSnap?.checks?.claudeCode?.ok ? 'var(--cc-green)' : 'var(--cc-red)'} sub={setupSnap?.checks?.claudeAuth?.ok ? 'authenticated' : t('common.unknown')} />
         <Stat title={t('console.totalTokens')} value={totalTokens >= 1000 ? (totalTokens / 1000).toFixed(1) + 'k' : String(totalTokens)} color="var(--cc-text)" sub={t('console.tokensDesc')} />
       </div>
 
@@ -142,8 +145,8 @@ export function ConsoleSurface() {
         <CcCard className="cc-section-card console-card">
           <div className="cc-card-header">
             <h3 style={st}>{t('console.environment')}</h3>
-            <CcButton size="sm" variant="ghost" onClick={() => void refreshEnv()} disabled={envLoading}>
-              {envLoading ? t('common.detecting') : hasEnvInfo ? '刷新环境配置' : '检测环境配置'}
+            <CcButton size="sm" variant="ghost" onClick={() => void detectAll()} disabled={setupRunState === 'running'}>
+              {setupRunState === 'running' ? t('common.detecting') : hasEnvInfo ? '刷新环境配置' : '检测环境配置'}
             </CcButton>
           </div>
 
@@ -153,11 +156,11 @@ export function ConsoleSurface() {
             </div>
           ) : (
             <div className="console-env-grid">
-              <E label={t('console.claudeCli')} value={cap?.exists ? cap?.version || String(t('common.installed')) : String(t('common.notDetected'))} c={cap?.exists ? 'var(--cc-green)' : 'var(--cc-red)'} />
-              <E label={t('console.authStatus')} value={cap?.authStatus || String(t('common.unknown'))} c={cap?.authStatus === 'authenticated' ? 'var(--cc-green)' : 'var(--cc-amber)'} />
-              <E label="LaunchPlan" value={selectedLaunchPlan?.id ?? 'not selected'} c={selectedLaunchPlan ? 'var(--cc-green)' : 'var(--cc-red)'} />
-              <E label="Claude JS" value={`${envSnapshot?.jsCandidates?.filter((c: { exists: boolean }) => c.exists).length ?? 0} candidates`} />
-              <E label={t('console.streamJson')} value={cap?.supportsStreamJson ? String(t('common.supported')) : String(t('common.unknown'))} />
+              <E label={t('console.claudeCli')} value={setupSnap?.checks?.claudeCode?.ok ? setupSnap?.checks?.claudeCode?.version || String(t('common.installed')) : String(t('common.notDetected'))} c={setupSnap?.checks?.claudeCode?.ok ? 'var(--cc-green)' : 'var(--cc-red)'} />
+              <E label={t('console.authStatus')} value={setupSnap?.checks?.claudeAuth?.ok ? 'authenticated' : String(t('common.unknown'))} c={setupSnap?.checks?.claudeAuth?.ok ? 'var(--cc-green)' : 'var(--cc-amber)'} />
+              <E label="LaunchPlan" value={setupSnap?.selectedTerminalCommandId || setupSnap?.selectedChatCommandId || 'not selected'} c={(setupSnap?.selectedTerminalCommandId || setupSnap?.selectedChatCommandId) ? 'var(--cc-green)' : 'var(--cc-red)'} />
+              <E label="Claude JS" value="N/A" />
+              <E label={t('console.streamJson')} value={String(t('common.supported'))} />
               <E label={t('console.frontend')} value={t('console.techFrontend')} />
               <E label={t('console.backend')} value={t('console.techBackend')} />
               <E label={t('console.terminal')} value={t('console.techTerminal')} />

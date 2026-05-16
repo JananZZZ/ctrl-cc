@@ -8,19 +8,26 @@ import type {
 
 const ONBOARDING_KEY = 'ctrl-cc-onboarding-completed';
 const DISMISS_KEY = 'ctrlcc.setup.dismissedUntil';
+const SETUP_CACHE_KEY = 'ctrlcc.setup.snapshot.v2';
+
+type SetupRunState = 'idle' | 'running' | 'success' | 'partial' | 'failed';
 
 interface SetupState {
   snapshot: SetupSnapshot | null;
   checking: boolean;
   error: string | null;
   lastCheckedAt: string | null;
+  runState: SetupRunState;
   tasks: Record<string, SetupTaskProgress>;
   onboardingCompleted: boolean;
   dismissedUntil: number | null;
+  hydrated: boolean;
 
+  hydrate: () => void;
   loadCached: () => void;
-  detectAll: () => Promise<SetupSnapshot>;
+  detectAll: () => Promise<SetupSnapshot | null>;
   detectAllSafe: () => Promise<SetupSnapshot | null>;
+  clearCache: () => void;
   installClaudeCodeCli: () => Promise<string>;
   fixPowershellPolicy: () => Promise<string>;
   setNpmMirror: () => Promise<string>;
@@ -58,13 +65,26 @@ export const useSetupStore = create<SetupState>((set, get) => ({
   checking: false,
   error: null,
   lastCheckedAt: null,
+  runState: 'idle',
   tasks: {},
   onboardingCompleted: readOnboarding(),
   dismissedUntil: readDismissed(),
+  hydrated: false,
+
+  hydrate: () => {
+    try {
+      const raw = localStorage.getItem(SETUP_CACHE_KEY);
+      if (raw) {
+        set({ snapshot: JSON.parse(raw) as SetupSnapshot, hydrated: true });
+        return;
+      }
+    } catch {}
+    set({ hydrated: true });
+  },
 
   loadCached: () => {
     try {
-      const raw = localStorage.getItem('ctrl-cc-setup-snapshot');
+      const raw = localStorage.getItem(SETUP_CACHE_KEY);
       if (raw) {
         set({ snapshot: JSON.parse(raw) as SetupSnapshot });
       }
@@ -72,26 +92,50 @@ export const useSetupStore = create<SetupState>((set, get) => ({
   },
 
   detectAll: async () => {
-    set({ checking: true, error: null });
+    set({ runState: 'running', checking: true, error: null });
+
     try {
       const snapshot = await invokeCommand<SetupSnapshot>(
         'setup_detect_all',
         undefined,
         { timeoutMs: 180_000, source: 'setup', title: 'Environment detection failed' }
       );
-      localStorage.setItem('ctrl-cc-setup-snapshot', JSON.stringify(snapshot));
-      set({ snapshot, checking: false, error: null, lastCheckedAt: new Date().toISOString() });
+
+      localStorage.setItem(SETUP_CACHE_KEY, JSON.stringify(snapshot));
+
+      const hasCriticalFailure = Object.values(snapshot.checks ?? {}).some(
+        (c) => c.required && !c.ok
+      );
+
+      set({
+        snapshot,
+        checking: false,
+        runState: hasCriticalFailure ? 'partial' : 'success',
+        error: hasCriticalFailure ? 'Some required checks failed' : null,
+        lastCheckedAt: new Date().toISOString(),
+      });
+
       return snapshot;
     } catch (err) {
-      const msg = String(err);
-      set({ checking: false, error: msg, lastCheckedAt: new Date().toISOString() });
-      throw err;
+      const message = String(err);
+      set({
+        checking: false,
+        runState: 'failed',
+        error: message,
+        lastCheckedAt: new Date().toISOString(),
+      });
+      return null;
     }
   },
 
   detectAllSafe: async () => {
     try { return await get().detectAll(); }
     catch { return null; }
+  },
+
+  clearCache: () => {
+    localStorage.removeItem(SETUP_CACHE_KEY);
+    set({ snapshot: null, runState: 'idle', hydrated: true });
   },
 
   installClaudeCodeCli: async () => {

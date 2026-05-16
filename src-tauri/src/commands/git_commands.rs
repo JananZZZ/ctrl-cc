@@ -1,5 +1,6 @@
 use serde::Serialize;
-use std::process::Command;
+
+use crate::utils::hidden_command::hidden_command;
 
 #[derive(Debug, Serialize)]
 pub struct GitRepoInfo {
@@ -84,7 +85,7 @@ pub fn get_git_log(path: String, count: Option<usize>) -> Result<Vec<String>, St
 }
 
 fn run_git(cwd: &str, args: &[&str]) -> Option<String> {
-    Command::new("git")
+    hidden_command("git")
         .args(args)
         .current_dir(cwd)
         .output()

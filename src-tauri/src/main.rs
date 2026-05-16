@@ -8,6 +8,7 @@ mod runtime;
 mod runtime_v2;
 mod runtime_kernel;
 mod setup;
+mod utils;
 
 use pty::PtyManager;
 use runtime::commands::ClaudeManager;
@@ -231,6 +232,7 @@ fn main() {
             runtime_kernel::commands::runtime_kernel_submit_user_message,
             runtime_kernel::commands::runtime_kernel_write_terminal,
             runtime_kernel::commands::runtime_kernel_stop_session,
+            runtime_kernel::commands::runtime_kernel_detach_session,
             runtime_kernel::commands::runtime_kernel_list_sessions,
             // Setup domain (v23.0)
             setup::commands::setup_detect_all,

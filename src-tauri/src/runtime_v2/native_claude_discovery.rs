@@ -1,6 +1,6 @@
 use std::env;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use crate::utils::hidden_command::hidden_command;
 
 use serde::Serialize;
 
@@ -153,9 +153,9 @@ fn inspect_candidate(path: &Path, source: &str) -> ClaudeNativeCandidate {
         };
     }
 
-    let version = Command::new(path)
+    let path_str = path.to_string_lossy();
+    let version = hidden_command(&path_str)
         .arg("--version")
-        .stdin(Stdio::null())
         .output();
 
     match version {

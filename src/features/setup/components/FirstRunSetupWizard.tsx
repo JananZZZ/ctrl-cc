@@ -48,10 +48,10 @@ export function FirstRunSetupWizard() {
     setVerifyError(null);
     setStep('verify');
     const result = await detectAll();
-    if (result.ready) {
+    if (result?.ready) {
       setVerifyResult('环境检测通过！所有必需组件已就绪。');
     } else {
-      setVerifyError(`环境未完成: ${result.summary}`);
+      setVerifyError(`环境未完成: ${result?.summary ?? 'Unknown error'}`);
     }
   };
 
@@ -161,6 +161,8 @@ export function FirstRunSetupWizard() {
                     <button onClick={() => setStep('repair')} style={secondaryBtnStyle}>手动修复</button>
                     <button onClick={() => setStep('config')} style={secondaryBtnStyle}>先配置 API</button>
                     <button onClick={() => navigator.clipboard.writeText(verifyError || useSetupStore.getState().error || '')} style={secondaryBtnStyle}>复制错误</button>
+                    <button onClick={() => { const bundle = JSON.stringify({ error: verifyError, snapshot: useSetupStore.getState().snapshot, time: new Date().toISOString() }, null, 2); navigator.clipboard.writeText(bundle); }} style={secondaryBtnStyle}>复制诊断包</button>
+                    <button onClick={() => { useSetupStore.getState().clearCache(); window.location.reload(); }} style={secondaryBtnStyle}>打开日志目录</button>
                     <button onClick={handleFinish} style={skipBtnStyle}>跳过并进入应用</button>
                   </div>
                 </div>
@@ -242,7 +244,7 @@ export function FirstRunSetupWizard() {
                   setVerifyError(null);
                   try {
                     const result = await detectAll();
-                    if (result.selectedChatCommandId) {
+                    if (result?.selectedChatCommandId) {
                       setVerifyResult(`Claude Code CLI 可用 (${result.selectedChatCommandId})。环境就绪，可以开始使用。`);
                     } else {
                       setVerifyError('Claude 命令未找到。请返回修复步骤安装 Claude Code CLI。');

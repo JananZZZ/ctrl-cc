@@ -1,0 +1,126 @@
+/* Ctrl-CC v28 — Chat UI */
+.cc-chat-view {
+  height: 100%;
+  overflow: auto;
+  background: var(--cc-bg);
+}
+
+.cc-chat-empty {
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.cc-chat-timeline {
+  min-height: 100%;
+  padding: 20px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cc-msg-row {
+  display: flex;
+  width: 100%;
+}
+
+.cc-msg-row-user {
+  justify-content: flex-end;
+}
+
+.cc-msg-row-assistant {
+  justify-content: flex-start;
+}
+
+.cc-msg-row-system {
+  justify-content: center;
+}
+
+.cc-msg-bubble {
+  max-width: min(840px, 78%);
+  border-radius: var(--cc-radius-lg, 18px);
+  padding: 12px 16px;
+  font-size: var(--cc-font-md, 14px);
+  line-height: var(--cc-leading-relaxed, 1.7);
+  word-break: break-word;
+}
+
+.cc-msg-user {
+  background: var(--cc-brand-soft);
+  border-bottom-right-radius: 6px;
+}
+
+.cc-msg-assistant {
+  background: var(--cc-surface-solid);
+  border: 1px solid var(--cc-border);
+  box-shadow: var(--cc-shadow-card);
+  border-bottom-left-radius: 6px;
+}
+
+.cc-msg-streaming {
+  margin-top: 8px;
+  font-size: var(--cc-font-xs, 12px);
+  color: var(--cc-text-muted);
+}
+
+.cc-status-chip {
+  max-width: 70%;
+  border-radius: 999px;
+  background: var(--cc-bg-muted);
+  border: 1px solid var(--cc-border-muted);
+  color: var(--cc-text-muted);
+  padding: 4px 12px;
+  font-size: var(--cc-font-xs, 12px);
+  display: flex;
+  gap: 8px;
+}
+
+.cc-tool-card {
+  margin: 2px auto;
+  width: min(840px, 78%);
+  border-radius: var(--cc-radius-md, 14px);
+  border: 1px solid var(--cc-border);
+  background: var(--cc-bg-subtle);
+  padding: 10px 14px;
+  font-size: var(--cc-font-sm, 13px);
+}
+
+.cc-tool-card pre {
+  white-space: pre-wrap;
+  overflow: auto;
+  max-height: 320px;
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-font-xs, 12px);
+}
+
+.cc-error-card {
+  max-width: 760px;
+  background: var(--cc-red-soft);
+  border: 1px solid var(--cc-red);
+  color: var(--cc-red);
+  border-radius: var(--cc-radius-md, 14px);
+  padding: 10px 14px;
+  font-size: var(--cc-font-sm, 13px);
+}
+
+.cc-chat-streaming-indicator {
+  align-self: center;
+  color: var(--cc-text-muted);
+  font-size: var(--cc-font-xs, 12px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cc-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--cc-brand);
+  animation: ccPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes ccPulse {
+  0%, 100% { transform: scale(0.75); opacity: 0.55; }
+  50% { transform: scale(1); opacity: 1; }
+}

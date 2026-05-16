@@ -3,6 +3,8 @@ use std::sync::Mutex;
 use std::thread;
 use tauri::{AppHandle, Emitter};
 
+use crate::utils::hidden_command::hidden_command;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct ProcessSnapshot {
     pub pid: u32,
@@ -36,7 +38,7 @@ impl ProcessWatcher {
                 
                 #[cfg(target_os = "windows")]
                 {
-                    if let Ok(out) = std::process::Command::new("tasklist")
+                    if let Ok(out) = hidden_command("tasklist")
                         .args(["/FO", "CSV", "/NH"]).output()
                     {
                         for line in String::from_utf8_lossy(&out.stdout).lines() {

@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { usePtyTerminal } from '../../features/terminal/usePtyTerminal';
 import { useRuntimeKernelStore } from '../../runtime-kernel/runtimeKernelStore';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
-interface Props { sessionId: string | null; }
+interface Props {
+  sessionId: string | null;
+  buffer?: string;
+  onSend?: (data: string) => void;
+}
 
 function parseRuntimeStartupHint(error?: string | null) {
   if (!error) return null;

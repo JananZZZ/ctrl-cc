@@ -8,8 +8,6 @@ import { useSessionStore } from '../stores/sessionStore';
 import { invokeCommand, warnLog } from '../services/invokeCommand';
 import { useErrorStore } from '../stores/errorStore';
 import { listen } from '@tauri-apps/api/event';
-import { installRuntimeLifecycleBridge } from '../features/runtime/services/runtimeLifecycleBridge';
-import { installRuntimeFabricEventBridge } from '../features/runtime-fabric/services/runtimeFabricEventBridge';
 import { FirstRunSetupWizard } from '../features/setup/components/FirstRunSetupWizard';
 import { useSetupStore } from '../features/setup/stores/setupStore';
 import { RuntimeKernelBridge } from '../runtime-kernel/runtimeKernelBridge';
@@ -22,27 +20,7 @@ export function App() {
   const projects = useProjectStore((s) => s.projects);
   const setSessions = useSessionStore((s) => s.setSessions);
 
-  // v13.0: Install runtime lifecycle bridge (pty://data, pty://exit, pty://error, runtime://session-status)
-  useEffect(() => {
-    let cleanup: undefined | (() => void);
-    installRuntimeLifecycleBridge().then((fn) => {
-      cleanup = fn;
-    }).catch((error) => {
-      console.error('[Ctrl-CC] installRuntimeLifecycleBridge failed', error);
-    });
-    return () => cleanup?.();
-  }, []);
-
-  // v19.0: Install Runtime Fabric Event Bridge (runtime://chat-stream, chat-stderr, chat-exit)
-  useEffect(() => {
-    let cleanup: undefined | (() => void);
-    installRuntimeFabricEventBridge()
-      .then((fn) => { cleanup = fn; })
-      .catch((err) => console.error('[Ctrl-CC] RuntimeFabricEventBridge failed', err));
-    return () => cleanup?.();
-  }, []);
-
-  // v27.0: Install RuntimeKernelBridge — persistent Claude CLI runtime event bridge
+  // v28.0: Install RuntimeKernelBridge —唯一 Runtime 事件桥接
   useEffect(() => {
     let cleanup: undefined | (() => void);
     RuntimeKernelBridge.install().then((fn) => { cleanup = fn; }).catch((err) => console.error('[Ctrl-CC] RuntimeKernelBridge install failed', err));

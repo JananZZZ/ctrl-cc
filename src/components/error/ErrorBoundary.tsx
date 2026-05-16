@@ -1,7 +1,6 @@
 // Ctrl-CC ErrorBoundary — 应用级崩溃防护
 // Catches React render errors and saves componentStack for diagnostics
 import { Component, type ReactNode } from 'react';
-import { useErrorStore } from '../../stores/errorStore';
 import i18n from '../../i18n';
 
 interface Props { children: ReactNode; }
@@ -31,25 +30,22 @@ export class ErrorBoundary extends Component<Props, State> {
 
     this.setState({ stack });
 
-    // Save to localStorage for Diagnostics panel (Section 7.4)
-    try {
-      localStorage.setItem('ctrlcc:last-react-error', JSON.stringify({
-        message: error.message,
-        stack: error.stack,
-        componentStack: stack,
-        ts: new Date().toISOString(),
-      }));
-    } catch {}
+    const detail = {
+      message: error.message,
+      stack: error.stack,
+      componentStack: stack,
+      time: new Date().toISOString(),
+    };
 
-    try {
-      useErrorStore.getState().addError({
-        severity: 'critical',
-        source: 'unknown',
-        title: `${i18n.t('error.renderCrash')}: ${error.message}`,
-        detail: stack,
-        rawError: error.stack || String(error),
-      });
-    } catch {}
+    queueMicrotask(() => {
+      try {
+        localStorage.setItem('ctrlcc:last-react-error', JSON.stringify(detail));
+      } catch {
+        // ignore
+      }
+    });
+
+    console.error('[Ctrl-CC] React error boundary caught', detail);
   }
 
   copyError = () => {

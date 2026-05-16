@@ -1,4 +1,5 @@
 use crate::runtime::claude_runner::ClaudeSession;
+use crate::utils::hidden_command::hidden_command;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use tauri::State;
@@ -141,7 +142,7 @@ pub fn claude_check_capability() -> Result<ClaudeCapability, String> {
         }
     };
 
-    match std::process::Command::new(&cli_path).arg("--version").output() {
+    match hidden_command(&cli_path).arg("--version").output() {
         Ok(out) => {
             cap.exists = true;
             let raw = String::from_utf8_lossy(&out.stdout).trim().to_string();
@@ -153,7 +154,7 @@ pub fn claude_check_capability() -> Result<ClaudeCapability, String> {
         }
     }
 
-    match std::process::Command::new(&cli_path).args(["auth", "status"]).output() {
+    match hidden_command(&cli_path).args(["auth", "status"]).output() {
         Ok(out) => {
             let status = String::from_utf8_lossy(&out.stdout).to_lowercase();
             cap.auth_status = Some(if status.contains("authenticated") || status.contains("logged") {

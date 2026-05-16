@@ -179,7 +179,7 @@ export function RuntimeDiagnosticsPanel() {
         </summary>
         <Section title="">
         {jsCandidates.length === 0 ? (
-          <p style={{ color: 'var(--cc-text-muted)' }}>No JS candidates found. Set CTRL_CC_CLAUDE_JS manually.</p>
+          <p style={{ color: 'var(--cc-text-muted)' }}>未找到 JS 内部入口，不影响 cmd/native 启动。如需自定义，设置 CTRL_CC_CLAUDE_JS 环境变量。</p>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ ...tableStyle, minWidth: 900 }}>

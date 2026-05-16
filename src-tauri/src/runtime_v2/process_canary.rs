@@ -1,7 +1,9 @@
-use std::process::{Command, Stdio};
+use std::process::Stdio;
+
+use crate::utils::hidden_command::hidden_command;
 
 pub fn canary_program(program: &str, args: &[&str]) -> Result<String, String> {
-    let output = Command::new(program)
+    let output = hidden_command(program)
         .args(args)
         .stdin(Stdio::null())
         .output()

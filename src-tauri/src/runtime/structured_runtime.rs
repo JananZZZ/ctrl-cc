@@ -1,7 +1,9 @@
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader};
-use std::process::{Command, Stdio};
+use std::process::Stdio;
+
+use crate::utils::hidden_command::hidden_command;
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
@@ -42,11 +44,7 @@ pub fn start_structured_run(
     let task_id_for_thread = task_id.clone();
 
     std::thread::spawn(move || {
-        let mut command = Command::new("claude");
-        #[cfg(windows)]
-        {
-            command.creation_flags(CREATE_NO_WINDOW);
-        }
+        let mut command = hidden_command("claude");
         command
             .current_dir(req.cwd)
             .arg("-p")
