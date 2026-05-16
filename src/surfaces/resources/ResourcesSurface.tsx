@@ -6,6 +6,15 @@ import { CcButton } from '../../components/ui/CcButton';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 
 interface ResourceItem { name: string; path: string; size: number; isDir: boolean; modified: string; }
+/** v28: Derive a resource's enabled status from its file extension and directory presence */
+function resourceStatus(item: ResourceItem): { enabled: boolean; label: string; color: string } {
+  if (item.isDir) return { enabled: true, label: 'active', color: 'var(--cc-green)' };
+  const ext = item.name.split('.').pop()?.toLowerCase();
+  if (ext === 'md' || ext === 'json' || ext === 'toml' || ext === 'yml' || ext === 'yaml' || ext === 'js' || ext === 'ts' || ext === 'py' || ext === 'toml' || ext === 'lock') {
+    return { enabled: true, label: 'enabled', color: 'var(--cc-green)' };
+  }
+  return { enabled: false, label: 'unknown', color: 'var(--cc-text-muted)' };
+}
 type TabId = 'skills' | 'agents' | 'rules' | 'memory' | 'hooks' | 'mcp';
 
 const TABS: { id: TabId; labelKey: string; dir: string }[] = [
@@ -107,15 +116,18 @@ export function ResourcesSurface() {
         <div style={{ width: 280, flexShrink: 0, overflow: 'auto', borderRight: '1px solid var(--cc-border)', padding: 8 }}>
           {loading ? <div style={{ padding: 20, color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-sm)', textAlign: 'center' }}>{t('common.loading')}</div>
           : items.length === 0 ? <div style={{ padding: 20, color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-sm)', textAlign: 'center' }}>{t('resources.noResources')}</div>
-          : items.map((item) => (
+          : items.map((item) => {
+            const st = resourceStatus(item);
+            return (
             <div key={item.path} onClick={() => selectItem(item)}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 'var(--cc-radius-xs)', cursor: 'pointer',
                 background: selected?.path === item.path ? 'var(--cc-brand-soft)' : 'transparent', fontSize: 'var(--cc-font-xs)' }}>
-              <span>{item.isDir ? 'D' : 'F'}</span>
+              <span style={{ width: 6, height: 6, borderRadius: 3, flexShrink: 0, background: st.color }} title={st.label} />
               <span style={{ color: 'var(--cc-text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
               {!item.isDir && <span style={{ color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-3xs)' }}>{fmtSize(item.size)}</span>}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Right: Detail Panel */}

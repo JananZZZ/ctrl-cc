@@ -91,7 +91,8 @@ export function CanvasSurface() {
           <h1 style={{fontSize:'var(--cc-font-xl)',fontWeight:600,color:'var(--cc-text)',margin:0}}>{t('canvas.title')}</h1>
           <span style={{fontSize:'var(--cc-font-xs)',color:'var(--cc-text-muted)'}}>{nodes.length} {t('canvas.nodes')}, {projects.length} {t('canvas.projectLegend')}, {t('canvas.zoom')} {Math.round(scale*100)}%</span>
         </div>
-        <div style={{display:'flex',gap:4}}>
+        <div style={{display:'flex',gap:4,alignItems:'center'}}>
+          <span style={{fontSize:'var(--cc-font-3xs)',color:'var(--cc-text-muted)',marginRight:4}}>{t('canvas.panHint')}</span>
           <button onClick={()=>{setScale(1);setOffset({x:0,y:0});}} style={bs}>{t('canvas.resetView')}</button>
           <button onClick={()=>setScale((s)=>s+0.25)} style={bs}>+</button>
           <button onClick={()=>setScale((s)=>Math.max(0.08,s-0.25))} style={bs}>-</button>

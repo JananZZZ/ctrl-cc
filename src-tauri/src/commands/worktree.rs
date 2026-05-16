@@ -1,5 +1,5 @@
 use serde::Serialize;
-use std::process::Command;
+use crate::utils::hidden_command::hidden_command;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct WorktreeInfo {
@@ -11,7 +11,7 @@ pub struct WorktreeInfo {
 
 #[tauri::command]
 pub fn list_worktrees(project_path: String) -> Result<Vec<WorktreeInfo>, String> {
-    let output = Command::new("git")
+    let output = hidden_command("git")
         .args(["worktree", "list", "--porcelain"])
         .current_dir(&project_path)
         .output()
@@ -52,7 +52,7 @@ pub fn list_worktrees(project_path: String) -> Result<Vec<WorktreeInfo>, String>
 #[tauri::command]
 pub fn create_worktree(project_path: String, branch_name: String, target_path: Option<String>) -> Result<String, String> {
     let base = target_path.unwrap_or_else(|| format!("../ctrl-cc-worktree-{}", branch_name));
-    let output = Command::new("git")
+    let output = hidden_command("git")
         .args(["worktree", "add", &base, "-b", &branch_name])
         .current_dir(&project_path)
         .output()
@@ -67,7 +67,7 @@ pub fn create_worktree(project_path: String, branch_name: String, target_path: O
 
 #[tauri::command]
 pub fn remove_worktree(project_path: String, worktree_path: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = hidden_command("git")
         .args(["worktree", "remove", &worktree_path, "--force"])
         .current_dir(&project_path)
         .output()

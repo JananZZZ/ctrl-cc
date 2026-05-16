@@ -12,13 +12,27 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Ctrl-CC",
+        "url": "/",
         "width": 1280,
         "height": 800,
         "minWidth": 900,
         "minHeight": 600,
         "center": true,
         "decorations": true
+      },
+      {
+        "label": "ai-dock",
+        "title": "Ctrl-CC Dock",
+        "url": "/index-dock.html",
+        "width": 300,
+        "height": 600,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false
       }
     ],
     "security": {

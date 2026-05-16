@@ -1,7 +1,7 @@
 use crate::setup::config_writer::{ProviderConfigRequest, ProviderConfigSafe};
 use crate::setup::task_manager::SetupTaskManager;
 use crate::setup::types::SetupSnapshot;
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Emitter, State};
 
 #[tauri::command]
 pub async fn setup_detect_all() -> Result<SetupSnapshot, String> {
@@ -10,6 +10,40 @@ pub async fn setup_detect_all() -> Result<SetupSnapshot, String> {
     })
     .await
     .map_err(|e| format!("setup_detect_all worker failed: {}", e))
+}
+
+#[tauri::command]
+pub async fn setup_detect_all_v2(app: tauri::AppHandle) -> Result<SetupSnapshot, String> {
+    let app2 = app.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        // Emit start event
+        let _ = app2.emit("setup://check-progress", serde_json::json!({
+            "taskId": "detect-all",
+            "actionId": "detect-all",
+            "status": "running",
+            "step": "Starting environment detection...",
+            "progress": 0.05,
+            "message": "Detecting Node, npm, Git, Claude CLI...",
+            "updatedAt": chrono::Utc::now().to_rfc3339()
+        }));
+
+        let result = crate::setup::detector::detect_all_setup();
+
+        // Emit complete event
+        let _ = app2.emit("setup://check-progress", serde_json::json!({
+            "taskId": "detect-all",
+            "actionId": "detect-all",
+            "status": if result.ready { "complete" } else { "error" },
+            "step": if result.ready { "All checks passed" } else { "Some checks failed" },
+            "progress": 1.0,
+            "message": result.summary.clone(),
+            "updatedAt": chrono::Utc::now().to_rfc3339()
+        }));
+
+        Ok(result)
+    })
+    .await
+    .map_err(|e| format!("setup_detect_all_v2 worker failed: {}", e))?
 }
 
 #[tauri::command]

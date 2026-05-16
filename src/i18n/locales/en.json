@@ -7,6 +7,7 @@
     "openInWorkspace": "Open in Workspace",
     "projectLegend": "Project",
     "resetView": "Reset View",
+    "panHint": "Drag to pan · Scroll to zoom",
     "runningLegend": "Running",
     "title": "Infinite Canvas",
     "zoom": "Zoom"

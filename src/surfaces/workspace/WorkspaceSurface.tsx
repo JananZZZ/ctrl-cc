@@ -144,6 +144,11 @@ export function WorkspaceSurface() {
     closeTab(sessionId);
   }, [closeTab]);
 
+  const handleStopRuntime = useCallback(async () => {
+    if (!activeTabId) return;
+    await RuntimeKernelBridge.stopSession(activeTabId, false);
+  }, [activeTabId]);
+
   const handleStartPtySession = useCallback(() => {
     setShowNewSessionDialog(true);
   }, []);
@@ -194,16 +199,31 @@ export function WorkspaceSurface() {
       ) : (
         <>
           <OpenSessionTabs tabs={tabs} activeTabId={activeTabId} onSelectTab={setActiveTab} onCloseTab={handleCloseTab} />
+          <div className="cc-workspace-statusbar" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 12px', borderBottom: '1px solid var(--cc-border)', background: 'var(--cc-bg-muted)', fontSize: 'var(--cc-font-xs)', flexShrink: 0 }}>
+            <span style={{ fontWeight: 600, color: 'var(--cc-text)' }}>{activeSession?.title ?? t('workspace.noSession')}</span>
+            <span style={{ color: 'var(--cc-text-muted)' }}>|</span>
+            <span style={{ color: runtimeSnapshot?.hasWriter && runtimeSnapshot?.readerAlive ? 'var(--cc-green)' : 'var(--cc-red)' }}>
+              ● {runtimeSnapshot?.status ?? 'idle'}
+            </span>
+            {runtimeSnapshot?.pid && <span style={{ color: 'var(--cc-text-soft)' }}>PID {runtimeSnapshot.pid}</span>}
+            <span style={{ color: 'var(--cc-text-muted)' }}>|</span>
+            <span style={{ color: 'var(--cc-text-soft)' }}>Model: {activeSession?.model ?? 'sonnet'}</span>
+            <span style={{ color: 'var(--cc-text-soft)' }}>Perm: {activeSession?.permissionMode ?? 'default'}</span>
+            <div style={{ flex: 1 }} />
+            {runtimeSnapshot?.hasWriter && runtimeSnapshot?.readerAlive && (
+              <button onClick={handleStopRuntime} style={{ padding: '2px 10px', fontSize: 'var(--cc-font-xs)', border: '1px solid var(--cc-red)', borderRadius: 'var(--cc-radius-sm)', background: 'transparent', color: 'var(--cc-red)', cursor: 'pointer' }}>Stop Runtime</button>
+            )}
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px', borderBottom: '1px solid var(--cc-border)', background: 'var(--cc-bg-muted)', flexShrink: 0, gap: 0 }}>
-            {(['chat', 'terminal', 'split'] as ViewMode[]).map((mode) => {
-              const a = viewMode === mode;
-              return <button
+            {(['chat', 'terminal', 'split'] as ViewMode[]).map((mode) => (
+              <button
                 key={mode}
-                onClick={() => {
-                  setViewMode(mode);
-                }}
-                style={{ padding: '4px 14px', fontSize: 'var(--cc-font-xs)', fontWeight: a ? 600 : 400, border: 'none', borderBottom: a ? '2px solid var(--cc-navy)' : '2px solid transparent', background: a ? 'var(--cc-surface-solid)' : 'transparent', color: a ? 'var(--cc-text)' : 'var(--cc-text-muted)', cursor: 'pointer' }}>{viewModeLabels[mode]}</button>;
-            })}
+                onClick={() => setViewMode(mode)}
+                className={viewMode === mode ? 'cc-viewmode-btn cc-viewmode-btn-active' : 'cc-viewmode-btn'}
+              >
+                {viewModeLabels[mode]}
+              </button>
+            ))}
             <CcButton variant="ghost" size="sm" onClick={handleStartPtySession} disabled={starting}>{starting ? t('workspace.starting') : `+ ${t('workspace.newSession')}`}</CcButton>
             {error && <span style={{ marginLeft: 12, fontSize: 'var(--cc-font-xs)', color: 'var(--cc-red)' }}>{error}</span>}
           </div>

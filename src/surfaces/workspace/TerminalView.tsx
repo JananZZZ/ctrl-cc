@@ -5,6 +5,9 @@ import { useRuntimeKernelStore } from '../../runtime-kernel/runtimeKernelStore';
 import { CcEmptyState } from '../../components/ui/CcEmptyState';
 interface Props {
   sessionId: string | null;
+  /** v28: buffer prop received from RuntimeKernel terminalBuffers.
+   *  Terminal writes are handled by usePtyTerminal via runtime-kernel://event.
+   *  The buffer prop is available for reference/snapshot purposes. */
   buffer?: string;
   onSend?: (data: string) => void;
 }

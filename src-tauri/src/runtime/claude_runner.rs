@@ -2,7 +2,6 @@ use crate::error::AppError;
 use crate::runtime::ndjson_parser::{self, ChatRuntimeEvent};
 use crate::utils::hidden_command::hidden_command;
 use std::io::{BufRead, BufReader};
-use std::process::Stdio;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use tauri::{AppHandle, Emitter};

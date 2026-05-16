@@ -124,3 +124,22 @@
   0%, 100% { transform: scale(0.75); opacity: 0.55; }
   50% { transform: scale(1); opacity: 1; }
 }
+
+/* v28: View mode toggle buttons */
+.cc-viewmode-btn {
+  padding: 4px 14px;
+  font-size: var(--cc-font-xs);
+  font-weight: 400;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--cc-text-muted);
+  cursor: pointer;
+}
+
+.cc-viewmode-btn-active {
+  font-weight: 600;
+  border-bottom-color: var(--cc-navy);
+  background: var(--cc-surface-solid);
+  color: var(--cc-text);
+}

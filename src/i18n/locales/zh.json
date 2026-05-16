@@ -7,6 +7,7 @@
     "openInWorkspace": "在工作区打开",
     "projectLegend": "项目",
     "resetView": "重置视图",
+    "panHint": "拖拽平移 · 滚轮缩放",
     "runningLegend": "运行中",
     "title": "无限画布",
     "zoom": "缩放"

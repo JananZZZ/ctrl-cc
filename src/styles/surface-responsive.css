@@ -189,6 +189,11 @@
   }
 }
 
+@media (max-width: 820px) {
+  .cc-page-inner { padding: 12px; }
+  .cc-workspace-statusbar { flex-wrap: wrap; gap: 6px; font-size: var(--cc-font-2xs); }
+}
+
 @media (min-width: 1400px) {
   .cc-stat-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));

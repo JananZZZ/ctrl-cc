@@ -5,12 +5,6 @@ use std::process::Stdio;
 
 use crate::utils::hidden_command::hidden_command;
 
-#[cfg(windows)]
-use std::os::windows::process::CommandExt;
-
-#[cfg(windows)]
-const CREATE_NO_WINDOW: u32 = 0x08000000;
-
 use tauri::{AppHandle, Emitter};
 use uuid::Uuid;
 

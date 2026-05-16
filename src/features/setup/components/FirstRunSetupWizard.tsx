@@ -152,7 +152,7 @@ export function FirstRunSetupWizard() {
 
                   <div className="setup-action-row">
                     <button
-                      onClick={() => runAsyncAction(handleStartCheck, { source: 'setup', title: 'Retry setup detection failed' })}
+                      onClick={() => runAsyncAction({ run: (_signal) => handleStartCheck(), source: 'setup', title: 'Retry setup detection failed' })}
                       style={primaryBtnStyle}
                       disabled={checking}
                     >
