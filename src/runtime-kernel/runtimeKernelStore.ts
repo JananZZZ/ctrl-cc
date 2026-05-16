@@ -24,12 +24,33 @@ export const useRuntimeKernelStore = create<RuntimeKernelState>((set) => ({
   activeAssistantBlockId: {},
 
   upsertSession: (snapshot) => {
-    set((state) => ({
-      sessions: {
-        ...state.sessions,
-        [snapshot.guiSessionId]: snapshot,
-      },
-    }));
+    set((state) => {
+      const existing = state.sessions[snapshot.guiSessionId];
+      // Idempotent guard: if snapshot identical to existing, return state unchanged
+      if (
+        existing &&
+        existing.traceId === snapshot.traceId &&
+        existing.runtimeSessionId === snapshot.runtimeSessionId &&
+        existing.claudeSessionId === snapshot.claudeSessionId &&
+        existing.projectId === snapshot.projectId &&
+        existing.cwd === snapshot.cwd &&
+        existing.pid === snapshot.pid &&
+        existing.status === snapshot.status &&
+        existing.hasWriter === snapshot.hasWriter &&
+        existing.readerAlive === snapshot.readerAlive &&
+        existing.createdAt === snapshot.createdAt &&
+        existing.updatedAt === snapshot.updatedAt &&
+        existing.lastError === snapshot.lastError
+      ) {
+        return state;
+      }
+      return {
+        sessions: {
+          ...state.sessions,
+          [snapshot.guiSessionId]: snapshot,
+        },
+      };
+    });
   },
 
   appendUserMessage: (sessionId, text) => {
@@ -124,6 +145,17 @@ export const useRuntimeKernelStore = create<RuntimeKernelState>((set) => ({
             [sid]: [...(chatBlocks[sid] ?? []), block],
           };
         }
+      }
+
+      // Idempotent guard: if nothing changed, return previous state
+      if (
+        sessions === state.sessions &&
+        rawEvents === state.rawEvents &&
+        terminalBuffers === state.terminalBuffers &&
+        chatBlocks === state.chatBlocks &&
+        activeAssistantBlockId === state.activeAssistantBlockId
+      ) {
+        return state;
       }
 
       return {

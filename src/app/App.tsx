@@ -11,6 +11,7 @@ import { listen } from '@tauri-apps/api/event';
 import { FirstRunSetupWizard } from '../features/setup/components/FirstRunSetupWizard';
 import { useSetupStore } from '../features/setup/stores/setupStore';
 import { RuntimeKernelBridge } from '../runtime-kernel/runtimeKernelBridge';
+import { TaskBridge } from '../core/tasks/taskBridge';
 import i18n from '../i18n';
 
 export function App() {
@@ -25,6 +26,14 @@ export function App() {
     let cleanup: undefined | (() => void);
     RuntimeKernelBridge.install().then((fn) => { cleanup = fn; }).catch((err) => console.error('[Ctrl-CC] RuntimeKernelBridge install failed', err));
     RuntimeKernelBridge.listSessions().catch(() => {});
+    return () => cleanup?.();
+  }, []);
+
+  // v29.0: Install TaskBridge —全局任务事件桥接
+  // 所有后台任务统一通过 task://progress 进入前端
+  useEffect(() => {
+    let cleanup: undefined | (() => void);
+    TaskBridge.install().then((fn) => { cleanup = fn; }).catch((err) => console.error('[Ctrl-CC] TaskBridge install failed', err));
     return () => cleanup?.();
   }, []);
 

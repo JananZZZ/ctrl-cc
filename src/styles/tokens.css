@@ -16,6 +16,12 @@
   --cc-font-xl: calc(20px * var(--cc-font-scale));
   --cc-font-2xl: calc(26px * var(--cc-font-scale));
   --cc-font-3xl: calc(34px * var(--cc-font-scale));
+
+  /* v29: Responsive font-size tokens with minimum 12px floor */
+  --cc-font-body: clamp(14px, 1.5vw, 16px);
+  --cc-font-caption: clamp(12px, 1.2vw, 13px);
+  --cc-font-micro: clamp(11px, 1vw, 12px);
+
   --cc-leading-tight: 1.25;
   --cc-leading-normal: 1.50;
   --cc-leading-relaxed: 1.70;

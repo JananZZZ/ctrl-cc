@@ -9,6 +9,7 @@ mod runtime_v2;
 mod runtime_kernel;
 mod setup;
 mod utils;
+mod task_control;
 
 use pty::PtyManager;
 use runtime::commands::ClaudeManager;
@@ -109,6 +110,7 @@ fn main() {
     let process_watchdog = commands::watchdog::ProcessWatchdog::new();
     let pty_session_manager = PtySessionManager::default();
     let runtime_kernel = runtime_kernel::manager::RuntimeKernel::default();
+    let task_control = task_control::manager::TaskControlManager::default();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
@@ -128,6 +130,7 @@ fn main() {
         .manage(pty_session_manager)
         .manage(runtime_v2::runtime_manager::RuntimeManager::default())
         .manage(runtime_kernel)
+        .manage(task_control)
         .manage(setup::task_manager::SetupTaskManager::new())
         .invoke_handler(tauri::generate_handler![
             // Database persistence
@@ -241,6 +244,11 @@ fn main() {
             commands::dock_commands::close_ai_dock,
             commands::dock_commands::toggle_ai_dock,
             commands::dock_commands::get_dock_status,
+            // Task Control (v29)
+            task_control::commands::task_pause,
+            task_control::commands::task_resume,
+            task_control::commands::task_cancel,
+            task_control::commands::task_terminate,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

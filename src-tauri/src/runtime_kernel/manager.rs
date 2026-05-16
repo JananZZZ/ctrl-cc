@@ -166,6 +166,7 @@ impl RuntimeKernel {
                             sessions.and_then(|mut s| {
                                 let h = s.get_mut(&gui_session_id)?;
                                 h.seq += 1;
+                                h.status = RuntimeStatus::Failed;
                                 Some(h.seq)
                             }).unwrap_or(0)
                         };

@@ -33,7 +33,7 @@ export function useRenderLoopGuard(name: string, limit = 120, windowMs = 1000) {
         }
       });
 
-      throw new Error(
+      console.error(
         `[Ctrl-CC] Render loop suspected in ${nameRef.current}: ${current.count} renders/${windowMs}ms`
       );
     }

@@ -1,8 +1,11 @@
 use crate::setup::path_helper;
 use crate::setup::subprocess_runner::{run_cmd, run_cmd_shell, run_powershell};
 use crate::setup::types::{SetupCheckResult, SetupSnapshot};
+use crate::task_control::manager::{TaskControlToken, emit_task};
+use crate::task_control::types::{TaskInterruptPolicy, TaskProgress, TaskStatus};
 use std::collections::HashMap;
 use std::path::Path;
+use std::sync::Arc;
 
 fn check(label: &str, id: &str, ok: bool, required: bool) -> SetupCheckResult {
     SetupCheckResult {
@@ -414,31 +417,65 @@ fn check_api_provider() -> SetupCheckResult {
     r
 }
 
-pub fn detect_all_setup() -> SetupSnapshot {
-    let mut checks: HashMap<String, SetupCheckResult> = HashMap::new();
+/// 逐项检测进度事件发射器。
+///
+/// 通过 Tauri `task://progress` 事件向 UI 推送每项检测的进度。
+fn emit_detect_progress(
+    app: &tauri::AppHandle,
+    task_id: &str,
+    step_index: u32,
+    total_steps: u32,
+    label: &str,
+    check_status: &str,
+) {
+    let progress = if total_steps > 0 {
+        step_index as f64 / total_steps as f64
+    } else {
+        0.0
+    };
 
-    let items: Vec<SetupCheckResult> = vec![
-        check_nodejs(),
-        check_npm(),
-        check_git(),
-        check_git_bash(),
-        check_claude_code(),
-        check_claude_command(),
-        check_claude_auth(),
-        check_claude_config(),
-        check_windows_terminal(),
-        check_powershell_policy(),
-        check_npm_registry(),
-        check_path_env(),
-        check_path_issues(),
-        check_workspace(),
-        check_api_provider(),
-    ];
+    let task_status = match check_status {
+        "ok" => TaskStatus::Success,
+        "error" | "missing" => TaskStatus::Error,
+        "warning" => TaskStatus::Warning,
+        _ => TaskStatus::Running,
+    };
 
-    for item in items {
-        checks.insert(item.id.clone(), item);
-    }
+    let message = match check_status {
+        "ok" => Some(format!("{} — 通过", label)),
+        "missing" => Some(format!("{} — 缺失", label)),
+        "warning" => Some(format!("{} — 警告", label)),
+        "error" => Some(format!("{} — 错误", label)),
+        _ => Some(format!("正在检测 {}...", label)),
+    };
 
+    let task_progress = TaskProgress {
+        task_id: task_id.to_string(),
+        kind: "setup-detect".to_string(),
+        title: format!("环境检测: {}", label),
+        status: task_status,
+        interrupt_policy: TaskInterruptPolicy::SafeBackground,
+        current_step_id: Some(label.to_string()),
+        current_step_label: Some(label.to_string()),
+        message,
+        progress,
+        started_at: chrono::Utc::now().to_rfc3339(),
+        updated_at: chrono::Utc::now().to_rfc3339(),
+        ended_at: None,
+        can_pause: true,
+        can_resume: false,
+        can_cancel: true,
+        can_terminate: true,
+        error: None,
+    };
+
+    emit_task(app, task_progress);
+}
+
+/// 从检测结果构建快照（提取自 detect_all_setup，供两种路径共享）。
+pub fn build_snapshot_from_checks(
+    checks: HashMap<String, SetupCheckResult>,
+) -> SetupSnapshot {
     let required_ok = checks
         .values()
         .filter(|c| c.required)
@@ -480,7 +517,8 @@ pub fn detect_all_setup() -> SetupSnapshot {
     let api_provider_ok = checks.get("apiProvider").map(|c| c.ok).unwrap_or(false);
     let workspace_ok = checks.get("workspace").map(|c| c.ok).unwrap_or(false);
 
-    let ready_for_chat = chat_cmd.is_some() && claude_code_ok && (claude_auth_ok || claude_config_ok);
+    let ready_for_chat =
+        chat_cmd.is_some() && claude_code_ok && (claude_auth_ok || claude_config_ok);
     let ready_for_terminal = term_cmd.is_some();
     let ready_for_api = claude_auth_ok || api_provider_ok;
     let ready_for_project = workspace_ok;
@@ -499,4 +537,128 @@ pub fn detect_all_setup() -> SetupSnapshot {
         selected_chat_command_id: chat_cmd.map(|c| c.id),
         selected_terminal_command_id: term_cmd.map(|c| c.id),
     }
+}
+
+/// 逐项进度宏：等待暂停/取消、发射进度、执行检测函数。
+macro_rules! run_check {
+    ($token:expr, $app:expr, $task_id:expr, $index:expr, $total:expr, $check_fn:expr, $label:expr) => {{
+        $token.wait_if_paused();
+        if $token.is_cancelled() || $token.is_terminated() {
+            return Err(format!(
+                "环境检测任务已取消: {}",
+                $task_id
+            ));
+        }
+        emit_detect_progress($app, $task_id, $index, $total, $label, "running");
+        $check_fn()
+    }};
+}
+
+/// 渐进式环境检测。
+///
+/// 逐项运行 15 项检测，每项检测前后通过 `task://progress` 推送进度。
+/// 支持暂停、取消和终止控制。
+pub fn detect_all_setup_progressive(
+    app: tauri::AppHandle,
+    task_id: String,
+    token: Arc<TaskControlToken>,
+) -> Result<SetupSnapshot, String> {
+    let total: u32 = 15;
+    let mut checks: HashMap<String, SetupCheckResult> = HashMap::new();
+
+    // 1. Node.js
+    let r = run_check!(token, &app, &task_id, 0, total, check_nodejs, "Node.js");
+    checks.insert("nodejs".to_string(), r);
+
+    // 2. npm
+    let r = run_check!(token, &app, &task_id, 1, total, check_npm, "npm");
+    checks.insert("npm".to_string(), r);
+
+    // 3. Git
+    let r = run_check!(token, &app, &task_id, 2, total, check_git, "Git");
+    checks.insert("git".to_string(), r);
+
+    // 4. Git Bash
+    let r = run_check!(token, &app, &task_id, 3, total, check_git_bash, "Git Bash");
+    checks.insert("gitBash".to_string(), r);
+
+    // 5. Claude Code CLI
+    let r = run_check!(token, &app, &task_id, 4, total, check_claude_code, "Claude Code CLI");
+    checks.insert("claudeCode".to_string(), r);
+
+    // 6. Claude 命令入口
+    let r = run_check!(token, &app, &task_id, 5, total, check_claude_command, "Claude 命令入口");
+    checks.insert("claudeCommand".to_string(), r);
+
+    // 7. Claude 认证
+    let r = run_check!(token, &app, &task_id, 6, total, check_claude_auth, "Claude 认证");
+    checks.insert("claudeAuth".to_string(), r);
+
+    // 8. Claude 配置
+    let r = run_check!(token, &app, &task_id, 7, total, check_claude_config, "Claude 配置");
+    checks.insert("claudeConfig".to_string(), r);
+
+    // 9. Windows Terminal
+    let r = run_check!(token, &app, &task_id, 8, total, check_windows_terminal, "Windows Terminal");
+    checks.insert("windowsTerminal".to_string(), r);
+
+    // 10. PowerShell 策略
+    let r = run_check!(token, &app, &task_id, 9, total, check_powershell_policy, "PowerShell 执行策略");
+    checks.insert("powershellPolicy".to_string(), r);
+
+    // 11. npm Registry
+    let r = run_check!(token, &app, &task_id, 10, total, check_npm_registry, "npm Registry");
+    checks.insert("npmRegistry".to_string(), r);
+
+    // 12. PATH 环境
+    let r = run_check!(token, &app, &task_id, 11, total, check_path_env, "PATH 环境");
+    checks.insert("pathEnv".to_string(), r);
+
+    // 13. 路径问题
+    let r = run_check!(token, &app, &task_id, 12, total, check_path_issues, "路径问题");
+    checks.insert("pathIssues".to_string(), r);
+
+    // 14. 工作目录
+    let r = run_check!(token, &app, &task_id, 13, total, check_workspace, "工作目录");
+    checks.insert("workspace".to_string(), r);
+
+    // 15. API Provider
+    let r = run_check!(token, &app, &task_id, 14, total, check_api_provider, "API Provider");
+    checks.insert("apiProvider".to_string(), r);
+
+    // 发射完成进度
+    emit_detect_progress(&app, &task_id, total, total, "构建快照", "ok");
+
+    Ok(build_snapshot_from_checks(checks))
+}
+
+/// 同步环境检测（保留兼容旧路径）。
+///
+/// 内部复用 `build_snapshot_from_checks`，确保两种路径产出一致。
+pub fn detect_all_setup() -> SetupSnapshot {
+    let mut checks: HashMap<String, SetupCheckResult> = HashMap::new();
+
+    let items: Vec<SetupCheckResult> = vec![
+        check_nodejs(),
+        check_npm(),
+        check_git(),
+        check_git_bash(),
+        check_claude_code(),
+        check_claude_command(),
+        check_claude_auth(),
+        check_claude_config(),
+        check_windows_terminal(),
+        check_powershell_policy(),
+        check_npm_registry(),
+        check_path_env(),
+        check_path_issues(),
+        check_workspace(),
+        check_api_provider(),
+    ];
+
+    for item in items {
+        checks.insert(item.id.clone(), item);
+    }
+
+    build_snapshot_from_checks(checks)
 }
