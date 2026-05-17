@@ -287,18 +287,18 @@ export const useSetupStore = create<SetupState>((set, get) => ({
     unlisteners.push(
       await listen<TaskProgressPayload>('task://progress', (event) => {
         const p = event.payload;
-        set({
+        // 只处理环境检测类任务
+        if (p.kind !== 'setup.detect') return;
+
+        set((state) => ({
           currentTaskId: p.taskId,
-          currentStepLabel: p.currentStepLabel ?? p.title ?? null,
-          currentMessage: p.message ?? null,
-          progress: p.progress,
-        });
-        if (p.status === 'paused') {
-          set({ paused: true });
-        } else if (p.status === 'running') {
-          const state = get();
-          if (state.paused) set({ paused: false });
-        }
+          currentStepLabel: p.currentStepLabel ?? state.currentStepLabel,
+          currentMessage: p.message ?? state.currentMessage,
+          progress: typeof p.progress === 'number' ? p.progress : state.progress,
+          checking: p.status === 'running' || p.status === 'paused',
+          paused: p.status === 'paused',
+          tasks: { ...state.tasks, [p.taskId]: p as any },
+        }));
         if (p.error) {
           set({ error: p.error });
         }
@@ -314,7 +314,7 @@ export const useSetupStore = create<SetupState>((set, get) => ({
     if (!currentTaskId) return;
     try {
       await invokeCommand('task_pause', { taskId: currentTaskId });
-      set({ paused: true });
+      set({ paused: true, checking: true, currentMessage: '检测已暂停。你可以继续检测、重新检测，或退出软件。' });
     } catch (err) {
       set({ error: String(err) });
     }
@@ -326,7 +326,7 @@ export const useSetupStore = create<SetupState>((set, get) => ({
     if (!currentTaskId) return;
     try {
       await invokeCommand('task_resume', { taskId: currentTaskId });
-      set({ paused: false });
+      set({ paused: false, checking: true, currentMessage: '正在继续检测...' });
     } catch (err) {
       set({ error: String(err) });
     }
@@ -341,10 +341,11 @@ export const useSetupStore = create<SetupState>((set, get) => ({
       set({
         paused: false,
         checking: false,
-        runState: 'idle',
+        runState: 'failed',
+        error: '检测已终止',
         currentTaskId: null,
-        currentStepLabel: null,
-        currentMessage: null,
+        currentStepLabel: '检测已终止',
+        currentMessage: '你已经终止本次检测，可以重新检测或退出软件。',
         progress: 0,
       });
     } catch (err) {
@@ -354,6 +355,10 @@ export const useSetupStore = create<SetupState>((set, get) => ({
 
   /** v29: 重新运行检测 */
   restartDetection: async () => {
+    const { currentTaskId } = get();
+    if (currentTaskId) {
+      try { await invokeCommand('task_cancel', { taskId: currentTaskId }); } catch {}
+    }
     await get().detectAll();
   },
 
