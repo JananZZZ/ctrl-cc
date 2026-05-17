@@ -7,14 +7,26 @@ import { SetupCommandPreview } from './SetupCommandPreview';
 import { runAsyncAction } from '../../../services/invokeCommand';
 import '../styles/first-run-setup.css';
 
-type Step = 'welcome' | 'check' | 'repair' | 'config' | 'verify' | 'done';
+type Step =
+  | 'welcome' | 'language' | 'appearance' | 'font'
+  | 'runtimeIntro' | 'check' | 'repair' | 'api'
+  | 'chat' | 'dock' | 'permissions' | 'github'
+  | 'verify' | 'done';
 
 const STEPS: { id: Step; label: string; icon: string }[] = [
   { id: 'welcome', label: '欢迎', icon: '👋' },
+  { id: 'language', label: '语言', icon: '🌐' },
+  { id: 'appearance', label: '主题', icon: '🎨' },
+  { id: 'font', label: '字体', icon: '🔠' },
+  { id: 'runtimeIntro', label: '工作方式', icon: '🧭' },
   { id: 'check', label: '环境检测', icon: '🔍' },
-  { id: 'repair', label: '修复依赖', icon: '🔧' },
-  { id: 'config', label: 'API 配置', icon: '🔑' },
-  { id: 'verify', label: '验证', icon: '✅' },
+  { id: 'repair', label: '修复依赖', icon: '🛠️' },
+  { id: 'api', label: 'API 配置', icon: '🔑' },
+  { id: 'chat', label: '聊天设置', icon: '💬' },
+  { id: 'dock', label: 'AI 工作坞', icon: '🛟' },
+  { id: 'permissions', label: '安全权限', icon: '🛡️' },
+  { id: 'github', label: 'GitHub', icon: '🐙' },
+  { id: 'verify', label: '最终验证', icon: '✅' },
   { id: 'done', label: '完成', icon: '🚀' },
 ];
 
@@ -90,6 +102,29 @@ export function FirstRunSetupWizard() {
 
         {/* Main Content */}
         <div className="setup-v23-main">
+          {/* v29: New stepping stone steps — click through to proceed */}
+          {(step === 'language' || step === 'appearance' || step === 'font' || step === 'runtimeIntro' || step === 'chat' || step === 'dock' || step === 'permissions' || step === 'github') && (
+            <div>
+              <h1>{STEPS.find(s => s.id === step)?.icon} {STEPS.find(s => s.id === step)?.label}</h1>
+              <p className="cc-caption" style={{ marginBottom: 20 }}>
+                {step === 'language' && 'Ctrl-CC 默认使用简体中文。你可以在设置中随时切换语言。'}
+                {step === 'appearance' && 'Ctrl-CC 提供四种主题：浅色 / 深色 / 浅蓝 / 暖沙。默认为浅色主题，适合长时间工作。'}
+                {step === 'font' && 'Ctrl-CC 使用系统原生字体 Inter 和 Noto Sans SC。你可以在设置中调整字体大小。'}
+                {step === 'runtimeIntro' && 'Ctrl-CC 是 Claude Code CLI 的可视化控制台。Chat 和 Terminal 共享同一个 Claude 进程，切换视图不会中断对话。'}
+                {step === 'chat' && '你可以选择默认的 AI 模型、思考模式（effort）和权限策略。这些设置可以在后续会话中随时修改。'}
+                {step === 'dock' && 'AI Dock 是一个独立的小窗口，可以显示 Runtime 状态、审批请求和后台任务。你可以随时通过主窗口按钮打开或关闭它。'}
+                {step === 'permissions' && 'Ctrl-CC 提供多种权限控制策略。你可以设置为自动信任、每次确认或严格模式。所有权限变更都会被审计记录。'}
+                {step === 'github' && 'Ctrl-CC 内置了 GitHub 浏览器。你可以设置默认打开的仓库地址，用于查看 Issues、PRs、Actions 和 Releases。'}
+              </p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => {
+                  const idx = STEPS.findIndex(s => s.id === step);
+                  if (idx < STEPS.length - 1) setStep(STEPS[idx + 1].id);
+                }} style={primaryBtnStyle}>继续</button>
+              </div>
+            </div>
+          )}
+
           {step === 'welcome' && (
             <div>
               <h1>欢迎使用 Ctrl-CC</h1>
@@ -138,7 +173,7 @@ export function FirstRunSetupWizard() {
                   <SetupCheckList checks={snapshot.checks} />
                   <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
                     <button onClick={() => setStep('repair')} style={primaryBtnStyle}>继续修复</button>
-                    {snapshot.ready && <button onClick={() => setStep('config')} style={secondaryBtnStyle}>跳过修复，配置 API</button>}
+                    {snapshot.ready && <button onClick={() => setStep('api')} style={secondaryBtnStyle}>跳过修复，配置 API</button>}
                   </div>
                 </>
               ) : (
@@ -159,7 +194,7 @@ export function FirstRunSetupWizard() {
                       {checking ? '检测中...' : '重新检测'}
                     </button>
                     <button onClick={() => setStep('repair')} style={secondaryBtnStyle}>手动修复</button>
-                    <button onClick={() => setStep('config')} style={secondaryBtnStyle}>先配置 API</button>
+                    <button onClick={() => setStep('api')} style={secondaryBtnStyle}>先配置 API</button>
                     <button onClick={() => navigator.clipboard.writeText(verifyError || useSetupStore.getState().error || '')} style={secondaryBtnStyle}>复制错误</button>
                     <button onClick={() => { const bundle = JSON.stringify({ error: verifyError, snapshot: useSetupStore.getState().snapshot, time: new Date().toISOString() }, null, 2); navigator.clipboard.writeText(bundle); }} style={secondaryBtnStyle}>复制诊断包</button>
                     <button onClick={() => { useSetupStore.getState().clearCache(); window.location.reload(); }} style={secondaryBtnStyle}>打开日志目录</button>
@@ -179,12 +214,12 @@ export function FirstRunSetupWizard() {
               <SetupRepairPanel onDone={() => detectAll()} />
               <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
                 <button onClick={() => setStep('check')} style={secondaryBtnStyle}>返回检测</button>
-                <button onClick={() => setStep('config')} style={primaryBtnStyle}>继续配置 API</button>
+                <button onClick={() => setStep('api')} style={primaryBtnStyle}>继续配置 API</button>
               </div>
             </div>
           )}
 
-          {step === 'config' && (
+          {step === 'api' && (
             <div>
               <h1>API Provider 配置</h1>
               <p className="cc-caption" style={{ marginBottom: 20 }}>
@@ -263,7 +298,7 @@ export function FirstRunSetupWizard() {
                 </span>
               </div>
               <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-                <button onClick={() => setStep('config')} style={secondaryBtnStyle}>返回配置</button>
+                <button onClick={() => setStep('api')} style={secondaryBtnStyle}>返回配置</button>
                 <button onClick={handleFinish} style={primaryBtnStyle}>完成配置</button>
               </div>
             </div>

@@ -109,7 +109,7 @@ impl RuntimeKernel {
             project_id: req.project_id.clone(),
             cwd: req.cwd.clone(),
             pid,
-            status: RuntimeStatus::Ready,
+            status: RuntimeStatus::Starting,
             has_writer: true,
             reader_alive: true,
             created_at: now.clone(),

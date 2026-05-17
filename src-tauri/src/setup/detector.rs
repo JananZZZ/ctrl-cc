@@ -1,7 +1,7 @@
 use crate::setup::path_helper;
 use crate::setup::subprocess_runner::{run_cmd, run_cmd_shell, run_powershell};
 use crate::setup::types::{SetupCheckResult, SetupSnapshot};
-use crate::task_control::manager::{TaskControlToken, emit_task};
+use crate::task_control::manager::{TaskControlToken, emit_task, now_iso};
 use crate::task_control::types::{TaskInterruptPolicy, TaskProgress, TaskStatus};
 use std::collections::HashMap;
 use std::path::Path;
@@ -423,53 +423,32 @@ fn check_api_provider() -> SetupCheckResult {
 fn emit_detect_progress(
     app: &tauri::AppHandle,
     task_id: &str,
-    step_index: u32,
-    total_steps: u32,
+    status: TaskStatus,
+    step_id: &str,
     label: &str,
-    check_status: &str,
+    progress: f64,
+    message: impl Into<String>,
+    error: Option<String>,
 ) {
-    let progress = if total_steps > 0 {
-        step_index as f64 / total_steps as f64
-    } else {
-        0.0
-    };
-
-    let task_status = match check_status {
-        "ok" => TaskStatus::Success,
-        "error" | "missing" => TaskStatus::Error,
-        "warning" => TaskStatus::Warning,
-        _ => TaskStatus::Running,
-    };
-
-    let message = match check_status {
-        "ok" => Some(format!("{} — 通过", label)),
-        "missing" => Some(format!("{} — 缺失", label)),
-        "warning" => Some(format!("{} — 警告", label)),
-        "error" => Some(format!("{} — 错误", label)),
-        _ => Some(format!("正在检测 {}...", label)),
-    };
-
-    let task_progress = TaskProgress {
+    emit_task(app, TaskProgress {
         task_id: task_id.to_string(),
-        kind: "setup-detect".to_string(),
-        title: format!("环境检测: {}", label),
-        status: task_status,
-        interrupt_policy: TaskInterruptPolicy::SafeBackground,
-        current_step_id: Some(label.to_string()),
+        kind: "setup.detect".to_string(),
+        title: "环境检测".to_string(),
+        status,
+        interrupt_policy: TaskInterruptPolicy::ConfirmOnLeave,
+        current_step_id: Some(step_id.to_string()),
         current_step_label: Some(label.to_string()),
-        message,
+        message: Some(message.into()),
         progress,
-        started_at: chrono::Utc::now().to_rfc3339(),
-        updated_at: chrono::Utc::now().to_rfc3339(),
+        started_at: now_iso(),
+        updated_at: now_iso(),
         ended_at: None,
         can_pause: true,
-        can_resume: false,
+        can_resume: true,
         can_cancel: true,
         can_terminate: true,
-        error: None,
-    };
-
-    emit_task(app, task_progress);
+        error,
+    });
 }
 
 /// 从检测结果构建快照（提取自 detect_all_setup，供两种路径共享）。
@@ -541,16 +520,35 @@ pub fn build_snapshot_from_checks(
 
 /// 逐项进度宏：等待暂停/取消、发射进度、执行检测函数。
 macro_rules! run_check {
-    ($token:expr, $app:expr, $task_id:expr, $index:expr, $total:expr, $check_fn:expr, $label:expr) => {{
-        $token.wait_if_paused();
+    ($token:expr, $app:expr, $task_id:expr, $index:expr, $total:expr, $check_fn:expr, $step_id:expr, $label:expr) => {{
+        if let Err(e) = $token.wait_if_paused() {
+            return Err(e);
+        }
         if $token.is_cancelled() || $token.is_terminated() {
             return Err(format!(
                 "环境检测任务已取消: {}",
                 $task_id
             ));
         }
-        emit_detect_progress($app, $task_id, $index, $total, $label, "running");
-        $check_fn()
+        emit_detect_progress(
+            $app, $task_id,
+            TaskStatus::Running,
+            $step_id, $label,
+            ($index as f64) / ($total as f64),
+            format!("正在检测 {}...", $label),
+            None,
+        );
+        let result = $check_fn();
+        // After the check: emit result status
+        emit_detect_progress(
+            $app, $task_id,
+            if result.ok { TaskStatus::Running } else { TaskStatus::Warning },
+            $step_id, $label,
+            ($index as f64) / ($total as f64),
+            if result.ok { format!("{} 检测通过", $label) } else { format!("{} 需要关注", $label) },
+            result.error.clone(),
+        );
+        result
     }};
 }
 
@@ -567,69 +565,75 @@ pub fn detect_all_setup_progressive(
     let mut checks: HashMap<String, SetupCheckResult> = HashMap::new();
 
     // 1. Node.js
-    let r = run_check!(token, &app, &task_id, 0, total, check_nodejs, "Node.js");
+    let r = run_check!(token, &app, &task_id, 0, total, check_nodejs, "nodejs", "Node.js");
     checks.insert("nodejs".to_string(), r);
 
     // 2. npm
-    let r = run_check!(token, &app, &task_id, 1, total, check_npm, "npm");
+    let r = run_check!(token, &app, &task_id, 1, total, check_npm, "npm", "npm");
     checks.insert("npm".to_string(), r);
 
     // 3. Git
-    let r = run_check!(token, &app, &task_id, 2, total, check_git, "Git");
+    let r = run_check!(token, &app, &task_id, 2, total, check_git, "git", "Git");
     checks.insert("git".to_string(), r);
 
     // 4. Git Bash
-    let r = run_check!(token, &app, &task_id, 3, total, check_git_bash, "Git Bash");
+    let r = run_check!(token, &app, &task_id, 3, total, check_git_bash, "gitBash", "Git Bash");
     checks.insert("gitBash".to_string(), r);
 
     // 5. Claude Code CLI
-    let r = run_check!(token, &app, &task_id, 4, total, check_claude_code, "Claude Code CLI");
+    let r = run_check!(token, &app, &task_id, 4, total, check_claude_code, "claudeCode", "Claude Code CLI");
     checks.insert("claudeCode".to_string(), r);
 
     // 6. Claude 命令入口
-    let r = run_check!(token, &app, &task_id, 5, total, check_claude_command, "Claude 命令入口");
+    let r = run_check!(token, &app, &task_id, 5, total, check_claude_command, "claudeCommand", "Claude 命令入口");
     checks.insert("claudeCommand".to_string(), r);
 
     // 7. Claude 认证
-    let r = run_check!(token, &app, &task_id, 6, total, check_claude_auth, "Claude 认证");
+    let r = run_check!(token, &app, &task_id, 6, total, check_claude_auth, "claudeAuth", "Claude 认证");
     checks.insert("claudeAuth".to_string(), r);
 
     // 8. Claude 配置
-    let r = run_check!(token, &app, &task_id, 7, total, check_claude_config, "Claude 配置");
+    let r = run_check!(token, &app, &task_id, 7, total, check_claude_config, "claudeConfig", "Claude 配置");
     checks.insert("claudeConfig".to_string(), r);
 
     // 9. Windows Terminal
-    let r = run_check!(token, &app, &task_id, 8, total, check_windows_terminal, "Windows Terminal");
+    let r = run_check!(token, &app, &task_id, 8, total, check_windows_terminal, "windowsTerminal", "Windows Terminal");
     checks.insert("windowsTerminal".to_string(), r);
 
     // 10. PowerShell 策略
-    let r = run_check!(token, &app, &task_id, 9, total, check_powershell_policy, "PowerShell 执行策略");
+    let r = run_check!(token, &app, &task_id, 9, total, check_powershell_policy, "powershellPolicy", "PowerShell 执行策略");
     checks.insert("powershellPolicy".to_string(), r);
 
     // 11. npm Registry
-    let r = run_check!(token, &app, &task_id, 10, total, check_npm_registry, "npm Registry");
+    let r = run_check!(token, &app, &task_id, 10, total, check_npm_registry, "npmRegistry", "npm Registry");
     checks.insert("npmRegistry".to_string(), r);
 
     // 12. PATH 环境
-    let r = run_check!(token, &app, &task_id, 11, total, check_path_env, "PATH 环境");
+    let r = run_check!(token, &app, &task_id, 11, total, check_path_env, "pathEnv", "PATH 环境");
     checks.insert("pathEnv".to_string(), r);
 
     // 13. 路径问题
-    let r = run_check!(token, &app, &task_id, 12, total, check_path_issues, "路径问题");
+    let r = run_check!(token, &app, &task_id, 12, total, check_path_issues, "pathIssues", "路径问题");
     checks.insert("pathIssues".to_string(), r);
 
     // 14. 工作目录
-    let r = run_check!(token, &app, &task_id, 13, total, check_workspace, "工作目录");
+    let r = run_check!(token, &app, &task_id, 13, total, check_workspace, "workspace", "工作目录");
     checks.insert("workspace".to_string(), r);
 
     // 15. API Provider
-    let r = run_check!(token, &app, &task_id, 14, total, check_api_provider, "API Provider");
+    let r = run_check!(token, &app, &task_id, 14, total, check_api_provider, "apiProvider", "API Provider");
     checks.insert("apiProvider".to_string(), r);
 
     // 发射完成进度
-    emit_detect_progress(&app, &task_id, total, total, "构建快照", "ok");
-
-    Ok(build_snapshot_from_checks(checks))
+    let snapshot = build_snapshot_from_checks(checks);
+    emit_detect_progress(
+        &app, &task_id,
+        if snapshot.ready { TaskStatus::Success } else { TaskStatus::Warning },
+        "done", "检测完成", 1.0,
+        snapshot.summary.clone(),
+        None,
+    );
+    Ok(snapshot)
 }
 
 /// 同步环境检测（保留兼容旧路径）。

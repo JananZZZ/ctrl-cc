@@ -21,10 +21,12 @@ export const useAppearanceStore = create<AppearanceState>((set) => ({
 
   hydrate: () => {
     const theme = (localStorage.getItem('ctrl-cc-theme') as ThemeId) || 'light';
-    const fontScale = parseFloat(localStorage.getItem('ctrl-cc-font-scale') || '1');
+    const fontScale = Math.max(0.9, Math.min(1.25, parseFloat(localStorage.getItem('ctrl-cc-font-scale') || '1')));
     const language = (localStorage.getItem('ctrlcc_lang') as 'zh' | 'en') || 'zh';
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.style.setProperty('--cc-font-scale', String(fontScale));
+    // v29: 通知 i18next 语言切换, 确保首次加载时语言生效
+    try { import('../../i18n').then(m => { if (m.default.language !== language) m.default.changeLanguage(language); }).catch(() => {}); } catch {}
     set({ theme, fontScale, language, hydrated: true });
   },
 
@@ -35,13 +37,15 @@ export const useAppearanceStore = create<AppearanceState>((set) => ({
   },
 
   setFontScale: (scale) => {
-    localStorage.setItem('ctrl-cc-font-scale', String(scale));
-    document.documentElement.style.setProperty('--cc-font-scale', String(scale));
-    set({ fontScale: scale });
+    const clamped = Math.max(0.9, Math.min(1.25, scale));
+    localStorage.setItem('ctrl-cc-font-scale', String(clamped));
+    document.documentElement.style.setProperty('--cc-font-scale', String(clamped));
+    set({ fontScale: clamped });
   },
 
   setLanguage: (language) => {
     localStorage.setItem('ctrlcc_lang', language);
+    try { import('../../i18n').then(m => { if (m.default.language !== language) m.default.changeLanguage(language); }).catch(() => {}); } catch {}
     set({ language });
   },
 }));
