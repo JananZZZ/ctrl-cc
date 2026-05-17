@@ -89,13 +89,13 @@ export function ErrorLogPanel({ open: isOpen, onClose }: Props) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 8, height: 8, borderRadius: 4, background: SEVERITY_COLORS[e.severity] || 'gray', flexShrink: 0 }} />
                 <span style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.title}</span>
-                <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-soft)' }}>{new Date(e.timestamp).toLocaleTimeString()}</span>
+                <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)' }}>{new Date(e.timestamp).toLocaleTimeString()}</span>
               </div>
               {expandedId === e.id && (
                 <div style={{ marginTop: 6, fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
                   <div>{t('common.source')}: {e.source} | {t('common.severity')}: {e.severity}</div>
                   {e.detail && <div style={{ marginTop: 4, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{e.detail}</div>}
-                  {e.rawError && <pre style={{ marginTop: 4, fontSize: 'var(--cc-font-2xs)', whiteSpace: 'pre-wrap', wordBreak: 'break-all', background: 'var(--cc-bg-subtle)', padding: 4, borderRadius: 4, maxHeight: 120, overflow: 'auto' }}>{e.rawError}</pre>}
+                  {e.rawError && <pre style={{ marginTop: 4, fontSize: 'var(--cc-font-xs)', whiteSpace: 'pre-wrap', wordBreak: 'break-all', background: 'var(--cc-bg-subtle)', padding: 4, borderRadius: 4, maxHeight: 120, overflow: 'auto' }}>{e.rawError}</pre>}
                   <button onClick={(ev) => { ev.stopPropagation(); dismissError(e.id); }} style={{ marginTop: 4, border: 'none', background: 'transparent', color: 'var(--cc-text-soft)', fontSize: 'var(--cc-font-xs)', cursor: 'pointer', padding: 0 }}>{t('errorLog.markRead')}</button>
                 </div>
               )}
@@ -108,13 +108,13 @@ export function ErrorLogPanel({ open: isOpen, onClose }: Props) {
               <div style={{ padding: 24, textAlign: 'center', color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-sm)' }}>No trace events yet — create a session or send a message</div>
             ) : (
               traceEvents.map((e) => (
-                <div key={e.id} style={{ padding: '3px 12px', marginBottom: 1, borderLeft: `3px solid ${e.level === 'error' ? 'var(--cc-red)' : e.level === 'warning' ? 'var(--cc-amber)' : 'var(--cc-border-soft)'}`, fontSize: 'var(--cc-font-2xs)', fontFamily: 'var(--cc-font-mono)', background: e.level === 'error' ? 'var(--cc-red-soft)' : 'transparent' }}>
+                <div key={e.id} style={{ padding: '3px 12px', marginBottom: 1, borderLeft: `3px solid ${e.level === 'error' ? 'var(--cc-red)' : e.level === 'warning' ? 'var(--cc-amber)' : 'var(--cc-border-soft)'}`, fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-mono)', background: e.level === 'error' ? 'var(--cc-red-soft)' : 'transparent' }}>
                   <span style={{ color: 'var(--cc-text-soft)' }}>{e.ts.slice(11, 19)}</span>
                   <span style={{ marginLeft: 4, color: 'var(--cc-text-muted)' }}>[{e.source}]</span>
                   <span style={{ marginLeft: 4, fontWeight: 600 }}>{e.type}</span>
                   <span style={{ marginLeft: 4, color: 'var(--cc-text-soft)' }}>{e.message}</span>
-                  {(e.uiSessionId || e.ptySessionId) && <span style={{ marginLeft: 6, color: 'var(--cc-blue)', fontSize: 'var(--cc-font-3xs)' }}>ui:{e.uiSessionId?.slice(0,10) ?? '-'} pty:{e.ptySessionId?.slice(0,10) ?? '-'}</span>}
-                  <span style={{ marginLeft: 6, color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-3xs)' }}>trace:{e.traceId.slice(0,12)}</span>
+                  {(e.uiSessionId || e.ptySessionId) && <span style={{ marginLeft: 6, color: 'var(--cc-blue)', fontSize: 'var(--cc-font-xs)' }}>ui:{e.uiSessionId?.slice(0,10) ?? '-'} pty:{e.ptySessionId?.slice(0,10) ?? '-'}</span>}
+                  <span style={{ marginLeft: 6, color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-xs)' }}>trace:{e.traceId.slice(0,12)}</span>
                 </div>
               ))
             )}

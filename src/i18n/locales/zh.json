@@ -6,7 +6,10 @@
     "nodes": "节点数",
     "openInWorkspace": "在工作区打开",
     "projectLegend": "项目",
+    "fitView": "适应视图",
     "resetView": "重置视图",
+    "beginnerMode": "新手模式",
+    "expertMode": "专家模式",
     "panHint": "拖拽平移 · 滚轮缩放",
     "runningLegend": "运行中",
     "title": "无限画布",
@@ -166,6 +169,7 @@
     "selectProject": "选择项目"
   },
   "projects": {
+    "activeCount": "{{count}} 活跃",
     "activeSessions": "活跃会话",
     "allProjects": "全部项目",
     "archived": "已归档",
@@ -194,7 +198,9 @@
     "projectNamePlaceholder": "输入项目名称...",
     "projectNotFound": "项目未找到",
     "recentSessions": "最近会话",
+    "lastUpdate": "最近更新",
     "refreshGitStatus": "刷新 Git 状态",
+    "riskCountLabel": "{{count}} 风险",
     "risks": "风险",
     "scanResources": "扫描资源",
     "searchPlaceholder": "搜索项目...",
@@ -227,6 +233,9 @@
     "selectHint": "从左侧面板选择资源",
     "size": "大小",
     "skills": "Skills",
+    "templates": "Templates",
+    "description": "描述",
+    "openLocation": "打开位置",
     "title": "资源管理",
     "type": "类型"
   },
@@ -332,7 +341,7 @@
     "paleBlueDesc": "清澈、理性、科技 — 适合仪表盘和监视器",
     "recommend": "推荐",
     "warmSand": "暖沙 Claude",
-    "warmSandDesc": "温暖、亲切、高级纸张感 — Ctrl-CC 品牌默认"
+    "warmSandDesc": "温暖、亲切、高级纸张感 — 适合长时间阅读和舒缓工作"
   },
   "workspace": {
     "chat": "对话",

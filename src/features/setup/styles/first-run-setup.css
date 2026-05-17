@@ -124,3 +124,228 @@
   flex-wrap: wrap;
   gap: 10px;
 }
+
+/* v29: SetupLiveProgress */
+.setup-live-card {
+  padding: 20px;
+  border-radius: var(--cc-radius-lg);
+  border: 1px solid var(--cc-border);
+  background: var(--cc-surface-solid);
+}
+.setup-live-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.setup-live-title {
+  font-size: var(--cc-font-md);
+  font-weight: 600;
+  color: var(--cc-text);
+}
+.setup-live-title.is-running {
+  color: var(--cc-brand);
+}
+.setup-live-message {
+  font-size: var(--cc-font-sm);
+  color: var(--cc-text-muted);
+  margin-top: 4px;
+}
+.setup-live-percent {
+  font-size: var(--cc-font-2xl);
+  font-weight: 700;
+  color: var(--cc-brand);
+  font-variant-numeric: tabular-nums;
+}
+.setup-progress-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--cc-bg-subtle);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.setup-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--cc-brand);
+  transition: width 0.3s ease;
+}
+.setup-broadcast-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--cc-font-sm);
+  color: var(--cc-text-muted);
+  padding: 8px 12px;
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-bg-subtle);
+  margin-bottom: 16px;
+}
+.setup-broadcast-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cc-brand);
+  flex-shrink: 0;
+  animation: cc-pulse-opacity 1.2s ease-in-out infinite;
+}
+@keyframes cc-pulse-opacity {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.setup-live-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* v29: SetupAppearanceStep */
+.setup-step-panel h1 {
+  margin: 8px 0 12px;
+  font-size: var(--cc-font-2xl);
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--cc-text);
+}
+.setup-option-section {
+  margin-top: 24px;
+}
+.setup-option-section h3 {
+  font-size: var(--cc-font-md);
+  font-weight: 600;
+  color: var(--cc-text);
+  margin-bottom: 8px;
+}
+.setup-button-row {
+  display: flex;
+  gap: 8px;
+}
+.setup-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+@media (max-width: 560px) {
+  .setup-theme-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.setup-theme-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: var(--cc-radius-lg);
+  border: 1px solid var(--cc-border);
+  background: var(--cc-surface-solid);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.setup-theme-card:hover {
+  border-color: var(--cc-brand);
+  box-shadow: var(--cc-shadow-card);
+}
+.setup-theme-card.is-selected {
+  border-color: var(--cc-brand);
+  box-shadow: 0 0 0 2px var(--cc-brand-soft);
+}
+.setup-theme-card strong {
+  font-size: var(--cc-font-sm);
+  color: var(--cc-text);
+}
+.setup-theme-card p {
+  font-size: var(--cc-font-xs);
+  color: var(--cc-text-muted);
+  margin: 0;
+}
+.setup-theme-swatches {
+  display: flex;
+  gap: 4px;
+}
+.setup-theme-swatches span {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.setup-font-slider {
+  width: 100%;
+  margin: 12px 0;
+}
+.setup-font-preview {
+  padding: 12px 16px;
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-bg-subtle);
+  color: var(--cc-text);
+  line-height: 1.6;
+}
+
+/* v29: SetupProductTourStep */
+.setup-tour-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+@media (max-width: 560px) {
+  .setup-tour-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.setup-tour-card {
+  padding: 18px;
+  text-align: center;
+}
+.setup-tour-card h3 {
+  font-size: var(--cc-font-md);
+  font-weight: 600;
+  color: var(--cc-text);
+  margin: 8px 0 4px;
+}
+.setup-tour-card p {
+  font-size: var(--cc-font-sm);
+  color: var(--cc-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+.setup-tour-icon {
+  font-size: 28px;
+}
+
+/* v29: SetupChatDockPermissionStep */
+.setup-config-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+.setup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.setup-field span {
+  font-size: var(--cc-font-sm);
+  font-weight: 500;
+  color: var(--cc-text);
+}
+.setup-field select {
+  height: 38px;
+  padding: 0 12px;
+  border-radius: var(--cc-radius-sm);
+  border: 1px solid var(--cc-border);
+  background: var(--cc-surface-solid);
+  color: var(--cc-text);
+  font-size: var(--cc-font-sm);
+}
+.setup-friendly-note {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-brand-soft);
+  color: var(--cc-brand-strong);
+  font-size: var(--cc-font-sm);
+}

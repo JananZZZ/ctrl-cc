@@ -6,7 +6,10 @@
     "nodes": "Nodes",
     "openInWorkspace": "Open in Workspace",
     "projectLegend": "Project",
+    "fitView": "Fit View",
     "resetView": "Reset View",
+    "beginnerMode": "Beginner",
+    "expertMode": "Expert",
     "panHint": "Drag to pan · Scroll to zoom",
     "runningLegend": "Running",
     "title": "Infinite Canvas",
@@ -166,6 +169,7 @@
     "selectProject": "Select Project"
   },
   "projects": {
+    "activeCount": "{{count}} active",
     "activeSessions": "Active",
     "allProjects": "All Projects",
     "archived": "Archived",
@@ -194,7 +198,9 @@
     "projectNamePlaceholder": "Enter name...",
     "projectNotFound": "Not Found",
     "recentSessions": "Recent",
+    "lastUpdate": "Updated",
     "refreshGitStatus": "Refresh Git Status",
+    "riskCountLabel": "{{count}} risks",
     "risks": "Risks",
     "scanResources": "Scan",
     "searchPlaceholder": "Search projects...",
@@ -227,6 +233,9 @@
     "selectHint": "Select a resource from the left panel",
     "size": "Size",
     "skills": "Skills",
+    "templates": "Templates",
+    "description": "Description",
+    "openLocation": "Open Location",
     "title": "Resources",
     "type": "Type"
   },
@@ -332,7 +341,7 @@
     "paleBlueDesc": "Clear, rational, technical — ideal for dashboards and monitors",
     "recommend": "Recommended",
     "warmSand": "Warm Sand Claude",
-    "warmSandDesc": "Warm, inviting, premium paper feel — Ctrl-CC brand default"
+    "warmSandDesc": "Warm, inviting, premium paper feel — ideal for extended reading and relaxed work"
   },
   "workspace": {
     "chat": "Chat",

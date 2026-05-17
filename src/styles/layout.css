@@ -19,12 +19,7 @@
   gap: clamp(12px, 1.4vw, 18px);
 }
 
-.cc-dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
-  align-items: stretch;
-}
+/* .cc-dashboard-grid 定义已统一到 commercial.css */
 
 .cc-dashboard-card {
   min-width: 0;

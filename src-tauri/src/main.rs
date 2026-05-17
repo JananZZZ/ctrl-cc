@@ -10,6 +10,7 @@ mod runtime_kernel;
 mod setup;
 mod utils;
 mod task_control;
+mod diagnostics;
 
 use pty::PtyManager;
 use runtime::commands::ClaudeManager;
@@ -180,6 +181,7 @@ fn main() {
             commands::fs_commands::read_file_content,
             commands::fs_commands::write_file_content,
             commands::fs_commands::delete_file,
+            commands::fs_commands::open_in_explorer,
             // Git integration
             commands::git_commands::detect_git_info,
             commands::git_commands::detect_git_branch,
@@ -229,7 +231,6 @@ fn main() {
             runtime_kernel::commands::runtime_kernel_detach_session,
             runtime_kernel::commands::runtime_kernel_list_sessions,
             // Setup domain (v23.0)
-            setup::commands::setup_detect_all,
             setup::commands::setup_detect_all_v2,
             setup::commands::setup_fix_powershell_policy,
             setup::commands::setup_set_npm_mirror,
@@ -249,6 +250,10 @@ fn main() {
             task_control::commands::task_resume,
             task_control::commands::task_cancel,
             task_control::commands::task_terminate,
+            // Diagnostics (v29)
+            diagnostics::commands::emit_diagnostic,
+            // App lifecycle
+            commands::system_commands::app_exit,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

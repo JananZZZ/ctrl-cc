@@ -25,8 +25,9 @@ input, textarea, select { font-family: inherit; font-size: var(--cc-font-md); }
 .cc-card {
   background: var(--cc-surface);
   border: 1px solid var(--cc-border-soft);
-  border-radius: var(--cc-radius-lg);
+  border-radius: var(--cc-radius-xl);
   box-shadow: var(--cc-shadow-card);
+  backdrop-filter: blur(14px);
   color: var(--cc-text);
   transition: transform var(--cc-duration-normal) var(--cc-ease-standard),
               box-shadow var(--cc-duration-normal) var(--cc-ease-standard),
@@ -67,15 +68,46 @@ input, textarea, select { font-family: inherit; font-size: var(--cc-font-md); }
 .cc-button-danger:hover { filter: brightness(0.94); }
 .cc-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+/* ═══════════════ CcBtn (v29 alias for cc-button) ═══════════════ */
+.cc-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 34px; padding: 0 16px; border-radius: var(--cc-radius-full);
+  border: 1px solid var(--cc-border); background: var(--cc-surface-solid);
+  color: var(--cc-text); font-size: var(--cc-font-sm); font-weight: var(--cc-font-semibold);
+  cursor: pointer; white-space: nowrap;
+  transition: transform var(--cc-duration-fast) var(--cc-ease-spring),
+              box-shadow var(--cc-duration-fast) var(--cc-ease-standard),
+              background var(--cc-duration-fast) var(--cc-ease-standard),
+              border-color var(--cc-duration-fast) var(--cc-ease-standard);
+}
+.cc-btn:hover { transform: translateY(-1px); box-shadow: var(--cc-shadow-card); }
+.cc-btn:active { transform: translateY(0); }
+.cc-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.cc-btn-primary { background: var(--cc-brand); border-color: var(--cc-brand-strong); color: var(--cc-text-inverse); }
+.cc-btn-soft { background: var(--cc-brand-soft); border-color: var(--cc-border-soft); color: var(--cc-brand-strong); }
+.cc-btn-ghost { background: transparent; border-color: transparent; color: var(--cc-text-muted); }
+.cc-btn-danger { background: var(--cc-red-soft); border-color: color-mix(in srgb, var(--cc-red) 35%, transparent); color: var(--cc-red); }
+
+/* ═══════════════ CcActionRow ═══════════════ */
+.cc-action-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ═══════════════ CcCardPad ═══════════════ */
+.cc-card-pad { padding: clamp(16px, 2vw, 24px); }
+
 /* ═══════════════ CcBadge ═══════════════ */
 .cc-badge {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 0 8px; height: 22px; border-radius: var(--cc-radius-full);
-  font-size: var(--cc-font-2xs); font-weight: var(--cc-font-medium);
+  font-size: var(--cc-font-xs); font-weight: var(--cc-font-medium);
   transition: background var(--cc-duration-normal) var(--cc-ease-standard),
               color var(--cc-duration-normal) var(--cc-ease-standard);
 }
-.cc-badge-sm { height: 18px; padding: 0 6px; font-size: 10px; }
+.cc-badge-sm { height: 18px; padding: 0 6px; font-size: var(--cc-font-xs); }
 .cc-badge-success { background: var(--cc-green-soft); color: var(--cc-green); }
 .cc-badge-info    { background: var(--cc-blue-soft);  color: var(--cc-blue); }
 .cc-badge-warning { background: var(--cc-amber-soft); color: var(--cc-amber); }
@@ -175,3 +207,35 @@ html, body, .cc-card, .cc-button, .cc-badge, .cc-tabs, .cc-tab,
 .cc-enter-stagger > *:nth-child(6) { animation-delay: 300ms; }
 .cc-enter-stagger > *:nth-child(7) { animation-delay: 360ms; }
 .cc-enter-stagger > *:nth-child(8) { animation-delay: 420ms; }
+
+/* ═══════════════ v29 GitHub 内嵌浏览器 ═══════════════ */
+.cc-github-surface { display: flex; flex-direction: column; height: 100%; }
+.cc-github-toolbar {
+  height: 56px; flex-shrink: 0; display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid var(--cc-border);
+  background: var(--cc-surface-solid);
+}
+.cc-github-address {
+  flex: 1; height: 36px; border-radius: var(--cc-radius-full);
+  border: 1px solid var(--cc-border); background: var(--cc-bg);
+  color: var(--cc-text); padding: 0 14px; font-size: var(--cc-font-sm);
+}
+.cc-github-browser-shell { position: relative; flex: 1; min-height: 0; background: var(--cc-bg-subtle); }
+.cc-github-webview-host { position: absolute; inset: 0; }
+.cc-github-overlay {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  color: var(--cc-text-muted); background: var(--cc-bg); z-index: 2;
+}
+.cc-github-error { color: var(--cc-red); }
+
+/* ═══════════════ v29 Surface 布局 (global.css) ═══════════════ */
+.cc-surface-page {
+  width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: auto;
+  background: radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--cc-brand-soft) 38%, transparent), transparent 34%), var(--cc-bg);
+  color: var(--cc-text);
+}
+.cc-page-inner { width: min(100%, 1480px); margin: 0 auto; padding: clamp(16px, 2.2vw, 32px); }
+.cc-page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.cc-title-xl { font-size: var(--cc-font-3xl); line-height: var(--cc-leading-tight); font-weight: 850; letter-spacing: -0.03em; color: var(--cc-text); }
+.cc-body-sm { font-size: var(--cc-font-sm); color: var(--cc-text-muted); line-height: var(--cc-leading-relaxed); }
+.cc-grid-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 16px; }

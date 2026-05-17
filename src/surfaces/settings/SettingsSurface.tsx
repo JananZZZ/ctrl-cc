@@ -41,7 +41,7 @@ export function SettingsSurface() {
     if (htmlTheme && ['warm-sand', 'light', 'pale-blue', 'dark'].includes(htmlTheme)) return htmlTheme;
     const stored = localStorage.getItem('ctrl-cc-theme');
     if (stored && ['warm-sand', 'light', 'pale-blue', 'dark'].includes(stored)) return stored as CtrlCcTheme;
-    return 'warm-sand';
+    return 'light';
   });
 
   // v28: Unified setup snapshot via useSetupStore
@@ -165,7 +165,7 @@ export function SettingsSurface() {
                     {t(THEME_I18N_KEYS[meta.id])}
                   </span>
                   {meta.id === 'warm-sand' && (
-                    <span style={{ fontSize: 'var(--cc-font-3xs)', padding: '1px 6px', borderRadius: 'var(--cc-radius-xs)', background: 'var(--cc-amber)', color: 'var(--cc-text-on-accent)', fontWeight: 600, textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: 'var(--cc-font-xs)', padding: '1px 6px', borderRadius: 'var(--cc-radius-xs)', background: 'var(--cc-amber)', color: 'var(--cc-text-on-accent)', fontWeight: 600, textTransform: 'uppercase' }}>
                       {t('theme.recommend')}
                     </span>
                   )}
@@ -222,6 +222,22 @@ export function SettingsSurface() {
         )}
       </CcCard>
 
+      {/* v29: 首次启动与引导 */}
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
+        <h3 style={sectH3}>首次启动与引导</h3>
+        <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-muted)', marginBottom: 12 }}>
+          重新运行首次启动引导向导，配置语言、主题、环境检测和 API 设置。
+        </p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <CcButton size="sm" variant="primary" onClick={() => {
+            const store = useSetupStore.getState();
+            store.resetOnboarding();
+          }}>
+            重新运行引导
+          </CcButton>
+        </div>
+      </CcCard>
+
       {/* v23.0 Setup Center — 环境配置 */}
       <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
         <div className="cc-card-header">
@@ -257,8 +273,63 @@ export function SettingsSurface() {
         </div>
       </CcCard>
 
+      {/* v29: Chat 默认值 */}
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
+        <h3 style={sectH3}>Chat 默认值</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 'var(--cc-font-sm)' }}>
+          <S label="默认打开视图" value={localStorage.getItem('ctrlcc.defaultViewMode') || 'chat'} onChange={(v) => localStorage.setItem('ctrlcc.defaultViewMode', v)} opts={['chat', 'split', 'terminal']} />
+          <S label="思考模式 (Effort)" value={localStorage.getItem('ctrl-cc-effort') || 'medium'} onChange={(v) => localStorage.setItem('ctrl-cc-effort', v)} opts={['low', 'medium', 'high', 'xhigh', 'max']} />
+        </div>
+      </CcCard>
+
+      {/* v29: AI Dock */}
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
+        <h3 style={sectH3}>AI 工作坞</h3>
+        <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-muted)', marginBottom: 12 }}>
+          AI Dock 是一个独立的小窗口，显示 Runtime 状态、审批请求和后台任务。
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 'var(--cc-font-sm)' }}>
+          <S label="工作坞模式" value={localStorage.getItem('ctrlcc.aiDock.mode') || 'focus'} onChange={(v) => localStorage.setItem('ctrlcc.aiDock.mode', v)} opts={['focus', 'calm', 'quiet', 'disabled']} />
+        </div>
+      </CcCard>
+
+      {/* v29: GitHub */}
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
+        <h3 style={sectH3}>GitHub</h3>
+        <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-muted)', marginBottom: 12 }}>
+          Ctrl-CC 内置了 GitHub 浏览器。你可以设置默认打开的仓库地址。
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 'var(--cc-font-sm)' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <span style={{ color: 'var(--cc-text-soft)', minWidth: 100 }}>默认仓库</span>
+            <input
+              defaultValue={localStorage.getItem('ctrlcc.github.home') || 'https://github.com'}
+              onBlur={(e) => localStorage.setItem('ctrlcc.github.home', e.target.value || 'https://github.com')}
+              style={{ flex: 1, height: 34, padding: '0 12px', borderRadius: 'var(--cc-radius-sm)', border: '1px solid var(--cc-border)', background: 'var(--cc-bg)', color: 'var(--cc-text)', fontSize: 'var(--cc-font-sm)' }}
+              placeholder="https://github.com"
+            />
+          </div>
+        </div>
+      </CcCard>
+
       {/* Permission Center — real backend */}
       <PermissionCenterCard />
+
+      {/* v29: 开发者选项 */}
+      <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>
+        <h3 style={sectH3}>开发者选项</h3>
+        <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-muted)', marginBottom: 12 }}>
+          开发者工具和调试选项，用于诊断和优化 Ctrl-CC。
+        </p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <CcButton size="sm" variant="ghost" onClick={() => { useSetupStore.getState().clearCache(); }}>
+            重置环境缓存
+          </CcButton>
+          <CcButton size="sm" variant="ghost" onClick={() => { useSetupStore.getState().resetOnboarding(); }}>
+            重置引导
+          </CcButton>
+        </div>
+      </CcCard>
 
       {/* Diagnostics */}
       <CcCard className="cc-section-card" style={{ marginBottom: 16 }}>

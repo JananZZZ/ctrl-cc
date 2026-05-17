@@ -66,7 +66,7 @@ function ToastItem({ entry, expanded, onExpand, onDismiss }: { entry: ErrorEntry
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span>{icon}</span>
         <span style={{ flex: 1, fontSize: 'var(--cc-font-sm)', fontWeight: 600, color: colors.text }}>{entry.title}</span>
-        <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-soft)', background: 'var(--cc-surface-solid)', padding: '1px 6px', borderRadius: 8 }}>{entry.source}</span>
+        <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', background: 'var(--cc-surface-solid)', padding: '1px 6px', borderRadius: 8 }}>{entry.source}</span>
         <button onClick={(e) => { e.stopPropagation(); onDismiss(); }} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-muted)' }}>×</button>
       </div>
       {expanded && entry.detail && (

@@ -1,7 +1,8 @@
 // Ctrl-CC ErrorBoundary — 应用级崩溃防护
-// Catches React render errors and saves componentStack for diagnostics
+// Catches React render errors and routes to DiagnosticLedger for full traceability
 import { Component, type ReactNode } from 'react';
 import i18n from '../../i18n';
+import { useDiagnosticLedger } from '../../core/diagnostics/diagnosticLedger';
 
 interface Props { children: ReactNode; }
 interface State { hasError: boolean; error: Error | null; stack: string; }
@@ -45,7 +46,17 @@ export class ErrorBoundary extends Component<Props, State> {
       }
     });
 
-    console.error('[Ctrl-CC] React error boundary caught', detail);
+    // v29: Route to DiagnosticLedger for full traceability
+    try {
+      useDiagnosticLedger.getState().append({
+        source: 'ErrorBoundary',
+        severity: 'critical',
+        title: error.message || 'React render error',
+        detail: stack,
+      });
+    } catch {
+      // DiagnosticLedger write failure should not crash the error handler
+    }
   }
 
   copyError = () => {

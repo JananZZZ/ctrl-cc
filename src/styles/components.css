@@ -37,34 +37,13 @@
   overflow-x: auto;
 }
 
-/* Status badges */
-.cc-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 8px;
-  border-radius: var(--cc-radius-xs);
-  font-size: var(--cc-font-2xs);
-  font-weight: 600;
-}
-
+/* Status badge modifiers — base .cc-badge 见 global.css */
 .cc-badge-ok { background: var(--cc-green-soft); color: var(--cc-green); }
 .cc-badge-warn { background: var(--cc-amber-soft); color: var(--cc-amber); }
 .cc-badge-error { background: var(--cc-red-soft); color: var(--cc-red); }
 .cc-badge-info { background: var(--cc-blue-soft); color: var(--cc-blue); }
 
-/* Button variants */
-.cc-btn-primary {
-  padding: 8px 20px;
-  font-size: var(--cc-font-sm);
-  font-weight: 600;
-  border: none;
-  border-radius: var(--cc-radius-sm);
-  background: var(--cc-brand);
-  color: var(--cc-text-inverse);
-  cursor: pointer;
-}
-
+/* Secondary button — 补充 global.css 未定义的变体 */
 .cc-btn-secondary {
   padding: 8px 20px;
   font-size: var(--cc-font-sm);
@@ -76,13 +55,4 @@
   cursor: pointer;
 }
 
-.cc-btn-danger {
-  padding: 8px 20px;
-  font-size: var(--cc-font-sm);
-  font-weight: 600;
-  border: none;
-  border-radius: var(--cc-radius-sm);
-  background: var(--cc-red);
-  color: var(--cc-text-inverse);
-  cursor: pointer;
-}
+/* .cc-btn-danger 定义已统一到 global.css */

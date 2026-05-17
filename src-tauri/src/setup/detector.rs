@@ -518,111 +518,92 @@ pub fn build_snapshot_from_checks(
     }
 }
 
-/// 逐项进度宏：等待暂停/取消、发射进度、执行检测函数。
-macro_rules! run_check {
-    ($token:expr, $app:expr, $task_id:expr, $index:expr, $total:expr, $check_fn:expr, $step_id:expr, $label:expr) => {{
-        if let Err(e) = $token.wait_if_paused() {
-            return Err(e);
-        }
-        if $token.is_cancelled() || $token.is_terminated() {
-            return Err(format!(
-                "环境检测任务已取消: {}",
-                $task_id
-            ));
-        }
-        emit_detect_progress(
-            $app, $task_id,
-            TaskStatus::Running,
-            $step_id, $label,
-            ($index as f64) / ($total as f64),
-            format!("正在检测 {}...", $label),
-            None,
-        );
-        let result = $check_fn();
-        // After the check: emit result status
-        emit_detect_progress(
-            $app, $task_id,
-            if result.ok { TaskStatus::Running } else { TaskStatus::Warning },
-            $step_id, $label,
-            ($index as f64) / ($total as f64),
-            if result.ok { format!("{} 检测通过", $label) } else { format!("{} 需要关注", $label) },
-            result.error.clone(),
-        );
-        result
-    }};
-}
-
-/// 渐进式环境检测。
-///
-/// 逐项运行 15 项检测，每项检测前后通过 `task://progress` 推送进度。
-/// 支持暂停、取消和终止控制。
+/// 新版逐项环境检测。
+/// 每个检测项都会推送进度。
+/// 暂停/取消只在步骤边界生效，避免破坏正在运行的系统命令。
 pub fn detect_all_setup_progressive(
     app: tauri::AppHandle,
     task_id: String,
     token: Arc<TaskControlToken>,
 ) -> Result<SetupSnapshot, String> {
-    let total: u32 = 15;
     let mut checks: HashMap<String, SetupCheckResult> = HashMap::new();
 
-    // 1. Node.js
-    let r = run_check!(token, &app, &task_id, 0, total, check_nodejs, "nodejs", "Node.js");
-    checks.insert("nodejs".to_string(), r);
+    let total = 15.0;
+    let mut index = 0.0;
 
-    // 2. npm
-    let r = run_check!(token, &app, &task_id, 1, total, check_npm, "npm", "npm");
-    checks.insert("npm".to_string(), r);
+    macro_rules! run_check {
+        ($step_id:expr, $label:expr, $check_fn:expr) => {{
+            // 如果用户暂停检测，则在这里等待。
+            token.wait_if_paused()?;
 
-    // 3. Git
-    let r = run_check!(token, &app, &task_id, 2, total, check_git, "git", "Git");
-    checks.insert("git".to_string(), r);
+            // 如果用户取消或终止检测，则停止后续检测。
+            if token.is_cancelled() {
+                emit_detect_progress(
+                    &app,
+                    &task_id,
+                    TaskStatus::Cancelled,
+                    $step_id,
+                    $label,
+                    index / total,
+                    "检测已终止",
+                    None,
+                );
 
-    // 4. Git Bash
-    let r = run_check!(token, &app, &task_id, 3, total, check_git_bash, "gitBash", "Git Bash");
-    checks.insert("gitBash".to_string(), r);
+                return Err("环境检测已被用户终止".to_string());
+            }
 
-    // 5. Claude Code CLI
-    let r = run_check!(token, &app, &task_id, 4, total, check_claude_code, "claudeCode", "Claude Code CLI");
-    checks.insert("claudeCode".to_string(), r);
+            // 推送"正在检测某项"的状态。
+            emit_detect_progress(
+                &app,
+                &task_id,
+                TaskStatus::Running,
+                $step_id,
+                $label,
+                index / total,
+                format!("正在检测：{}", $label),
+                None,
+            );
 
-    // 6. Claude 命令入口
-    let r = run_check!(token, &app, &task_id, 5, total, check_claude_command, "claudeCommand", "Claude 命令入口");
-    checks.insert("claudeCommand".to_string(), r);
+            // 执行真实检测函数。
+            let result = $check_fn();
 
-    // 7. Claude 认证
-    let r = run_check!(token, &app, &task_id, 6, total, check_claude_auth, "claudeAuth", "Claude 认证");
-    checks.insert("claudeAuth".to_string(), r);
+            index += 1.0;
 
-    // 8. Claude 配置
-    let r = run_check!(token, &app, &task_id, 7, total, check_claude_config, "claudeConfig", "Claude 配置");
-    checks.insert("claudeConfig".to_string(), r);
+            // 推送检测结果。
+            emit_detect_progress(
+                &app,
+                &task_id,
+                if result.ok { TaskStatus::Running } else { TaskStatus::Warning },
+                $step_id,
+                $label,
+                index / total,
+                if result.ok {
+                    format!("{} 检测通过", $label)
+                } else {
+                    format!("{} 需要关注", $label)
+                },
+                result.error.clone(),
+            );
 
-    // 9. Windows Terminal
-    let r = run_check!(token, &app, &task_id, 8, total, check_windows_terminal, "windowsTerminal", "Windows Terminal");
-    checks.insert("windowsTerminal".to_string(), r);
+            checks.insert(result.id.clone(), result);
+        }};
+    }
 
-    // 10. PowerShell 策略
-    let r = run_check!(token, &app, &task_id, 9, total, check_powershell_policy, "powershellPolicy", "PowerShell 执行策略");
-    checks.insert("powershellPolicy".to_string(), r);
-
-    // 11. npm Registry
-    let r = run_check!(token, &app, &task_id, 10, total, check_npm_registry, "npmRegistry", "npm Registry");
-    checks.insert("npmRegistry".to_string(), r);
-
-    // 12. PATH 环境
-    let r = run_check!(token, &app, &task_id, 11, total, check_path_env, "pathEnv", "PATH 环境");
-    checks.insert("pathEnv".to_string(), r);
-
-    // 13. 路径问题
-    let r = run_check!(token, &app, &task_id, 12, total, check_path_issues, "pathIssues", "路径问题");
-    checks.insert("pathIssues".to_string(), r);
-
-    // 14. 工作目录
-    let r = run_check!(token, &app, &task_id, 13, total, check_workspace, "workspace", "工作目录");
-    checks.insert("workspace".to_string(), r);
-
-    // 15. API Provider
-    let r = run_check!(token, &app, &task_id, 14, total, check_api_provider, "apiProvider", "API Provider");
-    checks.insert("apiProvider".to_string(), r);
+    run_check!("nodejs", "Node.js", check_nodejs);
+    run_check!("npm", "npm", check_npm);
+    run_check!("git", "Git", check_git);
+    run_check!("gitBash", "Git Bash", check_git_bash);
+    run_check!("claudeCode", "Claude Code CLI", check_claude_code);
+    run_check!("claudeCommand", "Claude 命令入口", check_claude_command);
+    run_check!("claudeAuth", "Claude 认证状态", check_claude_auth);
+    run_check!("claudeConfig", "Claude 配置文件", check_claude_config);
+    run_check!("windowsTerminal", "Windows Terminal", check_windows_terminal);
+    run_check!("powershellPolicy", "PowerShell 执行策略", check_powershell_policy);
+    run_check!("npmRegistry", "npm Registry", check_npm_registry);
+    run_check!("pathEnv", "PATH 环境", check_path_env);
+    run_check!("pathIssues", "路径问题", check_path_issues);
+    run_check!("workspace", "工作目录", check_workspace);
+    run_check!("apiProvider", "API Provider", check_api_provider);
 
     // 发射完成进度
     let snapshot = build_snapshot_from_checks(checks);

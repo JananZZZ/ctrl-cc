@@ -1,16 +1,27 @@
 import { create } from 'zustand';
+import i18n from '../../i18n';
 
-type ThemeId = 'light' | 'dark' | 'pale-blue' | 'warm-sand';
+export type CtrlCcTheme = 'light' | 'dark' | 'pale-blue' | 'warm-sand';
+export type CtrlCcLanguage = 'zh' | 'en';
 
 interface AppearanceState {
-  theme: ThemeId;
+  theme: CtrlCcTheme;
   fontScale: number;
-  language: 'zh' | 'en';
+  language: CtrlCcLanguage;
   hydrated: boolean;
   hydrate: () => void;
-  setTheme: (theme: ThemeId) => void;
+  setTheme: (theme: CtrlCcTheme) => void;
   setFontScale: (scale: number) => void;
-  setLanguage: (lang: 'zh' | 'en') => void;
+  setLanguage: (lang: CtrlCcLanguage) => void;
+}
+
+function applyTheme(theme: CtrlCcTheme) {
+  document.documentElement.dataset.theme = theme;
+}
+
+function applyFontScale(scale: number) {
+  const safe = Math.max(0.9, Math.min(1.25, scale));
+  document.documentElement.style.setProperty('--cc-user-font-scale', String(safe));
 }
 
 export const useAppearanceStore = create<AppearanceState>((set) => ({
@@ -20,32 +31,33 @@ export const useAppearanceStore = create<AppearanceState>((set) => ({
   hydrated: false,
 
   hydrate: () => {
-    const theme = (localStorage.getItem('ctrl-cc-theme') as ThemeId) || 'light';
+    const theme = (localStorage.getItem('ctrl-cc-theme') as CtrlCcTheme) || 'light';
     const fontScale = Math.max(0.9, Math.min(1.25, parseFloat(localStorage.getItem('ctrl-cc-font-scale') || '1')));
-    const language = (localStorage.getItem('ctrlcc_lang') as 'zh' | 'en') || 'zh';
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.style.setProperty('--cc-font-scale', String(fontScale));
-    // v29: 通知 i18next 语言切换, 确保首次加载时语言生效
-    try { import('../../i18n').then(m => { if (m.default.language !== language) m.default.changeLanguage(language); }).catch(() => {}); } catch {}
+    const language = (localStorage.getItem('ctrlcc_lang') as CtrlCcLanguage) || 'zh';
+    applyTheme(theme);
+    applyFontScale(fontScale);
+    if (i18n.language !== language) {
+      void i18n.changeLanguage(language);
+    }
     set({ theme, fontScale, language, hydrated: true });
   },
 
   setTheme: (theme) => {
     localStorage.setItem('ctrl-cc-theme', theme);
-    document.documentElement.setAttribute('data-theme', theme);
+    applyTheme(theme);
     set({ theme });
   },
 
   setFontScale: (scale) => {
     const clamped = Math.max(0.9, Math.min(1.25, scale));
     localStorage.setItem('ctrl-cc-font-scale', String(clamped));
-    document.documentElement.style.setProperty('--cc-font-scale', String(clamped));
+    applyFontScale(clamped);
     set({ fontScale: clamped });
   },
 
   setLanguage: (language) => {
     localStorage.setItem('ctrlcc_lang', language);
-    try { import('../../i18n').then(m => { if (m.default.language !== language) m.default.changeLanguage(language); }).catch(() => {}); } catch {}
+    void i18n.changeLanguage(language);
     set({ language });
   },
 }));

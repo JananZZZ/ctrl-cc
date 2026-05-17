@@ -43,12 +43,12 @@ export function OpenSessionTabs({ tabs, activeTabId, onSelectTab, onCloseTab }: 
             <span style={{ color: 'var(--cc-text-soft)' }}>/</span>
             <span>{tab.title}</span>
             {tab.pendingConfirms > 0 && (
-              <span style={{ fontSize: 'var(--cc-font-2xs)', padding: '0 4px', borderRadius: 'var(--cc-radius-full)', background: 'var(--cc-amber-soft)', color: 'var(--cc-amber)' }}>{tab.pendingConfirms}</span>
+              <span style={{ fontSize: 'var(--cc-font-xs)', padding: '0 4px', borderRadius: 'var(--cc-radius-full)', background: 'var(--cc-amber-soft)', color: 'var(--cc-amber)' }}>{tab.pendingConfirms}</span>
             )}
             {tab.riskCount > 0 && (
-              <span style={{ fontSize: 'var(--cc-font-2xs)', padding: '0 4px', borderRadius: 'var(--cc-radius-full)', background: 'var(--cc-red-soft)', color: 'var(--cc-red)' }}>{tab.riskCount}</span>
+              <span style={{ fontSize: 'var(--cc-font-xs)', padding: '0 4px', borderRadius: 'var(--cc-radius-full)', background: 'var(--cc-red-soft)', color: 'var(--cc-red)' }}>{tab.riskCount}</span>
             )}
-            {tab.isPinned && <span style={{ fontSize: 'var(--cc-font-2xs)' }}>📌</span>}
+            {tab.isPinned && <span style={{ fontSize: 'var(--cc-font-xs)' }}>📌</span>}
             <button
               onClick={(e) => { e.stopPropagation(); onCloseTab(tab.sessionId); }}
               style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', padding: 0, lineHeight: 1 }}

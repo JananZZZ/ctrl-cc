@@ -1,17 +1,19 @@
-/* Ctrl-CC v29 — Motion Tokens */
+/* Ctrl-CC v29 — Unified Motion Tokens */
 :root {
   --cc-motion-fast: 120ms;
   --cc-motion-normal: 180ms;
   --cc-motion-slow: 260ms;
   --cc-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --cc-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --cc-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root {
-    --cc-motion-fast: 0ms;
-    --cc-motion-normal: 0ms;
-    --cc-motion-slow: 0ms;
-  }
+  :root { --cc-motion-fast: 0ms; --cc-motion-normal: 0ms; --cc-motion-slow: 0ms; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+.cc-motion-enter { animation: cc-fade-in var(--cc-duration-normal) var(--cc-ease-out) both; }
+.cc-motion-exit { animation: cc-fade-out var(--cc-duration-fast) var(--cc-ease-in) both; }
+
+@keyframes cc-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cc-fade-out { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(4px); } }

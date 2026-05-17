@@ -1,3 +1,5 @@
-pub mod types;
-pub mod manager;
 pub mod commands;
+pub mod manager;
+pub mod types;
+
+pub use manager::TaskControlManager;

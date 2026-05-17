@@ -124,6 +124,42 @@ pub fn write_file_content(path: String, content: String) -> Result<(), String> {
     f.write_all(content.as_bytes()).map_err(|e| e.to_string())
 }
 
+/// 在系统文件管理器中打开文件所在位置（跨平台）
+#[tauri::command]
+pub fn open_in_explorer(path: String) -> Result<String, String> {
+    let p = Path::new(&path);
+    if !p.exists() {
+        return Err(format!("路径不存在: {}", path));
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .arg("/select,")
+            .arg(p)
+            .spawn()
+            .map_err(|e| format!("打开资源管理器失败: {}", e))?;
+    }
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg("-R")
+            .arg(p)
+            .spawn()
+            .map_err(|e| format!("打开 Finder 失败: {}", e))?;
+    }
+    #[cfg(target_os = "linux")]
+    {
+        let target = if p.is_dir() { p } else { p.parent().unwrap_or(p) };
+        std::process::Command::new("xdg-open")
+            .arg(target)
+            .spawn()
+            .map_err(|e| format!("打开文件管理器失败: {}", e))?;
+    }
+
+    Ok("ok".to_string())
+}
+
 #[tauri::command]
 pub fn delete_file(path: String) -> Result<(), String> {
     let p = std::path::Path::new(&path);

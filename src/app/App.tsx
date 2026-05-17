@@ -25,19 +25,28 @@ export function App() {
   // v28.0: Install RuntimeKernelBridge —唯一 Runtime 事件桥接
   useEffect(() => {
     let cleanup: undefined | (() => void);
-    RuntimeKernelBridge.install().then((fn) => { cleanup = fn; }).catch((err) => console.error('[Ctrl-CC] RuntimeKernelBridge install failed', err));
+    RuntimeKernelBridge.install().then((fn) => { cleanup = fn; }).catch((err) => {
+      useDiagnosticLedger.getState().append({ source: 'RuntimeKernelBridge', severity: 'error', title: 'Runtime 事件桥安装失败', detail: String(err) });
+    });
     RuntimeKernelBridge.listSessions().catch(() => {});
     return () => cleanup?.();
   }, []);
 
-  // v29.0: Install TaskBridge —全局任务事件桥接
+  /**
+   * 安装全局任务桥。
+   * 所有后台任务统一通过 task://progress 进入前端。
+   */
   useEffect(() => {
     let cleanup: undefined | (() => void);
-    TaskBridge.install().then((fn) => { cleanup = fn; }).catch((err) => console.error('[Ctrl-CC] TaskBridge install failed', err));
+    TaskBridge.install().then((fn) => { cleanup = fn; }).catch((err) => { useDiagnosticLedger.getState().append({ source: 'TaskBridge', severity: 'error', title: '任务事件桥安装失败', detail: String(err) }); });
     return () => cleanup?.();
   }, []);
 
-  // v29: Hydrate appearance (theme/font/language) from single source
+  /**
+   * 应用启动时恢复外观设置。
+   * 注意：默认语言是中文，默认主题是浅色。
+   * 这里不要散落到各个页面，否则会造成设置不同步。
+   */
   const hydrateAppearance = useAppearanceStore((s) => s.hydrate);
   useEffect(() => { hydrateAppearance(); }, [hydrateAppearance]);
 
@@ -128,16 +137,14 @@ export function App() {
   useEffect(() => {
     const handler = (event: PromiseRejectionEvent) => {
       const detail = String(event.reason);
-      // v29: Route to DiagnosticLedger for full traceability
-      try {
-        useDiagnosticLedger.getState().append({
-          source: 'window.unhandledrejection',
-          severity: 'error',
-          title: '未处理的异步错误',
-          detail,
-          raw: event.reason,
-        });
-      } catch {}
+
+      useDiagnosticLedger.getState().append({
+        source: 'window.unhandledrejection',
+        severity: 'error',
+        title: '未处理的异步错误',
+        detail,
+        raw: event.reason,
+      });
 
       try {
         useErrorStore.getState().addError({

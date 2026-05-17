@@ -109,7 +109,7 @@ export function ActiveWorkBoard({
         </h3>
         <span
           className="cc-badge cc-badge-info"
-          style={{ fontSize: 'var(--cc-font-2xs)' }}
+          style={{ fontSize: 'var(--cc-font-xs)' }}
         >
           {sessions.length}
         </span>
@@ -175,7 +175,7 @@ export function ActiveWorkBoard({
                   <span
                     style={{
                       fontFamily: 'var(--cc-font-sans)',
-                      fontSize: 'var(--cc-font-2xs)',
+                      fontSize: 'var(--cc-font-xs)',
                       color: 'var(--cc-text-soft)',
                     }}
                   >
@@ -188,7 +188,7 @@ export function ActiveWorkBoard({
                     alignItems: 'center',
                     gap: 'var(--cc-space-3)',
                     fontFamily: 'var(--cc-font-mono)',
-                    fontSize: 'var(--cc-font-2xs)',
+                    fontSize: 'var(--cc-font-xs)',
                     color: 'var(--cc-text-muted)',
                   }}
                 >

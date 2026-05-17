@@ -43,7 +43,10 @@ export type ChatBlock =
   | { id: string; kind: 'assistant'; content: string; streaming: boolean; createdAt: string; updatedAt: string }
   | { id: string; kind: 'status'; label: string; content: string; createdAt: string }
   | { id: string; kind: 'tool'; name: string; content: string; createdAt: string }
-  | { id: string; kind: 'error'; content: string; createdAt: string };
+  | { id: string; kind: 'error'; content: string; createdAt: string }
+  | { id: string; kind: 'thinking'; content: string; createdAt: string }
+  | { id: string; kind: 'permission'; rule: string; approved?: boolean; createdAt: string }
+  | { id: string; kind: 'file_change'; path: string; action: string; diff?: string; createdAt: string };
 
 // Legacy compat
 export type KernelChatMessage = ChatBlock;

@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Webview } from '@tauri-apps/api/webview';
+import { Window } from '@tauri-apps/api/window';
 import { CcButton } from '../../components/ui/CcButton';
 
 const DEFAULT_HOME_KEY = 'ctrlcc.github.home';
@@ -6,16 +8,22 @@ const DEFAULT_URL = 'https://github.com';
 
 /**
  * GitHub Surface。
- * GitHub 不允许 iframe 嵌入，使用内嵌 Webview 方案。
- * 对于不支持 Webview 的环境，回退到外部浏览器。
+ * 注意：GitHub 不允许 iframe 嵌入，所以这里使用 Tauri Webview。
+ * 这不是外部浏览器，而是在应用内部创建一个子 Webview。
  */
 export function GitHubSurface() {
   const hostRef = useRef<HTMLDivElement | null>(null);
+  const webviewRef = useRef<Webview | null>(null);
+
   const [url, setUrl] = useState(() => localStorage.getItem(DEFAULT_HOME_KEY) || DEFAULT_URL);
   const [input, setInput] = useState(url);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * 规范化用户输入 URL。
+   * 用户输入 github.com 时自动补 https://。
+   */
   function normalizeUrl(raw: string) {
     const trimmed = raw.trim();
     if (!trimmed) return DEFAULT_URL;
@@ -23,45 +31,78 @@ export function GitHubSurface() {
     return `https://${trimmed}`;
   }
 
-  function openExternal(urlToOpen: string) {
-    window.open(urlToOpen, '_blank');
-  }
+  /**
+   * 创建或调整内嵌 Webview。
+   * Webview 的坐标必须跟随 host 容器。
+   */
+  async function createOrResizeWebview(nextUrl = url) {
+    const host = hostRef.current;
+    if (!host) return;
 
-  async function navigate(nextRaw: string) {
-    const next = normalizeUrl(nextRaw);
-    setUrl(next);
-    setInput(next);
+    const rect = host.getBoundingClientRect();
 
-    // Try Tauri Webview first, fallback to external
     try {
-      const { Webview } = await import('@tauri-apps/api/webview');
-      const { getCurrentWindow } = await import('@tauri-apps/api/window');
-
       setStatus('loading');
-      const host = hostRef.current;
-      if (!host) return;
+      setError(null);
 
-      const rect = host.getBoundingClientRect();
-      const appWindow = getCurrentWindow();
+      if (!webviewRef.current) {
+        const appWindow = new Window('main');
 
-      new Webview(appWindow, 'github-browser', {
-        url: next,
-        x: Math.round(rect.left),
-        y: Math.round(rect.top),
-        width: Math.round(rect.width),
-        height: Math.round(rect.height),
-        focus: true,
-      });
+        const webview = new Webview(appWindow, 'github-browser', {
+          url: nextUrl,
+          x: Math.round(rect.left),
+          y: Math.round(rect.top),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          focus: true,
+        });
 
-      setStatus('ready');
-    } catch {
-      // Fallback: open in external browser
+        webviewRef.current = webview;
+
+        await webview.once('tauri://created', () => {
+          setStatus('ready');
+        });
+
+        await webview.once('tauri://error', (event) => {
+          setStatus('error');
+          setError(String(event.payload));
+        });
+      } else {
+        await webviewRef.current.setPosition({
+          x: Math.round(rect.left),
+          y: Math.round(rect.top),
+        } as any);
+
+        await webviewRef.current.setSize({
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+        } as any);
+      }
+    } catch (err) {
       setStatus('error');
-      setError('Webview 不可用，已在外部浏览器中打开');
-      openExternal(next);
+      setError(String(err));
     }
   }
 
+  /**
+   * 打开新 URL。
+   * 为了避免旧 Webview 状态残留，这里关闭旧 Webview 后重新创建。
+   */
+  async function navigate(nextRaw: string) {
+    const next = normalizeUrl(nextRaw);
+
+    setUrl(next);
+    setInput(next);
+
+    await webviewRef.current?.close().catch(() => {});
+    webviewRef.current = null;
+
+    await createOrResizeWebview(next);
+  }
+
+  /**
+   * 保存默认 GitHub 主页。
+   */
   function saveDefault() {
     const next = normalizeUrl(input);
     localStorage.setItem(DEFAULT_HOME_KEY, next);
@@ -69,46 +110,64 @@ export function GitHubSurface() {
     setUrl(next);
   }
 
+  useEffect(() => {
+    void createOrResizeWebview(url);
+
+    const handleResize = () => {
+      void createOrResizeWebview(url);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      webviewRef.current?.close().catch(() => {});
+      webviewRef.current = null;
+    };
+  }, []);
+
   return (
-    <div data-testid="surface-github" className="cc-surface-page">
-      <div className="cc-page-inner">
-        <div className="cc-page-header">
-          <div>
-            <h1 className="cc-title-xl">GitHub</h1>
-            <p className="cc-body-sm">内置浏览器 — GitHub 不允许 iframe 嵌入</p>
-          </div>
-          <CcButton variant="primary" onClick={() => navigate(url)}>刷新</CcButton>
-        </div>
+    <div data-testid="surface-github" className="cc-surface-page cc-github-surface">
+      <div className="cc-github-toolbar">
+        <input
+          value={input}
+          onChange={(event) => setInput(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              void navigate(input);
+            }
+          }}
+          placeholder="https://github.com"
+          className="cc-github-address"
+        />
 
-        <div className="cc-card" style={{ marginBottom: 16 }}>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') navigate(input); }}
-              placeholder="https://github.com/owner/repo"
-              style={{ flex: 1, padding: '6px 12px', fontSize: 'var(--cc-font-sm)', border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-sm)', background: 'var(--cc-bg)', color: 'var(--cc-text)', outline: 'none' }}
-            />
-            <CcButton variant="primary" onClick={() => navigate(input)}>打开</CcButton>
-            <CcButton variant="ghost" onClick={saveDefault}>设为默认</CcButton>
-          </div>
-        </div>
+        <CcButton variant="primary" onClick={() => void navigate(input)}>
+          打开
+        </CcButton>
 
-        {status === 'loading' && <div className="cc-card" style={{ textAlign: 'center', padding: 40 }}>正在加载 GitHub...</div>}
-        {status === 'error' && <div className="cc-card" style={{ textAlign: 'center', padding: 40, color: 'var(--cc-red)' }}>{error || '加载失败'}</div>}
-        {status === 'ready' && (
-          <div className="cc-card" style={{ padding: 0, overflow: 'hidden' }}>
-            <div ref={hostRef} style={{ width: '100%', minHeight: 500, background: 'var(--cc-bg-muted)' }} />
+        <CcButton variant="ghost" onClick={saveDefault}>
+          设为默认主页
+        </CcButton>
+
+        <CcButton variant="ghost" onClick={() => void navigate(DEFAULT_URL)}>
+          GitHub 主页
+        </CcButton>
+      </div>
+
+      <div className="cc-github-browser-shell">
+        <div ref={hostRef} className="cc-github-webview-host" />
+
+        {status === 'loading' && (
+          <div className="cc-github-overlay">
+            正在打开 GitHub...
           </div>
         )}
 
-        <div style={{ marginTop: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <CcButton variant="ghost" onClick={() => openExternal(url + '/issues')}>Issues</CcButton>
-          <CcButton variant="ghost" onClick={() => openExternal(url + '/pulls')}>Pull Requests</CcButton>
-          <CcButton variant="ghost" onClick={() => openExternal(url + '/actions')}>Actions</CcButton>
-          <CcButton variant="ghost" onClick={() => openExternal(url + '/releases')}>Releases</CcButton>
-          <CcButton variant="ghost" onClick={() => openExternal(url)}>在浏览器中打开</CcButton>
-        </div>
+        {status === 'error' && (
+          <div className="cc-github-overlay cc-github-error">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

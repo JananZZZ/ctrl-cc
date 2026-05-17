@@ -2,34 +2,38 @@ use tauri::State;
 
 use super::manager::TaskControlManager;
 
+/// 暂停后台任务。
 #[tauri::command]
-pub fn task_pause(task_id: String, ctrl: State<'_, TaskControlManager>) -> Result<(), String> {
-    ctrl.get(&task_id)
-        .ok_or_else(|| format!("任务不存在: {}", task_id))?
-        .pause();
-    Ok(())
+pub fn task_pause(
+    task_id: String,
+    tasks: State<'_, TaskControlManager>,
+) -> Result<(), String> {
+    tasks.pause(&task_id)
 }
 
+/// 继续后台任务。
 #[tauri::command]
-pub fn task_resume(task_id: String, ctrl: State<'_, TaskControlManager>) -> Result<(), String> {
-    ctrl.get(&task_id)
-        .ok_or_else(|| format!("任务不存在: {}", task_id))?
-        .resume();
-    Ok(())
+pub fn task_resume(
+    task_id: String,
+    tasks: State<'_, TaskControlManager>,
+) -> Result<(), String> {
+    tasks.resume(&task_id)
 }
 
+/// 取消后台任务。
 #[tauri::command]
-pub fn task_cancel(task_id: String, ctrl: State<'_, TaskControlManager>) -> Result<(), String> {
-    ctrl.get(&task_id)
-        .ok_or_else(|| format!("任务不存在: {}", task_id))?
-        .cancel();
-    Ok(())
+pub fn task_cancel(
+    task_id: String,
+    tasks: State<'_, TaskControlManager>,
+) -> Result<(), String> {
+    tasks.cancel(&task_id)
 }
 
+/// 强制终止后台任务。
 #[tauri::command]
-pub fn task_terminate(task_id: String, ctrl: State<'_, TaskControlManager>) -> Result<(), String> {
-    ctrl.get(&task_id)
-        .ok_or_else(|| format!("任务不存在: {}", task_id))?
-        .terminate();
-    Ok(())
+pub fn task_terminate(
+    task_id: String,
+    tasks: State<'_, TaskControlManager>,
+) -> Result<(), String> {
+    tasks.terminate(&task_id)
 }

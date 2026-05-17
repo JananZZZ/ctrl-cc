@@ -66,7 +66,7 @@ export function TerminalView({ sessionId }: Props) {
         <ToolBtn onClick={() => handle?.sendCtrlD()} title="Ctrl+D">⏏</ToolBtn>
         <ToolBtn onClick={() => handle?.clear()} title={t('common.clear')}>⌧</ToolBtn>
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-muted)' }}>
+        <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
           {runtimeSession?.hasWriter && runtimeSession?.readerAlive ? '●' : runtimeFailed ? '×' : '○'} {runtimeSession?.status ?? handle?.status ?? 'idle'}{runtimeSession?.pid ? ` · PID ${runtimeSession.pid}` : ''}
         </span>
       </div>

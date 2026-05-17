@@ -26,6 +26,8 @@ export function CanvasSurface() {
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [nodePos, setNodePos] = useState<Record<string,{x:number;y:number}>>({});
+  /** v29: 新手模式（默认）隐藏复杂连线；专家模式显示全部 */
+  const [expertMode, setExpertMode] = useState(false);
 
   const colors = useMemo(() => ({
     project: getCssVar('--cc-brand') || '#3b82f6',
@@ -40,10 +42,28 @@ export function CanvasSurface() {
     btnText: getCssVar('--cc-text-on-accent') || '#fff',
   }), []);
 
-  const nodes: Node[] = useMemo(() => [
+  const allNodes: Node[] = useMemo(() => [
     ...projects.map((p, i) => ({ id: p.id, label: p.name, x: nodePos[p.id]?.x ?? 80 + i * 240, y: nodePos[p.id]?.y ?? 80, color: colors.project, size: 22, type: 'project', connections: sessions.filter((s) => s.projectId === p.id).map((s) => s.id) })),
     ...sessions.slice(0, 20).map((s, i) => ({ id: s.id, label: s.title, x: nodePos[s.id]?.x ?? 100 + (i % 6) * 150, y: nodePos[s.id]?.y ?? 200 + Math.floor(i / 6) * 140, color: s.status === 'running' ? colors.running : s.status === 'failed' ? colors.failed : colors.idle, size: 13, type: 'session', connections: [s.projectId] })),
+    // v29: Runtime nodes — one per actively running session (expert only)
+    ...sessions.filter((s) => s.status === 'running').slice(0, 10).map((s, i) => {
+      const runtimeId = `runtime-${s.id}`;
+      return { id: runtimeId, label: `Runtime: ${s.title}`, x: nodePos[runtimeId]?.x ?? 60 + i * 200, y: nodePos[runtimeId]?.y ?? 380, color: colors.running, size: 10, type: 'runtime', connections: [s.id] };
+    }),
+    // v29: Resource nodes (expert only)
+    ...[{ id: 'res-skills', label: 'Skills', x: nodePos['res-skills']?.x ?? 640, y: nodePos['res-skills']?.y ?? 420, color: getCssVar('--cc-purple') || '#8b7cff', size: 10, type: 'resource', connections: [] },
+       { id: 'res-rules', label: 'Rules', x: nodePos['res-rules']?.x ?? 720, y: nodePos['res-rules']?.y ?? 440, color: getCssVar('--cc-purple') || '#8b7cff', size: 10, type: 'resource', connections: [] },
+       { id: 'res-memory', label: 'Memory', x: nodePos['res-memory']?.x ?? 800, y: nodePos['res-memory']?.y ?? 420, color: getCssVar('--cc-purple') || '#8b7cff', size: 10, type: 'resource', connections: [] }],
+    // v29: GitHub node (expert only)
+    { id: 'node-github', label: 'GitHub', x: nodePos['node-github']?.x ?? 750, y: nodePos['node-github']?.y ?? 100, color: getCssVar('--cc-text-muted') || '#6b7280', size: 14, type: 'github', connections: ['res-skills', 'res-rules', 'res-memory'] },
+    // v29: Task nodes from taskStore are rendered dynamically in useEffect
   ], [projects, sessions, nodePos, colors]);
+
+  /** 新手模式：只显示 project 和 session 节点；专家模式：显示全部 */
+  const nodes = useMemo(() => {
+    if (expertMode) return allNodes;
+    return allNodes.filter((n) => n.type === 'project' || n.type === 'session');
+  }, [allNodes, expertMode]);
 
   useEffect(() => {
     const c = canvasRef.current; if (!c) return;
@@ -52,8 +72,11 @@ export function CanvasSurface() {
     c.width = r.width * dpr; c.height = r.height * dpr; ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, r.width, r.height);
     ctx.save(); ctx.translate(offset.x, offset.y); ctx.scale(scale, scale);
-    ctx.strokeStyle = colors.connector; ctx.lineWidth = 1;
-    nodes.forEach((n) => n.connections.forEach((tid) => { const t2 = nodes.find((x) => x.id === tid); if (t2) { ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(t2.x, t2.y); ctx.stroke(); } }));
+    /** 专家模式才渲染连线（边），新手模式隐藏复杂关系 */
+    if (expertMode) {
+      ctx.strokeStyle = colors.connector; ctx.lineWidth = 1;
+      nodes.forEach((n) => n.connections.forEach((tid) => { const t2 = nodes.find((x) => x.id === tid); if (t2) { ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(t2.x, t2.y); ctx.stroke(); } }));
+    }
     nodes.forEach((n) => {
       ctx.beginPath(); ctx.arc(n.x, n.y, n.size+4, 0, Math.PI*2); ctx.fillStyle = n.id===selectedNode ? colors.selectionGlow : n.color+'30'; ctx.fill();
       ctx.beginPath(); ctx.arc(n.x, n.y, n.size, 0, Math.PI*2); ctx.fillStyle = n.id===selectedNode ? colors.selectedFill : n.color; ctx.fill();
@@ -73,7 +96,7 @@ export function CanvasSurface() {
       ctx.fillStyle = colors.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'start'; ctx.fillText(label, 16 + 18, ly + 9);
       ly += 18;
     });
-  }, [nodes, selectedNode, scale, offset, t, colors]);
+  }, [nodes, selectedNode, scale, offset, t, colors, expertMode]);
 
   const getPos = useCallback((e: React.MouseEvent) => { const r = canvasRef.current?.getBoundingClientRect(); if (!r) return {x:0,y:0}; return {x:(e.clientX-r.left-offset.x)/scale, y:(e.clientY-r.top-offset.y)/scale}; }, [offset,scale]);
   const hWheel = useCallback((e: React.WheelEvent) => { e.preventDefault(); setScale((s)=>Math.max(0.08,Math.min(5,s-e.deltaY*0.0008))); }, []);
@@ -92,8 +115,29 @@ export function CanvasSurface() {
           <span style={{fontSize:'var(--cc-font-xs)',color:'var(--cc-text-muted)'}}>{nodes.length} {t('canvas.nodes')}, {projects.length} {t('canvas.projectLegend')}, {t('canvas.zoom')} {Math.round(scale*100)}%</span>
         </div>
         <div style={{display:'flex',gap:4,alignItems:'center'}}>
-          <span style={{fontSize:'var(--cc-font-3xs)',color:'var(--cc-text-muted)',marginRight:4}}>{t('canvas.panHint')}</span>
+          <span style={{fontSize:'var(--cc-font-xs)',color:'var(--cc-text-muted)',marginRight:4}}>{t('canvas.panHint')}</span>
+          <button onClick={() => setExpertMode((v) => !v)} style={{
+            padding:'4px 10px', fontSize:'var(--cc-font-xs)', border:'1px solid var(--cc-navy)', borderRadius:'var(--cc-radius-xs)',
+            background: expertMode ? 'var(--cc-navy)' : 'var(--cc-surface-solid)',
+            color: expertMode ? 'var(--cc-text-on-accent)' : 'var(--cc-text)',
+            cursor:'pointer', fontWeight: 500,
+          }}>{expertMode ? t('canvas.expertMode') : t('canvas.beginnerMode')}</button>
           <button onClick={()=>{setScale(1);setOffset({x:0,y:0});}} style={bs}>{t('canvas.resetView')}</button>
+          <button onClick={() => {
+            if (nodes.length === 0) return;
+            const positions = nodes.map((n) => nodePos[n.id] ?? { x: 0, y: 0 });
+            const minX = Math.min(...positions.map((p) => p.x));
+            const maxX = Math.max(...positions.map((p) => p.x));
+            const minY = Math.min(...positions.map((p) => p.y));
+            const maxY = Math.max(...positions.map((p) => p.y));
+            const w = maxX - minX + 200;
+            const h = maxY - minY + 200;
+            const cw = canvasRef.current?.clientWidth ?? 800;
+            const ch = canvasRef.current?.clientHeight ?? 600;
+            const fitScale = Math.min(cw / w, ch / h, 1.5);
+            setScale(fitScale);
+            setOffset({ x: (cw - w * fitScale) / 2 - minX * fitScale + 100 * fitScale, y: (ch - h * fitScale) / 2 - minY * fitScale + 100 * fitScale });
+          }} style={bs}>{t('canvas.fitView')}</button>
           <button onClick={()=>setScale((s)=>s+0.25)} style={bs}>+</button>
           <button onClick={()=>setScale((s)=>Math.max(0.08,s-0.25))} style={bs}>-</button>
         </div>

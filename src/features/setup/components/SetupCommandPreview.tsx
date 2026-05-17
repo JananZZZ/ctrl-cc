@@ -28,7 +28,7 @@ export function SetupCommandPreview({ command, label }: Props) {
       <button
         onClick={handleCopy}
         style={{
-          padding: '2px 10px', fontSize: 'var(--cc-font-2xs)',
+          padding: '2px 10px', fontSize: 'var(--cc-font-xs)',
           border: '1px solid var(--cc-border)', borderRadius: 'var(--cc-radius-xs)',
           background: copied ? 'var(--cc-green-soft)' : 'var(--cc-bg)',
           color: copied ? 'var(--cc-green)' : 'var(--cc-text-muted)',

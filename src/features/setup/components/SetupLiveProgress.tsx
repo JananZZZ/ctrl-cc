@@ -38,19 +38,29 @@ export function SetupLiveProgress() {
       </div>
 
       {/* 进度条 */}
-      <div className="setup-live-bar-track">
+      <div className="setup-progress-track">
         <div
-          className="setup-live-bar-fill"
+          className="setup-progress-fill"
           style={{ width: `${percent}%` }}
         />
       </div>
       <div className="setup-live-percent">{percent}%</div>
 
+      {/* 广播条 */}
+      <div className="setup-broadcast-bar">
+        <span className="setup-broadcast-dot" />
+        <span>
+          {paused
+            ? '检测已暂停。你可以继续检测、重新检测，或者先退出软件。'
+            : currentMessage || '正在准备检测任务...'}
+        </span>
+      </div>
+
       {/* 操作按钮 */}
       <div className="setup-live-actions">
         {!checking && (
           <button className="cc-btn cc-btn-primary" onClick={() => { detectAll(); }}>
-            开始检测
+            重新检测
           </button>
         )}
         {checking && !paused && (
@@ -58,22 +68,26 @@ export function SetupLiveProgress() {
             暂停检测
           </button>
         )}
-        {paused && (
+        {checking && paused && (
           <button className="cc-btn cc-btn-primary" onClick={() => { resumeDetection(); }}>
             继续检测
           </button>
         )}
         {checking && (
-          <button className="cc-btn cc-btn-ghost" onClick={() => { cancelDetection(); }}>
+          <button className="cc-btn cc-btn-danger" onClick={() => { cancelDetection(); }}>
             终止检测
           </button>
         )}
-        <button className="cc-btn cc-btn-ghost" onClick={() => { restartDetection(); }}>
-          重新检测
-        </button>
-        <button className="cc-btn cc-btn-ghost" onClick={() => { exitApp(); }}>
-          退出软件
-        </button>
+        {paused && (
+          <>
+            <button className="cc-btn cc-btn-soft" onClick={() => { restartDetection(); }}>
+              重新检测
+            </button>
+            <button className="cc-btn cc-btn-ghost" onClick={() => { exitApp(); }}>
+              退出软件
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

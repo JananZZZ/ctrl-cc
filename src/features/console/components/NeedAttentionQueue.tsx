@@ -111,7 +111,7 @@ export function NeedAttentionQueue({
             highSev ? 'cc-badge cc-badge-danger' : 'cc-badge cc-badge-warning'
           }
           style={{
-            fontSize: 'var(--cc-font-2xs)',
+            fontSize: 'var(--cc-font-xs)',
           }}
         >
           {items.length}
@@ -184,7 +184,7 @@ export function NeedAttentionQueue({
                       display: 'flex',
                       gap: 'var(--cc-space-3)',
                       fontFamily: 'var(--cc-font-mono)',
-                      fontSize: 'var(--cc-font-2xs)',
+                      fontSize: 'var(--cc-font-xs)',
                       color: 'var(--cc-text-soft)',
                     }}
                   >

@@ -24,7 +24,7 @@ impl CmdResult {
         Self {
             success: false,
             stdout: String::new(),
-            stderr: format!("Command `{}` timed out after {}ms", program, timeout.as_millis()),
+            stderr: format!("命令 `{}` 执行超过 {}ms，已终止", program, timeout.as_millis()),
             code: None,
             timed_out: true,
             duration_ms: timeout.as_millis(),
@@ -43,7 +43,7 @@ impl CmdResult {
     }
 }
 
-pub fn default_timeout() -> Duration { Duration::from_secs(4) }
+pub fn default_timeout() -> Duration { Duration::from_secs(5) }
 pub fn heavy_timeout() -> Duration { Duration::from_secs(30) }
 pub fn install_timeout() -> Duration { Duration::from_secs(600) }
 

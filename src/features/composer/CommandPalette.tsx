@@ -61,7 +61,7 @@ export function CommandPalette({ open: isOpen, onClose, onSelect }: Props) {
       <input type="text" value={search} onChange={(e) => { setSearch(e.target.value); setSelectedIdx(0); }}
         placeholder={t('common.search') + '...'} autoFocus style={searchStyle} onKeyDown={handleKeyDown} />
       <div style={{ maxHeight: 260, overflow: 'auto' }}>
-        <div style={{ padding: '4px 10px', fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-soft)', fontWeight: 600 }}>{t('chat.claudeCommands')}</div>
+        <div style={{ padding: '4px 10px', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', fontWeight: 600 }}>{t('chat.claudeCommands')}</div>
         {filtered.filter((c) => c.category === 'claude').map((cmd) => {
           const idx = filtered.indexOf(cmd);
           return (
@@ -72,7 +72,7 @@ export function CommandPalette({ open: isOpen, onClose, onSelect }: Props) {
             </div>
           );
         })}
-        <div style={{ padding: '4px 10px', fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-soft)', fontWeight: 600, marginTop: 4 }}>{t('chat.ctrlccCommands')}</div>
+        <div style={{ padding: '4px 10px', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', fontWeight: 600, marginTop: 4 }}>{t('chat.ctrlccCommands')}</div>
         {filtered.filter((c) => c.category === 'ctrlcc').map((cmd) => {
           const idx = filtered.indexOf(cmd);
           return (

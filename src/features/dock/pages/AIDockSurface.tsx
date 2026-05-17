@@ -12,9 +12,10 @@ export function AIDockSurface() {
   const snapshot = store.snapshot;
 
   useEffect(() => {
-    DockSnapshotPublisher.start(2000);
+    // v29: 事件驱动 — 组件挂载时立即发布快照，后续由 store 变更触发
+    DockSnapshotPublisher.publish();
     const unsub = DockSnapshotPublisher.subscribe(snap => useDockStore.getState().updateSnapshot(snap));
-    return () => { DockSnapshotPublisher.stop(); unsub(); };
+    return () => { unsub(); };
   }, []);
 
   const execute = useCallback((action: DockAction) => { DockActionBridge.execute(action); }, []);

@@ -7,6 +7,23 @@
   max-width: 720px;
 }
 
+.console-status-strip {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-surface-solid);
+  border: 1px solid var(--cc-border);
+  font-size: var(--cc-font-sm);
+  color: var(--cc-text-muted);
+}
+
+.console-status-strip span {
+  font-weight: var(--cc-font-medium);
+  color: var(--cc-text);
+}
+
 .console-stat-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

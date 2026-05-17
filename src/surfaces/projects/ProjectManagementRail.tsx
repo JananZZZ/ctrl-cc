@@ -85,6 +85,21 @@ function GroupSection({ title, children }: { title: string; children: React.Reac
   );
 }
 
+function relativeTime(iso: string): string {
+  const now = Date.now();
+  const then = new Date(iso).getTime();
+  const diffMs = now - then;
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return '刚刚';
+  if (minutes < 60) return `${minutes}分钟前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}小时前`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}天前`;
+  const months = Math.floor(days / 30);
+  return `${months}个月前`;
+}
+
 function ProjectNode({ project, isSelected, onSelect, t }: { project: Project; isSelected: boolean; onSelect: () => void; t: (key: string, opts?: any) => string }) {
   const status: 'running' | 'idle' | 'error' = project.activeSessionCount > 0 ? 'running' : project.riskCount > 0 ? 'error' : 'idle';
   return (
@@ -103,10 +118,14 @@ function ProjectNode({ project, isSelected, onSelect, t }: { project: Project; i
       </div>
       <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', marginTop: 2 }}>
         {project.gitBranch && <span style={{ marginRight: 8 }}>{project.gitBranch}</span>}
-        {project.activeSessionCount > 0 && <span style={{ marginRight: 8, color: 'var(--cc-green)' }}>{t('projects.activeCount', { count: project.activeSessionCount })}</span>}
+        <span style={{ marginRight: 8 }}>{t('projects.totalSessions')}: {project.totalSessionCount}</span>
+        {project.activeSessionCount > 0 && <span style={{ marginRight: 8, color: 'var(--cc-green)' }}>{t('projects.activeSessions')}: {project.activeSessionCount}</span>}
         {project.riskCount > 0 && <span style={{ color: 'var(--cc-red)' }}>{t('projects.riskCountLabel', { count: project.riskCount })}</span>}
       </div>
       <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project.path}</div>
+      <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
+        {t('projects.lastUpdate')}: {relativeTime(project.updatedAt)}
+      </div>
     </div>
   );
 }

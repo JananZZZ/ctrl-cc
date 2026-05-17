@@ -141,6 +141,7 @@ impl RuntimeKernel {
         std::thread::spawn(move || {
             let mut buf = [0u8; 8192];
             let mut received_any = false;
+            let mut reader_errored = false;
             loop {
                 match reader.read(&mut buf) {
                     Ok(0) => break,
@@ -154,9 +155,9 @@ impl RuntimeKernel {
                                 }
                             }
                             emit(&app2, &make_event(
-                                &trace_id, &gui_session_id, &runtime_session_id2, 0,
+                                &trace_id, &gui_session_id, &runtime_session_id2, 1,
                                 "runtime.ready", "status",
-                                None,
+                                Some("Claude Runtime 已连接".to_string()),
                                 Some(RuntimeStatus::Ready),
                                 pid, Some(cwd.clone()),
                             ));
@@ -178,12 +179,14 @@ impl RuntimeKernel {
                         ));
                     }
                     Err(err) => {
+                        reader_errored = true;
                         let seq = {
                             let sessions = inner.lock().ok();
                             sessions.and_then(|mut s| {
                                 let h = s.get_mut(&gui_session_id)?;
                                 h.seq += 1;
                                 h.status = RuntimeStatus::Failed;
+                                h.last_error = Some(format!("PTY reader error: {}", err));
                                 Some(h.seq)
                             }).unwrap_or(0)
                         };
@@ -199,25 +202,36 @@ impl RuntimeKernel {
                 }
             }
             // Reader exited — update status based on whether any data was received
-            if let Ok(mut sessions) = inner.lock() {
+            let final_status = if let Ok(mut sessions) = inner.lock() {
                 if let Some(h) = sessions.get_mut(&gui_session_id) {
                     h.reader_alive = false;
                     h.has_writer = false;
                     if !received_any {
                         h.status = RuntimeStatus::Failed;
                         h.last_error = Some("Claude 进程启动后未产生任何输出即退出".to_string());
-                    } else if h.status != RuntimeStatus::Failed {
+                    } else if reader_errored {
+                        // Reader errored after receiving data — keep Failed, don't overwrite to Exited
+                        h.status = RuntimeStatus::Failed;
+                        if h.last_error.is_none() {
+                            h.last_error = Some("PTY reader exited with error".to_string());
+                        }
+                    } else {
                         h.status = RuntimeStatus::Exited;
                         h.last_error = Some("PTY reader exited".to_string());
                     }
                     h.updated_at = Utc::now().to_rfc3339();
+                    h.status.clone()
+                } else {
+                    RuntimeStatus::Exited
                 }
-            }
+            } else {
+                RuntimeStatus::Exited
+            };
             emit(&app2, &make_event(
                 &trace_id, &gui_session_id, &runtime_session_id2, 0,
                 "session.exited", "lifecycle",
                 Some("Claude runtime exited".to_string()),
-                Some(RuntimeStatus::Exited),
+                Some(final_status),
                 pid, Some(cwd),
             ));
         });
@@ -302,7 +316,16 @@ impl RuntimeKernel {
         h.status = RuntimeStatus::Stopped;
         h.has_writer = false;
         h.reader_alive = false;
-        h.child.kill().map_err(|e| e.to_string())?;
+
+        if req.force {
+            h.child.kill().map_err(|e| e.to_string())?;
+        } else {
+            // Graceful: try to close stdin first, then wait briefly before force kill
+            drop(h.writer);
+            std::thread::sleep(std::time::Duration::from_millis(500));
+            let _ = h.child.kill();
+        }
+
         Ok(())
     }
 

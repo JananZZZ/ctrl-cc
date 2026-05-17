@@ -127,14 +127,14 @@ export function SessionInspector({ session, events: rawEvents = [], collapsed, e
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', width: 50 }}>Input</span>
                 <div style={{ flex: 1, height: 8, borderRadius: 4, background: 'var(--cc-bg-muted)', overflow: 'hidden' }}><div style={{ width: '100%', height: '100%', borderRadius: 4, background: 'var(--cc-blue)' }} /></div>
-                <span style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text)', fontWeight: 600 }}>{fmtNum(session.inputTokens)}</span>
+                <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text)', fontWeight: 600 }}>{fmtNum(session.inputTokens)}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', width: 50 }}>Output</span>
                 <div style={{ flex: 1, height: 8, borderRadius: 4, background: 'var(--cc-bg-muted)', overflow: 'hidden' }}><div style={{ width: Math.min(contextRatio, 100) + '%', height: '100%', borderRadius: 4, background: 'var(--cc-green)' }} /></div>
-                <span style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text)', fontWeight: 600 }}>{fmtNum(session.outputTokens)}</span>
+                <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text)', fontWeight: 600 }}>{fmtNum(session.outputTokens)}</span>
               </div>
-              <div style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-muted)', textAlign: 'center', marginTop: 2 }}>{t('sessionInspector.outputInputRatio')}: {contextRatio}%</div>
+              <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', textAlign: 'center', marginTop: 2 }}>{t('sessionInspector.outputInputRatio')}: {contextRatio}%</div>
             </div>
           </Card>
         )}
@@ -152,7 +152,7 @@ export function SessionInspector({ session, events: rawEvents = [], collapsed, e
 
         {expanded && latestEvent && (
           <Card><CardTitle>&#x1F4CB; {t('sessionInspector.rawPayload')}</CardTitle>
-            <pre style={{ fontSize: 'var(--cc-font-3xs)', fontFamily: 'var(--cc-font-mono)', color: 'var(--cc-text-muted)', maxHeight: 120, overflow: 'auto', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{JSON.stringify(latestEvent, null, 2).slice(0, 500)}</pre>
+            <pre style={{ fontSize: 'var(--cc-font-xs)', fontFamily: 'var(--cc-font-mono)', color: 'var(--cc-text-muted)', maxHeight: 120, overflow: 'auto', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{JSON.stringify(latestEvent, null, 2).slice(0, 500)}</pre>
           </Card>
         )}
 
@@ -160,7 +160,7 @@ export function SessionInspector({ session, events: rawEvents = [], collapsed, e
           <Card><CardTitle>{t('sessionInspector.audit')}</CardTitle>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 150, overflow: 'auto' }}>
               {auditEntries.map((e) => (
-                <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '2px 4px', borderRadius: 'var(--cc-radius-xs)', background: e.level === 'critical' ? 'var(--cc-bg-danger-soft)' : 'var(--cc-bg)', fontSize: 'var(--cc-font-3xs)' }}>
+                <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '2px 4px', borderRadius: 'var(--cc-radius-xs)', background: e.level === 'critical' ? 'var(--cc-bg-danger-soft)' : 'var(--cc-bg)', fontSize: 'var(--cc-font-xs)' }}>
                   <CcBadge variant={e.level === 'critical' ? 'danger' : e.level === 'warning' ? 'warning' : 'default'}>{e.level}</CcBadge>
                   <span style={{ color: 'var(--cc-text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.message}</span>
                   <span style={{ color: 'var(--cc-text-muted)' }}>{e.timestamp.slice(11, 19)}</span>
@@ -179,7 +179,7 @@ function Header({ onToggle, onExpand, expanded, title }: { onToggle: () => void;
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 12px', borderBottom: '1px solid var(--cc-border)', minHeight: 32 }}>
       <span style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)' }}>&#x1F4CA; {title}</span>
       <div style={{ display: 'flex', gap: 4 }}>
-        <button onClick={onExpand} style={{ ...collapseBtnStyle, fontSize: 'var(--cc-font-2xs)' }}>{expanded ? '⊟' : '⊞'}</button>
+        <button onClick={onExpand} style={{ ...collapseBtnStyle, fontSize: 'var(--cc-font-xs)' }}>{expanded ? '⊟' : '⊞'}</button>
         <button onClick={onToggle} style={collapseBtnStyle}>&#x25B6;</button>
       </div>
     </div>
@@ -193,10 +193,10 @@ function CardTitle({ children }: { children: React.ReactNode }) {
   return <div style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)', marginBottom: 4 }}>{children}</div>;
 }
 function M({ label, value, unit, color }: { label: string; value: string | number; unit: string; color: string }) {
-  return <div><div style={{ fontSize: 'var(--cc-font-md)', fontWeight: 700, color }}>{value}</div><div style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-soft)' }}>{unit}</div><div style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-muted)' }}>{label}</div></div>;
+  return <div><div style={{ fontSize: 'var(--cc-font-md)', fontWeight: 700, color }}>{value}</div><div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)' }}>{unit}</div><div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>{label}</div></div>;
 }
 function F({ label, value }: { label: string; value: string }) {
-  return <div><span style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-soft)' }}>{label}</span><div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text)' }}>{value}</div></div>;
+  return <div><span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)' }}>{label}</span><div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text)' }}>{value}</div></div>;
 }
 function FieldGrid({ children }: { children: React.ReactNode }) {
   return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px 10px' }}>{children}</div>;
@@ -206,6 +206,9 @@ function fmtNum(n: number) { return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : St
 function blockSummary(b: ChatBlock): string {
   if (b.kind === 'tool') return b.name;
   if (b.kind === 'status') return b.label;
+  if (b.kind === 'thinking') return b.content.slice(0, 60);
+  if (b.kind === 'permission') return b.rule;
+  if (b.kind === 'file_change') return `${b.action}: ${b.path}`;
   return b.content.slice(0, 60);
 }
 

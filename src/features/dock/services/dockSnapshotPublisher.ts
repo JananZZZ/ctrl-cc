@@ -1,40 +1,27 @@
-// v10.0 DockSnapshotPublisher — publishes snapshots from main window to dock window
+// v29: DockSnapshotPublisher — 事件驱动，不使用 setInterval 轮询
 import { buildDockSnapshot, type AIDockSnapshot } from '../../../features/app-core/snapshots/dockSnapshot';
 
 type SnapshotListener = (snapshot: AIDockSnapshot) => void;
 
 const listeners = new Set<SnapshotListener>();
-let intervalId: ReturnType<typeof setInterval> | null = null;
 let lastSnapshot: AIDockSnapshot | null = null;
 
 export const DockSnapshotPublisher = {
-  /** Start publishing snapshots at the given interval (ms). Minimum 500ms. */
-  start(intervalMs: number = 1000): void {
-    if (intervalId) return;
-    const ms = Math.max(500, intervalMs);
-    intervalId = setInterval(() => {
-      const snapshot = buildDockSnapshot();
-      lastSnapshot = snapshot;
-      for (const listener of listeners) {
-        try { listener(snapshot); } catch { /* listener error — don't break others */ }
-      }
-    }, ms);
-  },
-
-  /** Stop publishing. */
-  stop(): void {
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
+  /** 发布快照给所有订阅者。应在状态变更时主动调用，而非定时轮询。 */
+  publish(): void {
+    const snapshot = buildDockSnapshot();
+    lastSnapshot = snapshot;
+    for (const listener of listeners) {
+      try { listener(snapshot); } catch { /* listener error — don't break others */ }
     }
   },
 
-  /** Get the most recent snapshot, or build one now. */
+  /** 获取最近一次快照，无快照时立即构建一个。 */
   getLatest(): AIDockSnapshot {
     return lastSnapshot ?? buildDockSnapshot();
   },
 
-  /** Subscribe to snapshot updates. Returns unsubscribe function. */
+  /** 订阅快照更新。返回取消订阅函数。 */
   subscribe(listener: SnapshotListener): () => void {
     listeners.add(listener);
     return () => { listeners.delete(listener); };

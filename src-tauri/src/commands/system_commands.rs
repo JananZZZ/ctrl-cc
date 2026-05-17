@@ -73,3 +73,9 @@ pub fn get_system_health() -> Result<SystemHealth, String> {
 
     Ok(health)
 }
+
+/// 退出应用。
+#[tauri::command]
+pub fn app_exit() {
+    std::process::exit(0);
+}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useProjectStore } from '../../stores/projectStore';
@@ -7,12 +7,14 @@ import { useOpenSessionStore } from '../../stores/openSessionStore';
 import { useRuntimeStore } from '../../features/runtime/stores/runtimeStore';
 import { useRuntimeTraceStore } from '../../features/runtime/stores/runtimeTraceStore';
 import { useSetupStore } from '../../features/setup/stores/setupStore';
+import { useTaskStore } from '../../core/tasks/taskStore';
 import { useRuntimeKernelStore } from '../../runtime-kernel/runtimeKernelStore';
 import { CcButton } from '../../components/ui/CcButton';
 import { CcStatusDot } from '../../components/ui/CcStatusDot';
 import { CcCard } from '../../components/ui/CcCard';
 import { CcBadge } from '../../components/ui/CcBadge';
 import { CcKpiCard } from '../../components/ui/CcKpiCard';
+import { ActivityTimeline } from '../../features/console/components/ActivityTimeline';
 import { SurfacePage } from '../../components/layout/SurfacePage';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 import './console-surface.css';
@@ -50,6 +52,15 @@ export function ConsoleSurface() {
     s => s.status === 'failed' || s.lastError
   ).length;
   const kernelOk = kernelErrorCount === 0;
+
+  // v29: 订阅全局任务数（状态条用）— 选择稳定 tasks 引用，useMemo 派生避免无限重渲染
+  const taskMap = useTaskStore((s) => s.tasks);
+  const activeTasks = useMemo(
+    () => Object.values(taskMap).filter((t) =>
+      ['queued', 'running', 'paused'].includes(t.status)
+    ),
+    [taskMap],
+  );
 
   // v28: Unified setup snapshot — same as Console/Settings/FirstRun
   const setupSnap = useSetupStore((s) => s.snapshot);
@@ -96,17 +107,27 @@ export function ConsoleSurface() {
         </div>
       )}
 
-      <section className="cc-page-header">
+      <section className="console-hero">
         <div>
-          <h1 style={{ fontSize: 'var(--cc-font-3xl)', fontWeight: 700, color: 'var(--cc-text)', marginBottom: 4 }}>{t(greetKey)}, {t('greeting.developer')}</h1>
-          <p style={{ fontSize: 'var(--cc-font-sm)', color: 'var(--cc-text-soft)' }}>{t('console.subtitle')}</p>
+          <h1 className="cc-title-xl">{t(greetKey)}, {t('greeting.developer')}</h1>
+          <p className="cc-body-sm">
+            欢迎回来。你可以从这里开始新会话、检查环境、查看任务与项目状态。
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <CcButton variant="primary" onClick={() => navigateTo('workspace')}>{t('workspace.newSession')}</CcButton>
-          <CcButton variant="ghost" onClick={() => void detectAll()} disabled={setupRunState === 'running'}>
-            {setupSnap ? '刷新环境配置' : '检测环境配置'}
-          </CcButton>
+        <div className="cc-action-row">
+          <button className="cc-btn cc-btn-primary" onClick={() => navigateTo('workspace')}>
+            新建 Claude 会话
+          </button>
+          <button className="cc-btn cc-btn-soft" onClick={() => void detectAll()} disabled={setupRunState === 'running'}>
+            {setupRunState === 'running' ? '检测中...' : setupSnap ? '刷新环境配置' : '检测环境配置'}
+          </button>
         </div>
+      </section>
+
+      <section className="console-status-strip">
+        <span>Runtime {kernelSessionCount}</span>
+        <span>任务 {activeTasks.length}</span>
+        <span>环境 {setupSnap?.ready ? '就绪' : '待检测'}</span>
       </section>
 
       <div className="console-stat-grid">
@@ -131,7 +152,7 @@ export function ConsoleSurface() {
         <HealthDot label="Kernel" ok={kernelOk} detail={kernelOk ? 'OK' : String(kernelErrorCount)} />
         <HealthDot label="Bridge" ok={true} detail="OK" />
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-muted)' }}>RuntimeKernel v26 · persistent-pty · {kernelActiveCount}/{kernelSessionCount} active</span>
+        <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>RuntimeKernel v26 · persistent-pty · {kernelActiveCount}/{kernelSessionCount} active</span>
       </div>
 
       <div className="console-two-col">
@@ -200,13 +221,17 @@ export function ConsoleSurface() {
       <div style={{ borderTop: '1px solid var(--cc-border)', paddingTop: 12, fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
         {t('console.footer')}
       </div>
+
+      <div style={{ marginTop: 20 }}>
+        <ActivityTimeline />
+      </div>
       </div>
     </SurfacePage>
   );
 }
 /** @deprecated Use CcKpiCard component from ../../components/ui/CcKpiCard instead */
 export function Stat({ title, value, color, sub }: { title: string; value: string | number; color: string; sub: string }) { return <div style={{ padding: '12px 14px', borderRadius: 'var(--cc-radius-lg)', background: 'var(--cc-surface-solid)', border: '1px solid var(--cc-border)' }}><div style={{ fontSize: 'var(--cc-font-2xl)', fontWeight: 700, color }}>{value}</div><div style={{ fontSize: 'var(--cc-font-xs)', fontWeight: 600, color: 'var(--cc-text)', marginTop: 2 }}>{title}</div><div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', marginTop: 2 }}>{sub}</div></div>; }
-function Plane({ label, pct, color, desc }: { label: string; pct: number; color: string; desc: string }) { return <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ color: 'var(--cc-text-soft)', width: 80, fontSize: 'var(--cc-font-2xs)' }}>{label}</span><div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--cc-bg-muted)', overflow: 'hidden' }}><div style={{ width: pct + '%', height: '100%', borderRadius: 3, background: color }} /></div><span style={{ color, fontWeight: 600, fontSize: 'var(--cc-font-2xs)', width: 30 }}>{pct}%</span><span style={{ color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-3xs)', flex: 1 }}>{desc}</span></div>; }
+function Plane({ label, pct, color, desc }: { label: string; pct: number; color: string; desc: string }) { return <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ color: 'var(--cc-text-soft)', width: 80, fontSize: 'var(--cc-font-xs)' }}>{label}</span><div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--cc-bg-muted)', overflow: 'hidden' }}><div style={{ width: pct + '%', height: '100%', borderRadius: 3, background: color }} /></div><span style={{ color, fontWeight: 600, fontSize: 'var(--cc-font-xs)', width: 30 }}>{pct}%</span><span style={{ color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-xs)', flex: 1 }}>{desc}</span></div>; }
 function E({ label, value, c }: { label: string; value: string; c?: string }) {
   return (
     <>
@@ -219,7 +244,7 @@ const st: React.CSSProperties = { fontSize: 'var(--cc-font-sm)', fontWeight: 600
 function fmtDate(iso: string) { try { return new Date(iso).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return iso; } }
 function HealthDot({ label, ok, detail, color }: { label: string; ok: boolean; detail: string; color?: string }) {
   const c = color || (ok ? 'var(--cc-green)' : 'var(--cc-red)');
-  return <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--cc-font-2xs)' }}>
+  return <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--cc-font-xs)' }}>
     <span style={{ width: 6, height: 6, borderRadius: 3, background: c, flexShrink: 0 }} />
     <span style={{ color: 'var(--cc-text-soft)' }}>{label}</span>
     <span style={{ color: c, fontWeight: 600 }}>{detail}</span>

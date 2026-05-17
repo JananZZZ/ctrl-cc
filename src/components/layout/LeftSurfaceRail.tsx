@@ -1,5 +1,8 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSurfaceStore } from '../../stores/surfaceStore';
+import { useTaskStore } from '../../core/tasks/taskStore';
+import { NavigationGuardModal } from '../../core/tasks/NavigationGuardModal';
 import type { SurfaceId } from '../../types';
 
 const navItems: { id: SurfaceId; labelKey: string; icon: string }[] = [
@@ -14,7 +17,15 @@ const navItems: { id: SurfaceId; labelKey: string; icon: string }[] = [
 
 export function LeftSurfaceRail() {
   const { t } = useTranslation();
-  const { activeSurface, navigateTo } = useSurfaceStore();
+  const { activeSurface, requestNavigate, guardOpen, pendingSurface, confirmNavigate, setGuardOpen } = useSurfaceStore();
+  const tasks = useTaskStore((s) => s.tasks);
+  const blockingTasks = useMemo(
+    () => Object.values(tasks).filter((t) => {
+      const active = ['queued', 'running', 'paused'].includes(t.status);
+      return active && t.interruptPolicy !== 'safe-background';
+    }),
+    [tasks],
+  );
 
   return (
     <nav
@@ -31,7 +42,7 @@ export function LeftSurfaceRail() {
         flexShrink: 0,
       }}
     >
-      <div style={{ fontSize: 'var(--cc-font-lg)', marginBottom: 8, marginTop: 4, cursor: 'pointer' }} onClick={() => navigateTo('console')}>
+      <div style={{ fontSize: 'var(--cc-font-lg)', marginBottom: 8, marginTop: 4, cursor: 'pointer' }} onClick={() => requestNavigate('console')}>
         🐱
       </div>
       {navItems.map((item) => {
@@ -40,7 +51,7 @@ export function LeftSurfaceRail() {
           <button
             key={item.id}
             data-testid={`nav-${item.id}`}
-            onClick={() => navigateTo(item.id)}
+            onClick={() => requestNavigate(item.id)}
             title={t(item.labelKey)}
             style={{
               width: 40, height: 40,
@@ -65,6 +76,13 @@ export function LeftSurfaceRail() {
           </button>
         );
       })}
+      <NavigationGuardModal
+        open={guardOpen}
+        targetLabel={pendingSurface ? t(navItems.find((n) => n.id === pendingSurface)?.labelKey ?? '') : undefined}
+        tasks={blockingTasks}
+        onStay={() => setGuardOpen(false)}
+        onContinue={confirmNavigate}
+      />
     </nav>
   );
 }

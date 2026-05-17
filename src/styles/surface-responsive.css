@@ -90,7 +90,7 @@
 
 .cc-setting-field small {
   color: var(--cc-text-muted);
-  font-size: var(--cc-font-3xs);
+  font-size: var(--cc-font-xs);
 }
 
 .cc-inline-form {
@@ -191,7 +191,7 @@
 
 @media (max-width: 820px) {
   .cc-page-inner { padding: 12px; }
-  .cc-workspace-statusbar { flex-wrap: wrap; gap: 6px; font-size: var(--cc-font-2xs); }
+  .cc-workspace-statusbar { flex-wrap: wrap; gap: 6px; font-size: var(--cc-font-xs); }
 }
 
 @media (min-width: 1400px) {

@@ -94,7 +94,7 @@ export function AiDockWindow() {
       <div style={{ padding: 10, borderBottom: '1px solid var(--cc-border)' }}>
         <div
           style={{
-            fontSize: 'var(--cc-font-2xs)',
+            fontSize: 'var(--cc-font-xs)',
             color: 'var(--cc-text-muted)',
             marginBottom: 4,
           }}
@@ -119,7 +119,7 @@ export function AiDockWindow() {
       <div style={{ padding: 10, borderBottom: '1px solid var(--cc-border)' }}>
         <div
           style={{
-            fontSize: 'var(--cc-font-2xs)',
+            fontSize: 'var(--cc-font-xs)',
             color: 'var(--cc-text-muted)',
             marginBottom: 4,
           }}
@@ -144,7 +144,7 @@ export function AiDockWindow() {
       <div style={{ padding: 10, flex: 1 }}>
         <div
           style={{
-            fontSize: 'var(--cc-font-2xs)',
+            fontSize: 'var(--cc-font-xs)',
             color: 'var(--cc-text-muted)',
             marginBottom: 6,
           }}
@@ -176,7 +176,7 @@ export function AiDockWindow() {
         style={{
           padding: '6px 12px',
           borderTop: '1px solid var(--cc-border)',
-          fontSize: 'var(--cc-font-2xs)',
+          fontSize: 'var(--cc-font-xs)',
           color: 'var(--cc-text-muted)',
         }}
       >

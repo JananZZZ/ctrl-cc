@@ -31,7 +31,7 @@ export function TaskProgressCard({ task }: Props) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <span style={{
-          fontSize: 'var(--cc-font-2xs)', fontWeight: 600,
+          fontSize: 'var(--cc-font-xs)', fontWeight: 600,
           color, padding: '1px 8px', borderRadius: 'var(--cc-radius-xs)',
           background: color === 'var(--cc-blue)' ? 'var(--cc-blue-soft)' :
                        color === 'var(--cc-green)' ? 'var(--cc-green-soft)' :
@@ -44,7 +44,7 @@ export function TaskProgressCard({ task }: Props) {
           {task.step}
         </span>
         {task.progress > 0 && task.progress < 1 && (
-          <span style={{ fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-muted)' }}>
+          <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)' }}>
             {Math.round(task.progress * 100)}%
           </span>
         )}

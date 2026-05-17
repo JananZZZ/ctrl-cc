@@ -27,31 +27,31 @@ export function AIDock({ onOpenErrorLog, errorCount = 0 }: AIDockProps) {
   return (
     <div style={{ ...ds, width: w, transition: 'width 0.25s ease' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, paddingTop: 6 }}>
-        <button onClick={() => setMode(mode === 'quiet' ? 'calm' : mode === 'calm' ? 'focus' : 'quiet')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-2xs)', color: 'var(--cc-text-muted)', padding: 2, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }} title={mode === 'quiet' ? t('dock.expand') : mode === 'calm' ? t('dock.focus') : t('dock.collapse')}>{mode === 'quiet' ? '<' : mode === 'calm' ? '>' : 'x'}</button>
+        <button onClick={() => setMode(mode === 'quiet' ? 'calm' : mode === 'calm' ? 'focus' : 'quiet')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', padding: 2, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }} title={mode === 'quiet' ? t('dock.expand') : mode === 'calm' ? t('dock.focus') : t('dock.collapse')}>{mode === 'quiet' ? '<' : mode === 'calm' ? '>' : 'x'}</button>
         <div style={{ width: 6, height: 6, borderRadius: 3, background: running.length > 0 ? 'var(--cc-green)' : 'var(--cc-text-muted)', transition: 'background 0.3s' }} />
         {onOpenErrorLog && (
           <button onClick={onOpenErrorLog} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--cc-font-xs)', padding: 2, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4, position: 'relative' }} title={t('errorLog.title')}>
             🔔
             {errorCount > 0 && (
-              <span style={{ position: 'absolute', top: -2, right: -2, width: 14, height: 14, borderRadius: 7, background: 'var(--cc-red)', color: 'var(--cc-text-on-accent)', fontSize: 'var(--cc-font-3xs)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ position: 'absolute', top: -2, right: -2, width: 14, height: 14, borderRadius: 7, background: 'var(--cc-red)', color: 'var(--cc-text-on-accent)', fontSize: 'var(--cc-font-xs)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {errorCount > 9 ? '!' : errorCount}
               </span>
             )}
           </button>
         )}
-        {(mode === 'calm' || mode === 'focus') && <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-muted)', fontWeight: 600 }}>{running.length} {t('dock.running')}</span>}
-        {risks > 0 && (mode === 'calm' || mode === 'focus') && <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-red)', fontWeight: 600 }}>{risks} {t('dock.risks')}</span>}
-        {(mode === 'calm' || mode === 'focus') && <span style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-amber)' }}>{'$' + cost.toFixed(2)}</span>}
+        {(mode === 'calm' || mode === 'focus') && <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', fontWeight: 600 }}>{running.length} {t('dock.running')}</span>}
+        {risks > 0 && (mode === 'calm' || mode === 'focus') && <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-red)', fontWeight: 600 }}>{risks} {t('dock.risks')}</span>}
+        {(mode === 'calm' || mode === 'focus') && <span style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-amber)' }}>{'$' + cost.toFixed(2)}</span>}
       </div>
       {(mode === 'calm' || mode === 'focus') && (
         <div style={{ flex: 1, overflow: 'auto', padding: 4, opacity: 1, transition: 'opacity 0.3s' }}>
-          <div style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-soft)', fontWeight: 600, padding: '2px 4px' }}>{t('dock.active')}</div>
+          <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-soft)', fontWeight: 600, padding: '2px 4px' }}>{t('dock.active')}</div>
           {running.map((s) => (
-            <div key={s.id} onClick={() => openWs(s.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '3px 4px', borderRadius: 'var(--cc-radius-xs)', cursor: 'pointer', fontSize: 'var(--cc-font-3xs)', marginBottom: 1 }}>
+            <div key={s.id} onClick={() => openWs(s.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '3px 4px', borderRadius: 'var(--cc-radius-xs)', cursor: 'pointer', fontSize: 'var(--cc-font-xs)', marginBottom: 1 }}>
               <CcStatusDot status="running" size={4} pulse /><span style={{ color: 'var(--cc-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{s.title}</span>
             </div>
           ))}
-          {running.length === 0 && <div style={{ fontSize: 'var(--cc-font-3xs)', color: 'var(--cc-text-muted)', padding: '4px 6px', fontStyle: 'italic' }}>{t('dock.noActive')}</div>}
+          {running.length === 0 && <div style={{ fontSize: 'var(--cc-font-xs)', color: 'var(--cc-text-muted)', padding: '4px 6px', fontStyle: 'italic' }}>{t('dock.noActive')}</div>}
         </div>
       )}
     </div>

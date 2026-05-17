@@ -4,6 +4,10 @@ import { SetupCheckList } from './SetupCheckList';
 import { SetupRepairPanel } from './SetupRepairPanel';
 import { SetupProviderConfigStep } from './SetupProviderConfigStep';
 import { SetupCommandPreview } from './SetupCommandPreview';
+import { SetupLiveProgress } from './SetupLiveProgress';
+import { SetupAppearanceStep } from './SetupAppearanceStep';
+import { SetupProductTourStep } from './SetupProductTourStep';
+import { SetupChatDockPermissionStep } from './SetupChatDockPermissionStep';
 import { runAsyncAction } from '../../../services/invokeCommand';
 import '../styles/first-run-setup.css';
 
@@ -41,6 +45,10 @@ export function FirstRunSetupWizard() {
   const [verifyError, setVerifyError] = useState<string | null>(null);
 
   const stepIndex = STEPS.findIndex((s) => s.id === step);
+
+  const handleStartWizard = () => {
+    setStep('language');
+  };
 
   const handleStartCheck = async () => {
     setStep('check');
@@ -102,25 +110,109 @@ export function FirstRunSetupWizard() {
 
         {/* Main Content */}
         <div className="setup-v23-main">
-          {/* v29: New stepping stone steps — click through to proceed */}
-          {(step === 'language' || step === 'appearance' || step === 'font' || step === 'runtimeIntro' || step === 'chat' || step === 'dock' || step === 'permissions' || step === 'github') && (
+          {/* v29: 语言选择 */}
+          {step === 'language' && (
             <div>
-              <h1>{STEPS.find(s => s.id === step)?.icon} {STEPS.find(s => s.id === step)?.label}</h1>
-              <p className="cc-caption" style={{ marginBottom: 20 }}>
-                {step === 'language' && 'Ctrl-CC 默认使用简体中文。你可以在设置中随时切换语言。'}
-                {step === 'appearance' && 'Ctrl-CC 提供四种主题：浅色 / 深色 / 浅蓝 / 暖沙。默认为浅色主题，适合长时间工作。'}
-                {step === 'font' && 'Ctrl-CC 使用系统原生字体 Inter 和 Noto Sans SC。你可以在设置中调整字体大小。'}
-                {step === 'runtimeIntro' && 'Ctrl-CC 是 Claude Code CLI 的可视化控制台。Chat 和 Terminal 共享同一个 Claude 进程，切换视图不会中断对话。'}
-                {step === 'chat' && '你可以选择默认的 AI 模型、思考模式（effort）和权限策略。这些设置可以在后续会话中随时修改。'}
-                {step === 'dock' && 'AI Dock 是一个独立的小窗口，可以显示 Runtime 状态、审批请求和后台任务。你可以随时通过主窗口按钮打开或关闭它。'}
-                {step === 'permissions' && 'Ctrl-CC 提供多种权限控制策略。你可以设置为自动信任、每次确认或严格模式。所有权限变更都会被审计记录。'}
-                {step === 'github' && 'Ctrl-CC 内置了 GitHub 浏览器。你可以设置默认打开的仓库地址，用于查看 Issues、PRs、Actions 和 Releases。'}
+              <SetupAppearanceStep />
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button onClick={() => setStep('appearance')} style={primaryBtnStyle}>继续</button>
+              </div>
+            </div>
+          )}
+
+          {/* v29: 主题配色 */}
+          {step === 'appearance' && (
+            <div>
+              <SetupAppearanceStep />
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button onClick={() => setStep('language')} style={secondaryBtnStyle}>返回</button>
+                <button onClick={() => setStep('font')} style={primaryBtnStyle}>继续</button>
+              </div>
+            </div>
+          )}
+
+          {/* v29: 字体大小 */}
+          {step === 'font' && (
+            <div>
+              <SetupAppearanceStep />
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button onClick={() => setStep('appearance')} style={secondaryBtnStyle}>返回</button>
+                <button onClick={() => setStep('runtimeIntro')} style={primaryBtnStyle}>继续</button>
+              </div>
+            </div>
+          )}
+
+          {/* v29: 产品导览（工作方式介绍） */}
+          {step === 'runtimeIntro' && (
+            <div>
+              <SetupProductTourStep />
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button onClick={() => setStep('language')} style={secondaryBtnStyle}>返回</button>
+                <button onClick={handleStartCheck} disabled={checking} style={primaryBtnStyle}>
+                  {checking ? '检测中...' : '开始环境检测'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* v29: Chat/Model/Permission 设置合一 */}
+          {step === 'chat' && (
+            <div>
+              <SetupChatDockPermissionStep />
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button onClick={() => setStep('api')} style={secondaryBtnStyle}>返回</button>
+                <button onClick={() => setStep('dock')} style={primaryBtnStyle}>继续</button>
+              </div>
+            </div>
+          )}
+
+          {/* v29: Dock/AI Dock 设置 */}
+          {step === 'dock' && (
+            <div>
+              <SetupChatDockPermissionStep />
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button onClick={() => setStep('chat')} style={secondaryBtnStyle}>返回</button>
+                <button onClick={() => setStep('permissions')} style={primaryBtnStyle}>继续</button>
+              </div>
+            </div>
+          )}
+
+          {/* v29: 权限设置 */}
+          {step === 'permissions' && (
+            <div>
+              <SetupChatDockPermissionStep />
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button onClick={() => setStep('dock')} style={secondaryBtnStyle}>返回</button>
+                <button onClick={() => setStep('github')} style={primaryBtnStyle}>继续</button>
+              </div>
+            </div>
+          )}
+
+          {/* v29: GitHub 浏览器设置 */}
+          {step === 'github' && (
+            <div>
+              <h1>🐙 GitHub 浏览器</h1>
+              <p className="cc-body-sm" style={{ marginBottom: 20 }}>
+                Ctrl-CC 内置了 GitHub 浏览器，使用应用内 Webview 直接访问 GitHub。
+                你可以设置默认打开的仓库地址，用于查看 Issues、Pull Requests、Actions 和 Releases。
               </p>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={() => {
-                  const idx = STEPS.findIndex(s => s.id === step);
-                  if (idx < STEPS.length - 1) setStep(STEPS[idx + 1].id);
-                }} style={primaryBtnStyle}>继续</button>
+              <label className="setup-field" style={{ marginBottom: 20 }}>
+                <span>默认 GitHub 地址</span>
+                <input
+                  type="text"
+                  defaultValue={localStorage.getItem('ctrlcc.github.home') || 'https://github.com'}
+                  onChange={(event) => localStorage.setItem('ctrlcc.github.home', event.target.value)}
+                  placeholder="https://github.com"
+                  style={{
+                    width: '100%', height: 36, borderRadius: 'var(--cc-radius-full)',
+                    border: '1px solid var(--cc-border)', background: 'var(--cc-bg)',
+                    color: 'var(--cc-text)', padding: '0 14px', fontSize: 'var(--cc-font-sm)',
+                  }}
+                />
+              </label>
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button onClick={() => setStep('permissions')} style={secondaryBtnStyle}>返回</button>
+                <button onClick={handleVerify} style={primaryBtnStyle}>开始最终验证</button>
               </div>
             </div>
           )}
@@ -150,8 +242,8 @@ export function FirstRunSetupWizard() {
                 </ul>
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={handleStartCheck} disabled={checking} style={primaryBtnStyle}>
-                  {checking ? '检测中...' : '开始检测'}
+                <button onClick={handleStartWizard} style={primaryBtnStyle}>
+                  开始配置
                 </button>
                 <button onClick={handleFinish} style={skipBtnStyle}>稍后再配置</button>
               </div>
@@ -165,9 +257,7 @@ export function FirstRunSetupWizard() {
                 正在检测您的系统环境...
               </p>
               {checking ? (
-                <div style={{ textAlign: 'center', padding: 40, color: 'var(--cc-text-muted)' }}>
-                  检测中...
-                </div>
+                <SetupLiveProgress />
               ) : snapshot ? (
                 <>
                   <SetupCheckList checks={snapshot.checks} />
@@ -229,7 +319,7 @@ export function FirstRunSetupWizard() {
               <SetupProviderConfigStep />
               <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
                 <button onClick={() => setStep('repair')} style={secondaryBtnStyle}>返回修复</button>
-                <button onClick={handleVerify} style={primaryBtnStyle}>保存并验证</button>
+                <button onClick={() => setStep('chat')} style={primaryBtnStyle}>继续配置</button>
               </div>
             </div>
           )}
@@ -267,9 +357,12 @@ export function FirstRunSetupWizard() {
                   </div>
                 </div>
               )}
-              {!verifyResult && !verifyError && (
+              {!verifyResult && !verifyError && checking && (
+                <SetupLiveProgress />
+              )}
+              {!verifyResult && !verifyError && !checking && (
                 <div style={{ textAlign: 'center', padding: 40, color: 'var(--cc-text-muted)' }}>
-                  正在验证...
+                  点击下方按钮开始验证...
                 </div>
               )}
               {/* Smoke test button */}
@@ -298,7 +391,7 @@ export function FirstRunSetupWizard() {
                 </span>
               </div>
               <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-                <button onClick={() => setStep('api')} style={secondaryBtnStyle}>返回配置</button>
+                <button onClick={() => setStep('github')} style={secondaryBtnStyle}>返回配置</button>
                 <button onClick={handleFinish} style={primaryBtnStyle}>完成配置</button>
               </div>
             </div>

@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import type { ChatBlock, RuntimeKernelEvent, RuntimeKernelSessionSnapshot } from './types';
 import { projectRawToChat } from './parsers/chatProjection';
+import { StreamCoalescer } from '../features/chat/StreamCoalescer';
+
+/** 全局 StreamCoalescer 单例，跨批次保持流缓冲状态 */
+const coalescer = new StreamCoalescer();
 
 interface RuntimeKernelState {
   sessions: Record<string, RuntimeKernelSessionSnapshot>;
@@ -78,86 +82,70 @@ export const useRuntimeKernelStore = create<RuntimeKernelState>((set) => ({
     if (events.length === 0) return;
 
     set((state) => {
-      let sessions = state.sessions;
-      let rawEvents = state.rawEvents;
-      let terminalBuffers = state.terminalBuffers;
-      let chatBlocks = state.chatBlocks;
-      let activeAssistantBlockId = state.activeAssistantBlockId;
+      // 只在批处理开始时复制一次顶层对象。
+      const sessions = { ...state.sessions };
+      const rawEvents = { ...state.rawEvents };
+      const terminalBuffers = { ...state.terminalBuffers };
+      const chatBlocks = { ...state.chatBlocks };
+      const activeAssistantBlockId = { ...state.activeAssistantBlockId };
+
+      // 跟踪本次批量中哪些会话有新的 raw 数据（延迟投影）
+      const rawDirty = new Set<string>();
 
       for (const evt of events) {
         const sid = evt.guiSessionId;
 
-        rawEvents = {
-          ...rawEvents,
-          [sid]: [...(rawEvents[sid] ?? []), evt].slice(-2000),
-        };
+        rawEvents[sid] = [...(rawEvents[sid] ?? []), evt].slice(-2000);
 
         if (evt.channel === 'raw' && evt.data) {
-          terminalBuffers = {
-            ...terminalBuffers,
-            // v29: Enforce 32KB PTY tail cap per session
-            [sid]: ((terminalBuffers[sid] ?? '') + evt.data).slice(-32768),
-          };
-
-          const projected = projectRawToChat({
-            sessionId: sid,
-            raw: evt.data,
-            existingBlocks: chatBlocks[sid] ?? [],
-            activeAssistantBlockId: activeAssistantBlockId[sid] ?? null,
-          });
-
-          // v29: Cap chat blocks at 500 per session
-          chatBlocks = {
-            ...chatBlocks,
-            [sid]: projected.blocks.slice(-500),
-          };
-
-          activeAssistantBlockId = {
-            ...activeAssistantBlockId,
-            [sid]: projected.activeAssistantBlockId,
-          };
+          // 累积终端缓冲，延迟 chat 投影以避免高频调用 projectRawToChat
+          terminalBuffers[sid] = (terminalBuffers[sid] ?? '') + evt.data;
+          rawDirty.add(sid);
+          // v29: 喂入 StreamCoalescer，合并连续 raw 块（用于跨批次去重）
+          coalescer.feed(evt);
         }
 
         if (evt.channel === 'status' && evt.status) {
           const existing = sessions[sid];
           if (existing) {
-            sessions = {
-              ...sessions,
-              [sid]: {
-                ...existing,
-                status: evt.status,
-                pid: evt.pid ?? existing.pid,
-                cwd: evt.cwd ?? existing.cwd,
-                updatedAt: evt.createdAt,
-              },
+            sessions[sid] = {
+              ...existing,
+              status: evt.status,
+              pid: evt.pid ?? existing.pid,
+              cwd: evt.cwd ?? existing.cwd,
+              updatedAt: evt.createdAt,
             };
           }
         }
 
         if (evt.channel === 'error') {
-          const block: ChatBlock = {
-            id: `err-${evt.seq}-${evt.createdAt}`,
-            kind: 'error',
-            content: evt.data ?? 'Runtime error',
-            createdAt: evt.createdAt,
-          };
-
-          chatBlocks = {
-            ...chatBlocks,
-            [sid]: [...(chatBlocks[sid] ?? []), block],
-          };
+          chatBlocks[sid] = [
+            ...(chatBlocks[sid] ?? []),
+            {
+              id: `err-${evt.seq}-${evt.createdAt}`,
+              kind: 'error',
+              content: evt.data ?? 'Runtime error',
+              createdAt: evt.createdAt,
+            },
+          ];
         }
       }
 
-      // Idempotent guard: if nothing changed, return previous state
-      if (
-        sessions === state.sessions &&
-        rawEvents === state.rawEvents &&
-        terminalBuffers === state.terminalBuffers &&
-        chatBlocks === state.chatBlocks &&
-        activeAssistantBlockId === state.activeAssistantBlockId
-      ) {
-        return state;
+      // 批量结束时，对每个脏会话只做一次 chat 投影（StreamCoalescer 去重）
+      for (const sid of rawDirty) {
+        // 尝试冲刷 coalescer 缓冲，获取合并后的 raw 数据
+        const flushed = coalescer.flush(sid);
+        const projectedRaw = flushed?.data ?? terminalBuffers[sid] ?? '';
+        if (projectedRaw) {
+          const projected = projectRawToChat({
+            sessionId: sid,
+            raw: projectedRaw,
+            existingBlocks: chatBlocks[sid] ?? [],
+            activeAssistantBlockId: activeAssistantBlockId[sid] ?? null,
+          });
+          chatBlocks[sid] = projected.blocks;
+          activeAssistantBlockId[sid] = projected.activeAssistantBlockId;
+        }
       }
 
       return {

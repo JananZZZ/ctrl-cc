@@ -5,7 +5,7 @@ import { CcCard } from '../../components/ui/CcCard';
 import { CcButton } from '../../components/ui/CcButton';
 import { useRenderLoopGuard } from '../../debug/useRenderLoopGuard';
 
-interface ResourceItem { name: string; path: string; size: number; isDir: boolean; modified: string; }
+interface ResourceItem { name: string; path: string; size: number; isDir: boolean; modified: string; description?: string; }
 /** v28: Derive a resource's enabled status from its file extension and directory presence */
 function resourceStatus(item: ResourceItem): { enabled: boolean; label: string; color: string } {
   if (item.isDir) return { enabled: true, label: 'active', color: 'var(--cc-green)' };
@@ -15,7 +15,17 @@ function resourceStatus(item: ResourceItem): { enabled: boolean; label: string; 
   }
   return { enabled: false, label: 'unknown', color: 'var(--cc-text-muted)' };
 }
-type TabId = 'skills' | 'agents' | 'rules' | 'memory' | 'hooks' | 'mcp';
+
+/** 打开文件所在目录（跨平台） */
+async function openFileLocation(filePath: string) {
+  try {
+    await invokeCommand<string>('open_in_explorer', { path: filePath });
+  } catch {
+    // 如果后端命令不可用，回退：显示完整路径供复制
+    console.error('open_in_explorer 后端命令不可用');
+  }
+}
+type TabId = 'skills' | 'agents' | 'rules' | 'memory' | 'hooks' | 'mcp' | 'templates';
 
 const TABS: { id: TabId; labelKey: string; dir: string }[] = [
   { id: 'skills', labelKey: 'resources.skills', dir: '/skills' },
@@ -24,6 +34,7 @@ const TABS: { id: TabId; labelKey: string; dir: string }[] = [
   { id: 'memory', labelKey: 'resources.memory', dir: '/memory' },
   { id: 'hooks', labelKey: 'resources.hooks', dir: '/hooks' },
   { id: 'mcp', labelKey: 'resources.mcp', dir: '' },
+  { id: 'templates', labelKey: 'resources.templates', dir: '/templates' },
 ];
 
 export function ResourcesSurface() {
@@ -120,11 +131,17 @@ export function ResourcesSurface() {
             const st = resourceStatus(item);
             return (
             <div key={item.path} onClick={() => selectItem(item)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 'var(--cc-radius-xs)', cursor: 'pointer',
+              style={{ display: 'flex', flexDirection: 'column', gap: 1, padding: '6px 10px', borderRadius: 'var(--cc-radius-xs)', cursor: 'pointer',
                 background: selected?.path === item.path ? 'var(--cc-brand-soft)' : 'transparent', fontSize: 'var(--cc-font-xs)' }}>
-              <span style={{ width: 6, height: 6, borderRadius: 3, flexShrink: 0, background: st.color }} title={st.label} />
-              <span style={{ color: 'var(--cc-text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-              {!item.isDir && <span style={{ color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-3xs)' }}>{fmtSize(item.size)}</span>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 6, height: 6, borderRadius: 3, flexShrink: 0, background: st.color }} title={st.label} />
+                <span style={{ color: 'var(--cc-text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                {!item.isDir && <span style={{ color: 'var(--cc-text-muted)', fontSize: 'var(--cc-font-xs)' }}>{fmtSize(item.size)}</span>}
+              </div>
+              <div style={{ paddingLeft: 12, display: 'flex', gap: 8, color: 'var(--cc-text-soft)', fontSize: 'var(--cc-font-xs)' }}>
+                {item.modified && <span>{t('resources.modified')}: {item.modified}</span>}
+                {item.description && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140 }}>{item.description}</span>}
+              </div>
             </div>
             );
           })}
@@ -141,6 +158,7 @@ export function ResourcesSurface() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                   <h3 style={{ fontSize: 'var(--cc-font-lg)', fontWeight: 600, color: 'var(--cc-text)', margin: 0 }}>{selected.name}</h3>
                   <div style={{ display: 'flex', gap: 6 }}>
+                    <CcButton size="sm" variant="ghost" onClick={() => openFileLocation(selected.path)}>{t('resources.openLocation')}</CcButton>
                     {!editing && <CcButton size="sm" variant="ghost" onClick={startEdit}>{t('common.edit')}</CcButton>}
                     <CcButton size="sm" variant="ghost" onClick={handleDelete}>{t('common.delete')}</CcButton>
                   </div>

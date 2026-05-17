@@ -5,17 +5,17 @@ export const CTRL_CC_THEMES: ThemeMeta[] = [
     id: "warm-sand",
     label: "暖沙 Claude",
     labelEn: "Warm Sand",
-    description: "温暖、亲切、高级纸张感 — Ctrl-CC 品牌默认主题",
-    descriptionEn: "Warm, inviting, premium paper feel — the Ctrl-CC signature default",
-    previewColors: { bg: "#FAF8F2", surface: "#F3ECE0", brand: "#B88352", text: "#736B5E" },
+    description: "温暖、亲切、高级纸张感",
+    descriptionEn: "Warm, inviting, premium paper feel",
+    previewColors: { bg: "#FAF6EF", surface: "#F4E9DA", brand: "#B77945", text: "#6E6254" },
   },
   {
     id: "light",
     label: "浅色",
     labelEn: "Light",
-    description: "干净、通透、轻盈 — 适合日常办公环境",
-    descriptionEn: "Clean, airy, lightweight — ideal for everyday office use",
-    previewColors: { bg: "#F9F9F8", surface: "#F5F5F3", brand: "#2563EB", text: "#6E6D68" },
+    description: "清爽、明亮 — Ctrl-CC 默认主题，适合日常办公",
+    descriptionEn: "Clean, bright — the Ctrl-CC default, ideal for everyday use",
+    previewColors: { bg: "#F7F8FA", surface: "#F3F5F8", brand: "#2563EB", text: "#5B6472" },
   },
   {
     id: "pale-blue",
@@ -35,7 +35,7 @@ export const CTRL_CC_THEMES: ThemeMeta[] = [
   },
 ];
 
-export const DEFAULT_THEME: CtrlCcTheme = "warm-sand";
+export const DEFAULT_THEME: CtrlCcTheme = "light";
 
 export const THEME_LABELS: Record<CtrlCcTheme, string> = {
   "warm-sand": "暖沙 Claude",
